@@ -9,7 +9,7 @@ public object SpikeLayout {
             rows =
                 listOf(
                     Row(
-                        listOf(special(KeyCode.ESC, "Esc")) +
+                        listOf(special(KeyCode.ESC, "Esc", 1.25f)) +
                             chars(
                                 "1!",
                                 "2@",
@@ -24,7 +24,7 @@ public object SpikeLayout {
                                 "-_",
                                 "=+",
                             ) +
-                            special(KeyCode.BACKSPACE, "⌫", 2f),
+                            special(KeyCode.BACKSPACE, "⌫", 1.75f),
                     ),
                     Row(
                         listOf(special(KeyCode.TAB, "Tab", 1.5f)) +
@@ -62,7 +62,7 @@ public object SpikeLayout {
                             special(KeyCode.ENTER, "Enter", 2.25f),
                     ),
                     Row(
-                        listOf(modifier(ModifierKind.SHIFT, "Shift", 2f)) +
+                        listOf(modifier(ModifierKind.SHIFT, "Shift", 1.5f)) +
                             chars(
                                 "zZ",
                                 "xX",
@@ -77,17 +77,17 @@ public object SpikeLayout {
                                 "`~",
                             ) +
                             special(KeyCode.UP, "↑") +
-                            special(KeyCode.FORWARD_DEL, "Del"),
+                            special(KeyCode.FORWARD_DEL, "Del", 1.5f),
                     ),
                     Row(
                         listOf(
                             modifier(ModifierKind.ALT, "Alt", 1.5f),
-                            KeySpec(KeyDef.Char(" ", " "), "", 7.5f),
+                            KeySpec(KeyDef.Char(" ", " "), "", 7f),
                             special(KeyCode.HOME, "Home", 1.5f),
                             special(KeyCode.END, "End", 1.5f),
                             special(KeyCode.LEFT, "←"),
                             special(KeyCode.DOWN, "↓"),
-                            special(KeyCode.RIGHT, "→"),
+                            special(KeyCode.RIGHT, "→", 1.5f),
                         ),
                     ),
                 ),
