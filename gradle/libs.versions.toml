@@ -5,7 +5,7 @@ kotlin = "2.4.21"
 ksp = "2.3.12"
 
 # Code quality
-spotless = "8.9.0"
+spotless = "8.10.4"
 detekt = "1.23.8"
 
 # AndroidX core
@@ -27,7 +27,7 @@ timber = "5.0.1"
 
 # Testing
 junit = "4.13.2"
-konsist = "0.17.3"
+konsist = "0.18.1"
 
 [libraries]
 # AndroidX core

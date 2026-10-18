@@ -99,8 +99,8 @@ class KeyboardEngineTest {
                             listOf(
                                 KeySpec(KeyDef.Modifier(ModifierKind.CTRL), "Ctrl"),
                                 KeySpec(KeyDef.Char("§", "§"), "§"),
-                            )
-                        )
+                            ),
+                        ),
                     ),
                 ),
                 200,
