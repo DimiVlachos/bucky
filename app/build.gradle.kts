@@ -1,4 +1,8 @@
-plugins { alias(libs.plugins.android.application) }
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
+}
 
 val architectureTestPattern = "**/architecture/**"
 
@@ -63,6 +67,9 @@ dependencies {
     "fossImplementation"(project(":billing-foss"))
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.timber)
 
     testImplementation(libs.junit)
     testImplementation(libs.konsist)
