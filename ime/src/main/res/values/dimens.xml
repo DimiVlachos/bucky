@@ -4,4 +4,6 @@
     <dimen name="key_corner_radius">6dp</dimen>
     <dimen name="key_label_size">18sp</dimen>
     <dimen name="key_label_small_size">12sp</dimen>
+    <dimen name="key_label_padding">2dp</dimen>
+    <dimen name="key_label_min_size">9sp</dimen>
 </resources>
