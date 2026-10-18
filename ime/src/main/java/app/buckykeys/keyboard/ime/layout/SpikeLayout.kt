@@ -76,18 +76,18 @@ public object SpikeLayout {
                                 "/?",
                                 "`~",
                             ) +
-                            special(KeyCode.UP, "↑") +
-                            special(KeyCode.FORWARD_DEL, "Del", 1.5f),
+                            special(KeyCode.UP, "↑", 1.25f) +
+                            special(KeyCode.FORWARD_DEL, "Del", 1.25f),
                     ),
                     Row(
                         listOf(
                             modifier(ModifierKind.ALT, "Alt", 1.5f),
-                            KeySpec(KeyDef.Char(" ", " "), "", 7f),
+                            KeySpec(KeyDef.Char(" ", " "), "", 6.75f),
                             special(KeyCode.HOME, "Home", 1.5f),
                             special(KeyCode.END, "End", 1.5f),
-                            special(KeyCode.LEFT, "←"),
-                            special(KeyCode.DOWN, "↓"),
-                            special(KeyCode.RIGHT, "→", 1.5f),
+                            special(KeyCode.LEFT, "←", 1.25f),
+                            special(KeyCode.DOWN, "↓", 1.25f),
+                            special(KeyCode.RIGHT, "→", 1.25f),
                         ),
                     ),
                 ),
