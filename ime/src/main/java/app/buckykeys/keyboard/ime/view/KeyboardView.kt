@@ -32,6 +32,8 @@ public class KeyboardView(
     private val rowHeightPx = resources.getDimensionPixelSize(R.dimen.key_row_height)
     private val gapPx = resources.getDimension(R.dimen.key_gap)
     private val cornerPx = resources.getDimension(R.dimen.key_corner_radius)
+    private val labelPaddingPx = resources.getDimension(R.dimen.key_label_padding)
+    private val labelMinSizePx = resources.getDimension(R.dimen.key_label_min_size)
 
     private val keyPaint = fillPaint(R.color.key_background)
     private val pressedPaint = fillPaint(R.color.key_pressed)
@@ -43,6 +45,7 @@ public class KeyboardView(
     private var engine = KeyboardEngine(geometry)
     private var labelX = FloatArray(0)
     private var labelY = FloatArray(0)
+    private var labelSize = FloatArray(0)
     private var modifierBits = IntArray(0)
     private var pendingDownTime = NO_PENDING
 
@@ -74,10 +77,21 @@ public class KeyboardView(
         val count = geometry.keyCount
         labelX = FloatArray(count)
         labelY = FloatArray(count)
+        labelSize = FloatArray(count)
         modifierBits = IntArray(count)
         val rects = geometry.rects
         for (i in 0 until count) {
-            val paint = paintFor(geometry.spec(i).label)
+            val label = geometry.spec(i).label
+            val paint = paintFor(label)
+            paint.textSize = baseSizeFor(label)
+            labelSize[i] =
+                fittedTextSize(
+                    paint.textSize,
+                    paint.measureText(label),
+                    rects[i * 4 + 2] - rects[i * 4] - 2 * (gapPx + labelPaddingPx),
+                    labelMinSizePx,
+                )
+            paint.textSize = labelSize[i]
             labelX[i] = (rects[i * 4] + rects[i * 4 + 2]) / 2f
             labelY[i] =
                 (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f - (paint.ascent() + paint.descent()) / 2f
@@ -109,7 +123,9 @@ public class KeyboardView(
             val spec = geometry.spec(i)
             val def = spec.def
             val label = if (shifted && def is KeyDef.Char) def.shifted else spec.label
-            canvas.drawText(label, labelX[i], labelY[i], paintFor(spec.label))
+            val paint = paintFor(spec.label)
+            paint.textSize = labelSize[i]
+            canvas.drawText(label, labelX[i], labelY[i], paint)
         }
         if (pendingDownTime != NO_PENDING) {
             Timber.tag(LATENCY_TAG)
@@ -159,6 +175,11 @@ public class KeyboardView(
 
     private fun paintFor(label: String): Paint =
         if (label.length > 1) smallLabelPaint else labelPaint
+
+    private fun baseSizeFor(label: String): Float =
+        resources.getDimension(
+            if (label.length > 1) R.dimen.key_label_small_size else R.dimen.key_label_size,
+        )
 
     private fun fillPaint(colorRes: Int): Paint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply { color = ContextCompat.getColor(context, colorRes) }
