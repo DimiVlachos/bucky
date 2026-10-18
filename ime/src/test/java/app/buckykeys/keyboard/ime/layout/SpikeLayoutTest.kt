@@ -32,4 +32,14 @@ class SpikeLayoutTest {
             assertEquals(1.5f, keys.first { it.def == KeyDef.Special(code) }.width, 0.001f)
         }
     }
+
+    @Test
+    fun `keys with word labels are at least one and a quarter units wide`() {
+        layout.rows
+            .flatMap { it.keys }
+            .filter { it.label.length > 1 }
+            .forEach { key ->
+                assertTrue("${key.label} is ${key.width}", key.width >= 1.25f)
+            }
+    }
 }
