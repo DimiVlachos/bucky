@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-PcKeys (codename, placeholder until a product name passes trademark checks) is a full PC-layout soft keyboard for Android: an `InputMethodService` with a Canvas keyboard, for Termux, SSH clients and coding.
+Bucky ("Bucky Keys" in stores, named after the *bucky bits* that Ctrl, Alt, Meta and Super set; trademark check pending) is a full PC-layout soft keyboard for Android: an `InputMethodService` with a Canvas keyboard, for Termux, SSH clients and coding.
 
 `PLAN.md` is the source of truth for scope and architecture. Read it before any non-trivial change. Any change of scope or any new module updates `PLAN.md` first, in the same commit.
 
@@ -10,7 +10,7 @@ Conventions follow Dimitris's other Android apps. When a convention is unclear, 
 
 | Module | Holds | May depend on |
 |---|---|---|
-| `:app` | Manifest, `play`/`foss` flavors, Hilt `Application`, `PcKeysImeService`, flavor `BillingModule` | everything |
+| `:app` | Manifest, `play`/`foss` flavors, Hilt `Application`, `BuckyImeService`, flavor `BillingModule` | everything |
 | `:ime` | Layout model, `KeyboardGeometry`, `KeyboardEngine`, `InputDispatcher`, `KeyboardView` | core-ktx, Timber |
 | `:settings` | Compose settings and onboarding | `:billing` |
 | `:billing` | `ProEntitlement`, `BillingRepository` | coroutines |
@@ -22,7 +22,7 @@ Conventions follow Dimitris's other Android apps. When a convention is unclear, 
 
 ## Packages
 
-- `:ime` uses component packages under `dev.pckeys.keyboard.ime`: `layout`, `geometry`, `engine`, `dispatch`, `view`.
+- `:ime` uses component packages under `app.buckykeys.keyboard.ime`: `layout`, `geometry`, `engine`, `dispatch`, `view`.
 - `:settings` and billing use feature-first `data/domain/presentation`, with `presentation/{entry,screen,state,view_model,components}`, `FooRepository` + `FooRepositoryImpl`, and an Entry that collects state with a stateless Screen.
 
 ## Code rules
@@ -50,7 +50,7 @@ Gate before every commit (`spotlessApply` first after any Kotlin edit):
 ./gradlew installFossDebug
 ```
 
-The Gradle daemon is pinned to JDK 21 (`gradle/gradle-daemon-jvm.properties`) because detekt 1.23 cannot run on JDK 25. Konsist gates live in `app/src/test/java/dev/pckeys/keyboard/architecture/` and run with `:app:architectureTest`. `config/detekt/baseline.xml` only shrinks (`BaselineBudgetTest`).
+The Gradle daemon is pinned to JDK 21 (`gradle/gradle-daemon-jvm.properties`) because detekt 1.23 cannot run on JDK 25. Konsist gates live in `app/src/test/java/app/buckykeys/keyboard/architecture/` and run with `:app:architectureTest`. `config/detekt/baseline.xml` only shrinks (`BaselineBudgetTest`).
 
 ## Git
 

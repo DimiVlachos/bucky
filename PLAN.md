@@ -1,6 +1,6 @@
 # Πλάνο: πληκτρολόγιο τύπου PC για Android
 
-Κωδικό όνομα repo: `TBD` (βλ. 8.1). Έκδοση πλάνου 1.0, 18 Οκτωβρίου 2026.
+Όνομα: **Bucky** (από τα *bucky bits*, τα bits που θέτουν τα Ctrl/Alt/Meta/Super), εμπορικά «Bucky Keys», domain `buckykeys.app`. Εκκρεμεί έλεγχος TMview/USPTO κλάση 9 (βλ. 8.1). Έκδοση πλάνου 1.0, 18 Οκτωβρίου 2026.
 Βασίζεται στην έρευνα της ίδιας ημέρας για εγκαταλελειμμένα open-source mobile projects, όπου το Hacker's Keyboard (klausw/hackerskeyboard) βγήκε πρώτο σε ευκαιρία: 2.4k stars, 514 ανοιχτά issues, 26 ανοιχτά PRs, τελευταίο release Νοέμβριο 2018, εγκαταστάσεις 10M+ (από mirror, not verified στο Play), νέα issues ακόμη και το 2026.
 
 ## 0. Σύνοψη
@@ -411,7 +411,7 @@ Maintenance mode σημαίνει: ενημέρωση targetSdk κάθε χρό�
 
 ## 12. Ανοιχτές ερωτήσεις
 
-1. Όνομα και domain.
+1. Όνομα και domain: αποφασίστηκε Bucky / `buckykeys.app` (18/10/2026). Μένει ο έλεγχος TMview και USPTO.
 2. Ποιες γλώσσες πέρα από EN και EL στο v1; Κάθε γλώσσα είναι data, αλλά χρειάζεται native tester.
 3. Αγορά μεταχειρισμένων συσκευών για το device matrix (ένα Samsung μεσαίας κατηγορίας, ένα Xiaomi, ένα foldable) ή αποκλειστική εξάρτηση από beta testers;
 4. Hosting για landing page και privacy policy: GitHub Pages ή Vercel;
