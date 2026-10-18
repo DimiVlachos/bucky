@@ -42,4 +42,14 @@ class SpikeLayoutTest {
                 assertTrue("${key.label} is ${key.width}", key.width >= 1.25f)
             }
     }
+
+    @Test
+    fun `the four arrow keys are the same width`() {
+        val keys = layout.rows.flatMap { it.keys }
+        val widths =
+            listOf(KeyCode.UP, KeyCode.LEFT, KeyCode.DOWN, KeyCode.RIGHT).map { code ->
+                keys.first { it.def == KeyDef.Special(code) }.width
+            }
+        assertEquals(listOf(1.25f, 1.25f, 1.25f, 1.25f), widths)
+    }
 }
