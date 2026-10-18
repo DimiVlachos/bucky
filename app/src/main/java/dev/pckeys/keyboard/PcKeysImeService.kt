@@ -22,6 +22,8 @@ class PcKeysImeService : InputMethodService() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
+    private var keyboardView: KeyboardView? = null
+
     override fun onCreate() {
         super.onCreate()
         serviceScope.launch {
@@ -31,14 +33,21 @@ class PcKeysImeService : InputMethodService() {
 
     override fun onCreateInputView(): View =
         KeyboardView(
-            context = this,
-            layout = SpikeLayout.pcFullEnUs,
-            sink = InputDispatcher { currentInputConnection },
-            latencyLogging = BuildConfig.DEBUG,
-        )
+                context = this,
+                layout = SpikeLayout.pcFullEnUs,
+                sink = InputDispatcher { currentInputConnection },
+                latencyLogging = BuildConfig.DEBUG,
+            )
+            .also { keyboardView = it }
+
+    override fun onFinishInputView(finishingInput: Boolean) {
+        keyboardView?.resetState()
+        super.onFinishInputView(finishingInput)
+    }
 
     override fun onDestroy() {
         serviceScope.cancel()
+        keyboardView = null
         super.onDestroy()
     }
 }
