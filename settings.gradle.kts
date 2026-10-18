@@ -25,8 +25,15 @@ dependencyResolutionManagement {
 rootProject.name = "PcKeys"
 
 include(":app")
+
 include(":ime")
+
 include(":settings")
+
 include(":billing")
+
 include(":billing-play")
+
 include(":billing-foss")
+
+include(":detekt-rules")

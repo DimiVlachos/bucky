@@ -16,6 +16,7 @@ Conventions follow Dimitris's other Android apps. When a convention is unclear, 
 | `:billing` | `ProEntitlement`, `BillingRepository` | coroutines |
 | `:billing-play` | Play implementation (`playImplementation` only) | `:billing` |
 | `:billing-foss` | Always-unlocked implementation (`fossImplementation` only) | `:billing` |
+| `:detekt-rules` | Custom detekt rules from Dimitris's other projects (build tooling, not shipped) | detekt-api |
 
 `:ime` never imports Compose, billing or Play Services. `KeyboardEngine` imports nothing from Android except `KeyEvent` constants.
 
@@ -41,11 +42,15 @@ JUnit4 with `org.junit.Assert`. Test names are backtick plain-English sentences.
 
 ## Commands
 
+Gate before every commit (`spotlessApply` first after any Kotlin edit):
+
 ```
-./gradlew assembleFossDebug assemblePlayDebug lintFossDebug
-./gradlew :ime:testDebugUnitTest :billing-foss:testDebugUnitTest
+./gradlew spotlessApply
+./gradlew detekt :detekt-rules:test testFossDebugUnitTest testDebugUnitTest :app:architectureTest lintFossDebug assembleFossDebug assemblePlayDebug
 ./gradlew installFossDebug
 ```
+
+The Gradle daemon is pinned to JDK 21 (`gradle/gradle-daemon-jvm.properties`) because detekt 1.23 cannot run on JDK 25. Konsist gates live in `app/src/test/java/dev/pckeys/keyboard/architecture/` and run with `:app:architectureTest`. `config/detekt/baseline.xml` only shrinks (`BaselineBudgetTest`).
 
 ## Git
 

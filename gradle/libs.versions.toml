@@ -4,6 +4,10 @@ agp = "9.4.1"
 kotlin = "2.4.21"
 ksp = "2.3.12"
 
+# Code quality
+spotless = "8.9.0"
+detekt = "1.23.8"
+
 # AndroidX core
 androidx-core-ktx = "1.19.1"
 androidx-lifecycle = "2.11.0"
@@ -23,6 +27,7 @@ timber = "5.0.1"
 
 # Testing
 junit = "4.13.2"
+konsist = "0.17.3"
 
 [libraries]
 # AndroidX core
@@ -51,13 +56,23 @@ timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "tim
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+konsist = { group = "com.lemonappdev", name = "konsist", version.ref = "konsist" }
+
+# Code quality
+detekt-api = { group = "io.gitlab.arturbosch.detekt", name = "detekt-api", version.ref = "detekt" }
+detekt-test = { group = "io.gitlab.arturbosch.detekt", name = "detekt-test", version.ref = "detekt" }
 
 [plugins]
 # Build tools
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+
+# Code quality
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 
 # Dependency injection
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }

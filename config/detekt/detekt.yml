@@ -1,0 +1,62 @@
+config:
+  validation: true
+  warningsAsErrors: false
+
+pckeys:
+  active: true
+  HardcodedColor:
+    active: true
+    excludes: ['**/presentation/theme/**']
+  NoNotNullAssertion:
+    active: true
+  CatchBlockHygiene:
+    active: true
+  TimberErrorArgument:
+    active: true
+
+naming:
+  FunctionNaming:
+    active: true
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    active: false
+  PackageNaming:
+    active: false
+
+complexity:
+  LargeClass:
+    active: false
+  LongMethod:
+    active: false
+  LongParameterList:
+    active: false
+  CyclomaticComplexMethod:
+    active: false
+  TooManyFunctions:
+    active: false
+  NestedBlockDepth:
+    active: false
+  CognitiveComplexMethod:
+    active: false
+
+style:
+  MagicNumber:
+    active: false
+  ReturnCount:
+    active: false
+  UnusedPrivateMember:
+    active: false
+  ForbiddenComment:
+    active: false
+  MaxLineLength:
+    active: false
+  WildcardImport:
+    active: true
+
+exceptions:
+  TooGenericExceptionCaught:
+    active: false
+  SwallowedException:
+    active: false
+  InstanceOfCheckForException:
+    active: false
