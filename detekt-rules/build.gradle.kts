@@ -14,7 +14,7 @@ val detektConfig = rootProject.file("config/detekt/detekt.yml")
 tasks.test {
     inputs.file(detektBaseline)
     inputs.file(detektConfig)
-    systemProperty("pckeys.detekt.baseline", detektBaseline.absolutePath)
-    systemProperty("pckeys.detekt.config", detektConfig.absolutePath)
-    systemProperty("pckeys.detekt.testDir", project.file("src/test/kotlin").absolutePath)
+    systemProperty("bucky.detekt.baseline", detektBaseline.absolutePath)
+    systemProperty("bucky.detekt.config", detektConfig.absolutePath)
+    systemProperty("bucky.detekt.testDir", project.file("src/test/kotlin").absolutePath)
 }

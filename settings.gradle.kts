@@ -22,7 +22,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "PcKeys"
+rootProject.name = "Bucky"
 
 include(":app")
 

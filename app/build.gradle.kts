@@ -7,11 +7,11 @@ plugins {
 val architectureTestPattern = "**/architecture/**"
 
 android {
-    namespace = "dev.pckeys.keyboard"
+    namespace = "app.buckykeys.keyboard"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "dev.pckeys.keyboard"
+        applicationId = "app.buckykeys.keyboard"
         minSdk = 26
         targetSdk = 37
         versionCode = 1

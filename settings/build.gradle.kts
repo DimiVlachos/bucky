@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "dev.pckeys.keyboard.settings"
+    namespace = "app.buckykeys.keyboard.settings"
     compileSdk = 37
 
     defaultConfig { minSdk = 26 }
