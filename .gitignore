@@ -1,0 +1,48 @@
+# Gradle files
+.gradle
+/local.properties
+.gradle/
+.gradle-cache/
+
+# IntelliJ/Android Studio files
+*.iml
+.idea/
+.idea/*
+
+# Build output
+/build/
+app/build/
+**/build/
+
+# APKs and AABs
+*.apk
+*.aab
+
+# Cache files
+.caches/
+.DS_Store
+
+# Native build artifacts
+.externalNativeBuild/
+.cxx/
+
+# Test results
+/test-output/
+
+# Captures
+captures/
+
+# Miscellaneous
+*.log
+*.keystore
+*.jks
+Thumbs.db
+/keystore.base64
+
+# Per-developer MCP config (may contain tokens)
+.mcp.json
+
+.kotlin/
+
+# Superpowers execution scratch
+.superpowers/
