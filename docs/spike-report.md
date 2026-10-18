@@ -16,7 +16,7 @@ Samsung Galaxy S23 Ultra (SM-S918B), Android 16, One UI 8 (build S918BXXSAFZI1),
 
 ## Results
 
-| Check | Input on PcKeys | Result |
+| Check | Input on Bucky | Result |
 |---|---|---|
 | Ctrl+C in Termux | `sleep 100`, Enter, Ctrl, c | `^C` and a new prompt |
 | Raw keys in Termux | `cat -v`, then Esc, Tab, ↑, a, Shift, a, Enter | `^[`, a tab, `^[[A`, `a`, `A` |
@@ -47,7 +47,7 @@ The panel was rendering at 60 Hz (One UI drops the rate when idle, and injected 
 ## What the spike found
 
 - **Bottom inset on One UI 8:** with gesture navigation, the system strip that holds the IME switch and hide buttons arrives as a 180 px `tappableElement` inset, while `navigationBars` reports only 56 px. Padding by the navigation-bar inset alone left the bottom row under the system buttons. `KeyboardView` now pads by both.
-- **Reinstall resets the keyboard:** reinstalling the APK switches the system default IME back to Samsung Keyboard. During development, run `adb shell ime set dev.pckeys.keyboard/.PcKeysImeService` after every install.
+- **Reinstall resets the keyboard:** reinstalling the APK switches the system default IME back to Samsung Keyboard. During development, run `adb shell ime set app.buckykeys.keyboard/.BuckyImeService` after every install.
 - **Termux extra keys:** Termux shows its own extra-keys row above any IME, and it takes 2 rows of vertical space. The terminal profile in week 8 should document how to turn it off (`extra-keys = []` in `termux.properties`).
 
 ## Gaps by design (weeks 3–5)
