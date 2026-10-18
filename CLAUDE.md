@@ -52,6 +52,14 @@ Gate before every commit (`spotlessApply` first after any Kotlin edit):
 
 The Gradle daemon is pinned to JDK 21 (`gradle/gradle-daemon-jvm.properties`) because detekt 1.23 cannot run on JDK 25. Konsist gates live in `app/src/test/java/app/buckykeys/keyboard/architecture/` and run with `:app:architectureTest`. `config/detekt/baseline.xml` only shrinks (`BaselineBudgetTest`).
 
+## Landing site (`site/`)
+
+`site/` is the buckykeys.app landing page and waitlist, not a Gradle module. It follows Dimitris's portfolio stack: Next.js 16 App Router, strict TypeScript, Tailwind v4 tokens in `globals.css` (the keyboard's dark-theme colours), Geist fonts, Vercel Analytics. Waitlist emails go to Upstash Redis (sorted set `waitlist`, score = join time) through `POST /api/waitlist`; the logic in `src/lib/waitlist.ts` is tested against `FakeWaitlistStore` with `node --test`. Next 16 differs from older versions: read `site/node_modules/next/dist/docs/` before changing framework code. No new dependencies without asking.
+
+```
+cd site && npm test && npm run lint && npm run build
+```
+
 ## Git
 
 Branches are `feat/…`, `fix/…`, `chore/…`. Commits use a conventional subject, a body that explains why and lists the checks run, `git commit -s` (DCO, PLAN §8.2), and the session attribution lines.
