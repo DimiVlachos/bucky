@@ -1,5 +1,5 @@
 <resources>
-    <string name="settings_title">PcKeys</string>
+    <string name="settings_title">Bucky</string>
     <string name="onboarding_body">Πλήρες πληκτρολόγιο υπολογιστή για Termux, SSH και προγραμματισμό. Δεν έχει άδεια πρόσβασης στο διαδίκτυο και ο κώδικάς του είναι ανοιχτός.</string>
     <string name="onboarding_enable">Ενεργοποίηση πληκτρολογίου</string>
     <string name="onboarding_choose">Επιλογή πληκτρολογίου</string>

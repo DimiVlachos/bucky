@@ -1,7 +1,7 @@
 plugins { alias(libs.plugins.android.library) }
 
 android {
-    namespace = "dev.pckeys.keyboard.ime"
+    namespace = "app.buckykeys.keyboard.ime"
     compileSdk = 37
 
     defaultConfig { minSdk = 26 }

@@ -1,7 +1,7 @@
 plugins { alias(libs.plugins.android.library) }
 
 android {
-    namespace = "dev.pckeys.keyboard.billing.play"
+    namespace = "app.buckykeys.keyboard.billing.play"
     compileSdk = 37
 
     defaultConfig { minSdk = 26 }
