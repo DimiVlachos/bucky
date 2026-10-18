@@ -137,7 +137,7 @@ On-device prediction και autocorrect (Pro), mic key που εναλλάσσε
 
 ### 4.4 Engine: από το άγγιγμα στο InputConnection
 
-`KeyboardEngine` σε καθαρό Kotlin, χωρίς Android imports εκτός από `KeyEvent` σταθερές. Δέχεται pointer δεδομένα ως primitives, `onPointer(pointerId, x, y, action, timeMs, sink)`, τα αντιστοιχίζει σε πλήκτρο μέσω προϋπολογισμένης γεωμετρίας και εκπέμπει μέσω `InputSink` (`commitText(text)`, `sendKey(keyCode, metaState)`). Primitives και sink αντί για αντικείμενα `PointerEvent` και `InputCommand`, ώστε το `onTouchEvent` να μένει χωρίς allocations (βλ. 4.12 και 13). Οι εντολές που εκπέμπονται:
+`KeyboardEngine` σε καθαρό Kotlin, χωρίς Android imports εκτός από `KeyEvent` σταθερές. Δέχεται pointer δεδομένα ως primitives, `onPointer(pointerId, x, y, action, sink)` (ο χρόνος προστίθεται μαζί με key repeat και long-press στην εβδομάδα 4), τα αντιστοιχίζει σε πλήκτρο μέσω προϋπολογισμένης γεωμετρίας και εκπέμπει μέσω `InputSink` (`commitText(text)`, `sendKey(keyCode, metaState)`). Primitives και sink αντί για αντικείμενα `PointerEvent` και `InputCommand`, ώστε το `onTouchEvent` να μένει χωρίς allocations (βλ. 4.12 και 13). Οι εντολές που εκπέμπονται:
 
 - `commitText(text)` για απλούς χαρακτήρες.
 - `sendKey(keyCode, metaState)` για special keys και για οποιονδήποτε χαρακτήρα όταν είναι ενεργό Ctrl ή Alt.
