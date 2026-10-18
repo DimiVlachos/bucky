@@ -9,7 +9,7 @@ public object SpikeLayout {
             rows =
                 listOf(
                     Row(
-                        listOf(special(KeyCode.ESC, "Esc")) +
+                        listOf(special(KeyCode.ESC, "Esc", 1.25f)) +
                             chars(
                                 "1!",
                                 "2@",
@@ -24,7 +24,7 @@ public object SpikeLayout {
                                 "-_",
                                 "=+",
                             ) +
-                            special(KeyCode.BACKSPACE, "⌫", 1.5f),
+                            special(KeyCode.BACKSPACE, "⌫", 1.75f),
                     ),
                     Row(
                         listOf(special(KeyCode.TAB, "Tab", 1.5f)) +
@@ -41,7 +41,8 @@ public object SpikeLayout {
                                 "pP",
                                 "[{",
                                 "]}",
-                            ),
+                            ) +
+                            KeySpec(KeyDef.Char("\\", "|"), "\\", 1.5f),
                     ),
                     Row(
                         listOf(modifier(ModifierKind.CTRL, "Ctrl", 1.75f)) +
@@ -58,22 +59,35 @@ public object SpikeLayout {
                                 ";:",
                                 "'\"",
                             ) +
-                            special(KeyCode.ENTER, "Enter", 1.75f),
+                            special(KeyCode.ENTER, "Enter", 2.25f),
                     ),
                     Row(
-                        listOf(modifier(ModifierKind.SHIFT, "Shift", 2f)) +
-                            chars("zZ", "xX", "cC", "vV", "bB", "nN", "mM", ",<", ".>", "/?") +
-                            special(KeyCode.UP, "↑"),
+                        listOf(modifier(ModifierKind.SHIFT, "Shift", 1.5f)) +
+                            chars(
+                                "zZ",
+                                "xX",
+                                "cC",
+                                "vV",
+                                "bB",
+                                "nN",
+                                "mM",
+                                ",<",
+                                ".>",
+                                "/?",
+                                "`~",
+                            ) +
+                            special(KeyCode.UP, "↑", 1.25f) +
+                            special(KeyCode.FORWARD_DEL, "Del", 1.25f),
                     ),
                     Row(
                         listOf(
                             modifier(ModifierKind.ALT, "Alt", 1.5f),
-                            KeySpec(KeyDef.Char(" ", " "), "", 6f),
-                            special(KeyCode.HOME, "Home"),
-                            special(KeyCode.END, "End"),
-                            special(KeyCode.LEFT, "←"),
-                            special(KeyCode.DOWN, "↓"),
-                            special(KeyCode.RIGHT, "→"),
+                            KeySpec(KeyDef.Char(" ", " "), "", 6.75f),
+                            special(KeyCode.HOME, "Home", 1.5f),
+                            special(KeyCode.END, "End", 1.5f),
+                            special(KeyCode.LEFT, "←", 1.25f),
+                            special(KeyCode.DOWN, "↓", 1.25f),
+                            special(KeyCode.RIGHT, "→", 1.25f),
                         ),
                     ),
                 ),

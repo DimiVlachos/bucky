@@ -48,6 +48,19 @@ class KeyboardGeometryTest {
     }
 
     @Test
+    fun `the up arrow sits directly above the down arrow`() {
+        assertEquals(centerX(KeyCode.UP), centerX(KeyCode.DOWN), 0.5f)
+    }
+
+    @Test
+    fun `delete sits directly above the right arrow`() {
+        val del = indexOf(KeyCode.FORWARD_DEL)
+        val right = indexOf(KeyCode.RIGHT)
+        assertEquals(geometry.rects[right * 4], geometry.rects[del * 4], 0.5f)
+        assertEquals(geometry.rects[right * 4 + 2], geometry.rects[del * 4 + 2], 0.5f)
+    }
+
+    @Test
     fun `a zero width view has no hits`() {
         assertEquals(-1, KeyboardGeometry(layout, widthPx = 0, rowHeightPx = 120).keyAt(0f, 0f))
     }
@@ -55,5 +68,13 @@ class KeyboardGeometryTest {
     @Test
     fun `a zero row height view has no hits`() {
         assertEquals(-1, KeyboardGeometry(layout, widthPx = 1080, rowHeightPx = 0).keyAt(5f, 0f))
+    }
+
+    private fun indexOf(code: KeyCode): Int =
+        (0 until geometry.keyCount).first { geometry.spec(it).def == KeyDef.Special(code) }
+
+    private fun centerX(code: KeyCode): Float {
+        val index = indexOf(code)
+        return (geometry.rects[index * 4] + geometry.rects[index * 4 + 2]) / 2f
     }
 }
