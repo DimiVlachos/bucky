@@ -24,4 +24,12 @@ class SpikeLayoutTest {
     fun `backslash and pipe can be typed`() {
         assertTrue(layout.rows.flatMap { it.keys }.any { it.def == KeyDef.Char("\\", "|") })
     }
+
+    @Test
+    fun `home and end are wide enough for their labels`() {
+        val keys = layout.rows.flatMap { it.keys }
+        listOf(KeyCode.HOME, KeyCode.END).forEach { code ->
+            assertEquals(1.5f, keys.first { it.def == KeyDef.Special(code) }.width, 0.001f)
+        }
+    }
 }

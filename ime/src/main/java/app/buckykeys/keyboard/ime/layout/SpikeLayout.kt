@@ -82,9 +82,9 @@ public object SpikeLayout {
                     Row(
                         listOf(
                             modifier(ModifierKind.ALT, "Alt", 1.5f),
-                            KeySpec(KeyDef.Char(" ", " "), "", 8.5f),
-                            special(KeyCode.HOME, "Home"),
-                            special(KeyCode.END, "End"),
+                            KeySpec(KeyDef.Char(" ", " "), "", 7.5f),
+                            special(KeyCode.HOME, "Home", 1.5f),
+                            special(KeyCode.END, "End", 1.5f),
                             special(KeyCode.LEFT, "←"),
                             special(KeyCode.DOWN, "↓"),
                             special(KeyCode.RIGHT, "→"),
