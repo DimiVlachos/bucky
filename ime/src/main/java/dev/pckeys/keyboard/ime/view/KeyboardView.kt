@@ -142,6 +142,11 @@ public class KeyboardView(
         return true
     }
 
+    public fun resetState() {
+        engine.reset()
+        invalidate()
+    }
+
     private fun dispatch(event: MotionEvent, index: Int, action: PointerAction) {
         engine.onPointer(
             event.getPointerId(index),

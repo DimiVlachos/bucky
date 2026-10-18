@@ -34,6 +34,7 @@ subprojects {
         parallel = true
         config.setFrom(rootProject.files("config/detekt/detekt.yml"))
         baseline = rootProject.file("config/detekt/baseline.xml")
+        source.setFrom(fileTree("src") { include("*/java/**", "*/kotlin/**") })
     }
     dependencies { "detektPlugins"(project(":detekt-rules")) }
 }

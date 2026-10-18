@@ -55,9 +55,14 @@ tasks.register<Test>("architectureTest") {
     testClassesDirs = unitTest.testClassesDirs
     classpath = unitTest.classpath
     include(architectureTestPattern)
-    inputs.dir(rootProject.layout.projectDirectory.dir("ime/src"))
-    inputs.dir(rootProject.layout.projectDirectory.dir("app/src"))
-    inputs.dir(rootProject.layout.projectDirectory.dir("settings/src"))
+    inputs
+        .files(
+            rootProject.fileTree(rootProject.projectDir) {
+                include("**/src/**/*.kt")
+                exclude("**/build/**")
+            },
+        )
+        .withPropertyName("allKotlinSources")
 }
 
 dependencies {
