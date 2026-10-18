@@ -99,6 +99,8 @@ On-device prediction και autocorrect (Pro), mic key που εναλλάσσε
 
 Γιατί έξι και όχι περισσότερα: το `:ime` δεν εξαρτάται από Compose ούτε από billing, κρατά τον build χρόνο χαμηλό και εγγυάται ότι τίποτα βαρύ δεν μπαίνει στο IME window. Το billing χωρίζεται σε modules επειδή το `foss` flavor δεν πρέπει να περιέχει τη βιβλιοθήκη της Google (απαίτηση F-Droid), και ο καθαρότερος τρόπος είναι `playImplementation(project(":billing-play"))` και `fossImplementation(project(":billing-foss"))` στο `:app`. Convention plugins και build-logic: όχι στο v1. Με έξι modules η επανάληψη στα build scripts είναι ανεκτή, και η επένδυση σε build υποδομή πριν βγει το προϊόν είναι ακριβώς το μοτίβο που σκότωσε το Ivy Wallet. Κανένα νέο module χωρίς ενημέρωση αυτού του αρχείου.
 
+Εξαίρεση εργαλείων build: το `:detekt-rules` (custom detekt rules από άλλα projects του Dimitris: NoNotNullAssertion, CatchBlockHygiene, TimberErrorArgument, HardcodedColor) είναι Kotlin/JVM module μόνο για static analysis, δεν μπαίνει στο APK και δεν μετράει στα έξι modules του προϊόντος.
+
 ### 4.2 Rendering: Canvas, όχι Compose, στο IME window
 
 Το πληκτρολόγιο είναι ένα custom `View` που ζωγραφίζει σε Canvas. Το Compose μέσα σε `InputMethodService` απαιτεί χειροκίνητο wiring των `LifecycleOwner`, `ViewModelStoreOwner` και `SavedStateRegistryOwner` στο decor view του IME window και φέρνει κόστος recomposition σε κάθε key press. Σε πληκτρολόγιο ο προϋπολογισμός από το άγγιγμα μέχρι το glyph είναι ένα frame, και με Canvas το κόστος ανά frame είναι ντετερμινιστικό. Το Compose χρησιμοποιείται κανονικά στο Activity των ρυθμίσεων.

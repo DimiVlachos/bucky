@@ -1,5 +1,7 @@
 plugins { alias(libs.plugins.android.application) }
 
+val architectureTestPattern = "**/architecture/**"
+
 android {
     namespace = "dev.pckeys.keyboard"
     compileSdk = 37
@@ -41,6 +43,19 @@ android {
 
 kotlin { jvmToolchain(17) }
 
+tasks.register<Test>("architectureTest") {
+    group = "verification"
+    description = "Konsist module-boundary and convention gates."
+    val unitTest = tasks.named<Test>("testFossDebugUnitTest").get()
+    dependsOn(unitTest.taskDependencies)
+    testClassesDirs = unitTest.testClassesDirs
+    classpath = unitTest.classpath
+    include(architectureTestPattern)
+    inputs.dir(rootProject.layout.projectDirectory.dir("ime/src"))
+    inputs.dir(rootProject.layout.projectDirectory.dir("app/src"))
+    inputs.dir(rootProject.layout.projectDirectory.dir("settings/src"))
+}
+
 dependencies {
     implementation(project(":ime"))
     implementation(project(":settings"))
@@ -50,4 +65,5 @@ dependencies {
     implementation(libs.androidx.core.ktx)
 
     testImplementation(libs.junit)
+    testImplementation(libs.konsist)
 }
