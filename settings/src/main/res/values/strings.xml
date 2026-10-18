@@ -1,0 +1,7 @@
+<resources>
+    <string name="settings_title">PcKeys</string>
+    <string name="onboarding_body">A full PC keyboard for Termux, SSH and coding. It has no internet permission and its code is open source.</string>
+    <string name="onboarding_enable">Enable keyboard</string>
+    <string name="onboarding_choose">Choose keyboard</string>
+    <string name="onboarding_try">Try typing here</string>
+</resources>

@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name" translatable="false">PcKeys</string>
+    <string name="ime_name" translatable="false">PcKeys</string>
+</resources>
