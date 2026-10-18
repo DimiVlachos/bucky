@@ -42,9 +42,9 @@ export default function Home() {
           src="/hero.png"
           alt="Bucky Keys under a Termux session: a pipe command and a sleep interrupted with Ctrl+C"
           width={1440}
-          height={1500}
+          height={1240}
           priority
-          className="mx-auto w-full max-w-sm rounded-xl border border-key-pressed"
+          className="w-full rounded-xl border border-key-pressed"
         />
         <figcaption className="text-center text-sm text-muted">
           Ctrl, then C. Termux gets a real ^C.
