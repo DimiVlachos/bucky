@@ -24,7 +24,7 @@ public object SpikeLayout {
                                 "-_",
                                 "=+",
                             ) +
-                            special(KeyCode.BACKSPACE, "⌫", 1.5f)
+                            special(KeyCode.BACKSPACE, "⌫", 1.5f),
                     ),
                     Row(
                         listOf(special(KeyCode.TAB, "Tab", 1.5f)) +
@@ -41,7 +41,7 @@ public object SpikeLayout {
                                 "pP",
                                 "[{",
                                 "]}",
-                            )
+                            ),
                     ),
                     Row(
                         listOf(modifier(ModifierKind.CTRL, "Ctrl", 1.75f)) +
@@ -58,12 +58,12 @@ public object SpikeLayout {
                                 ";:",
                                 "'\"",
                             ) +
-                            special(KeyCode.ENTER, "Enter", 1.75f)
+                            special(KeyCode.ENTER, "Enter", 1.75f),
                     ),
                     Row(
                         listOf(modifier(ModifierKind.SHIFT, "Shift", 2f)) +
                             chars("zZ", "xX", "cC", "vV", "bB", "nN", "mM", ",<", ".>", "/?") +
-                            special(KeyCode.UP, "↑")
+                            special(KeyCode.UP, "↑"),
                     ),
                     Row(
                         listOf(
@@ -74,7 +74,7 @@ public object SpikeLayout {
                             special(KeyCode.LEFT, "←"),
                             special(KeyCode.DOWN, "↓"),
                             special(KeyCode.RIGHT, "→"),
-                        )
+                        ),
                     ),
                 ),
         )

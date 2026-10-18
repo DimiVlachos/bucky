@@ -17,7 +17,7 @@ class CatchBlockHygieneRuleTest {
                 """
                 suspend fun load(): Int = try { 1 } catch (e: Exception) { 0 }
                 """
-                    .trimIndent()
+                    .trimIndent(),
             )
         assertEquals(1, findings.size)
     }
@@ -35,7 +35,7 @@ class CatchBlockHygieneRuleTest {
                     }
                 }
                 """
-                    .trimIndent()
+                    .trimIndent(),
             )
         assertEquals(1, findings.size)
     }
@@ -47,7 +47,7 @@ class CatchBlockHygieneRuleTest {
                 """
                 fun parse(s: String): Int = try { s.toInt() } catch (e: Exception) { 0 }
                 """
-                    .trimIndent()
+                    .trimIndent(),
             )
         assertEquals(0, findings.size)
     }
@@ -59,7 +59,7 @@ class CatchBlockHygieneRuleTest {
                 """
                 suspend fun load(): Int = try { 1 } catch (e: java.io.IOException) { 0 }
                 """
-                    .trimIndent()
+                    .trimIndent(),
             )
         assertEquals(0, findings.size)
     }
@@ -74,7 +74,7 @@ class CatchBlockHygieneRuleTest {
                     0
                 }
                 """
-                    .trimIndent()
+                    .trimIndent(),
             )
         assertEquals(0, findings.size)
     }
@@ -89,7 +89,7 @@ class CatchBlockHygieneRuleTest {
                     0
                 }
                 """
-                    .trimIndent()
+                    .trimIndent(),
             )
         assertEquals(1, findings.size)
     }
@@ -103,7 +103,7 @@ class CatchBlockHygieneRuleTest {
                     catch (e: CancellationException) { throw e }
                     catch (e: Exception) { 0 }
                 """
-                    .trimIndent()
+                    .trimIndent(),
             )
         assertEquals(0, findings.size)
     }
@@ -121,7 +121,7 @@ class CatchBlockHygieneRuleTest {
                     catch (e: CancellationException) { f.cancel(false); throw e }
                     catch (e: Exception) { 0 }
                 """
-                    .trimIndent()
+                    .trimIndent(),
             )
         assertEquals(0, findings.size)
     }
@@ -136,7 +136,7 @@ class CatchBlockHygieneRuleTest {
                     0
                 }
                 """
-                    .trimIndent()
+                    .trimIndent(),
             )
         assertEquals(0, findings.size)
     }
@@ -157,7 +157,7 @@ class CatchBlockHygieneRuleTest {
                     mutex.withLock { try { work() } catch (e: Exception) { log(e) } }
                 }
                 """
-                    .trimIndent()
+                    .trimIndent(),
             )
         assertEquals(3, findings.size)
     }
@@ -169,7 +169,7 @@ class CatchBlockHygieneRuleTest {
                 """
                 fun parse(all: List<String>) = all.mapNotNull { try { it.toInt() } catch (e: Exception) { null } }
                 """
-                    .trimIndent()
+                    .trimIndent(),
             )
         assertEquals(0, findings.size)
     }
@@ -183,7 +183,7 @@ class CatchBlockHygieneRuleTest {
                     catch (e: CancellationException) { }
                     catch (e: Exception) { 0 }
                 """
-                    .trimIndent()
+                    .trimIndent(),
             )
         assertEquals(2, findings.size)
     }
@@ -197,7 +197,7 @@ class CatchBlockHygieneRuleTest {
                     catch (e: Exception) { 0 }
                     catch (e: CancellationException) { throw e }
                 """
-                    .trimIndent()
+                    .trimIndent(),
             )
         assertEquals(1, findings.size)
     }
@@ -212,7 +212,7 @@ class CatchBlockHygieneRuleTest {
                     0
                 }
                 """
-                    .trimIndent()
+                    .trimIndent(),
             )
         assertEquals(0, findings.size)
     }
