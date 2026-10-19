@@ -9,6 +9,7 @@
   --color-label: #e8eaed; /* key_label: body text */
   --color-muted: #9aa0a6; /* secondary text */
   --color-latched: #3d5a80; /* key_modifier_active: the one accent */
+  --color-latched-hover: #4a6a94; /* waitlist button hover */
   --color-latched-bright: #8ab4f8; /* accent text on dark ground */
 }
 
@@ -20,4 +21,31 @@
 :focus-visible {
   outline: 2px solid var(--color-latched-bright);
   outline-offset: 2px;
+}
+
+/* The page's one authored moment: the headline's Ctrl key latches the way Bucky's does,
+   settling from an unlatched key into the latched blue. */
+@keyframes latch {
+  0%,
+  35% {
+    background-color: var(--color-key);
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(1px);
+  }
+  100% {
+    background-color: var(--color-latched);
+    transform: translateY(0);
+  }
+}
+
+.keycap-latch {
+  animation: latch 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .keycap-latch {
+    animation: none;
+  }
 }
