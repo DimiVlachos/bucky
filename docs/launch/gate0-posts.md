@@ -68,7 +68,9 @@ Before posting:
 
 ---
 
-## 3. #875 follow-up correction (posted after the review)
+## 3. #875 correction (not posted as a comment)
+
+Decided instead to edit the original #875 comment in place on 2026-10-19 (credits the forks, quotes Klaus's #939 suggestion, scopes the free promise and the latency figure, adds an "Edit:" note), so the thread's subscribers were not notified twice. The draft below is kept for reference.
 
 > A correction to my comment above. I wrote that nothing maintained has filled the gap, and that wasn't fair. @AlainKnaff's fork has had regular releases this year (1.42.9ak in September), and @codenameberyl and @jcb1ee have shipped builds too. If you need Hacker's Keyboard on a current phone today, those are the places to look.
 >
