@@ -68,8 +68,12 @@ export default function Home() {
             </p>
             <div className="flex flex-col gap-3">
               <WaitlistForm />
-              <p className="font-mono text-xs text-balance text-muted">
-                Open source · Apache-2.0 · No internet permission
+              <p className="flex flex-wrap gap-x-2 font-mono text-xs text-muted">
+                <span className="whitespace-nowrap">Open source · Apache-2.0</span>
+                <span className="whitespace-nowrap">· No internet permission</span>
+                <span className="whitespace-nowrap">
+                  · <Link href="/privacy" className="underline hover:text-label">Privacy</Link>
+                </span>
               </p>
             </div>
           </div>
