@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/* The keyboard's own dark theme (ime/src/main/res/values-night/colors.xml), so the
+   page and the product in the screenshot read as one surface. Dark-only. */
+@theme {
+  --color-board: #1e1f22; /* keyboard_background: page ground */
+  --color-key: #2e3135; /* key_background: lifted surfaces, inputs */
+  --color-key-pressed: #4a4f55; /* key_pressed: borders, hover */
+  --color-label: #e8eaed; /* key_label: body text */
+  --color-muted: #9aa0a6; /* secondary text */
+  --color-latched: #3d5a80; /* key_modifier_active: the one accent */
+  --color-latched-hover: #4a6a94; /* waitlist button hover */
+  --color-latched-bright: #8ab4f8; /* accent text on dark ground */
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-latched-bright);
+  outline-offset: 2px;
+}
+
+/* The page's one authored moment: the headline's Ctrl key latches the way Bucky's does,
+   settling from an unlatched key into the latched blue. */
+@keyframes latch {
+  0%,
+  35% {
+    background-color: var(--color-key);
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(1px);
+  }
+  100% {
+    background-color: var(--color-latched);
+    transform: translateY(0);
+  }
+}
+
+.keycap-latch {
+  animation: latch 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .keycap-latch {
+    animation: none;
+  }
+}
