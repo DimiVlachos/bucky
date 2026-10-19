@@ -18,7 +18,7 @@ Before posting:
 >
 > It's written from scratch rather than forked: new Kotlin code on today's APIs (target SDK 37), not a patched 2011 AOSP keyboard.
 >
-> Where it stands, honestly: an early build that already types in Termux on my S23 Ultra. Ctrl, Alt and Shift are one-shot modifiers that send real key events, so Ctrl+C interrupts, Esc leaves vim's insert mode and the arrows walk shell history. The full 5-row layout has `~`, `|` and `\` where you expect them, and touch-to-screen latency is about 13 ms at the median. Not done yet: long-press, key repeat, F1–F12 and other layouts.
+> Where it stands, honestly: an early build that already types in Termux on my S23 Ultra. Ctrl, Alt and Shift are one-shot modifiers that send real key events, so Ctrl+C interrupts, Esc leaves vim's insert mode and the arrows walk shell history. The full 5-row layout has `~`, `|` and `\` where you expect them, and it takes about 13 ms from touch to redraw at the median. Not done yet: long-press, key repeat, F1–F12 and other layouts.
 >
 > The ground rules: Apache-2.0, no INTERNET permission at all, and everything Hacker's Keyboard did stays free. Optional extras later (a layout editor, themes) would pay for the work.
 >
@@ -47,13 +47,13 @@ Before posting:
 > **What works today (early build):**
 > - Full 5-row PC layout, with `~ | \` in the usual places
 > - Ctrl/Alt/Shift as one-shot modifiers that send real KeyEvents: Ctrl+C interrupts `sleep`, Esc leaves vim's insert mode, arrows recall history
-> - About 13 ms median touch-to-screen latency on an S23 Ultra
+> - About 13 ms from touch to redraw (median, S23 Ultra)
 >
 > **Not yet:** long-press alternates, key repeat, F1–F12, Dvorak/Colemak/other layouts, per-app profiles
 >
-> **Ground rules:** Apache-2.0, no INTERNET permission, and everything Hacker's Keyboard did stays free. A paid "Pro" later only covers extras like a layout editor and themes.
+> **Ground rules:** Apache-2.0, no INTERNET permission, and everything Hacker's Keyboard did stays free. A paid "Pro" on Google Play later covers extras like a layout editor and themes, but all of it is in the same open-source repo, and the F-Droid build unlocks everything for free.
 >
-> I'd rather build what this sub needs than guess, so:
+> I'd rather build what this sub needs than guess, so (comments here or issues on GitHub both work):
 > 1. What's the one thing a terminal keyboard gets wrong for you today?
 > 2. Do you also use Termux's extra-keys row? Would you turn it off if the keyboard had those keys?
 > 3. F-keys: a dedicated row, or an Fn layer?
