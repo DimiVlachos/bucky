@@ -15,7 +15,7 @@ It is a from-scratch successor to [Hacker's Keyboard](https://github.com/klausw/
 - Full 5-row PC layout with `~`, `|` and `\` where you expect them
 - Ctrl, Alt and Shift as one-shot modifiers that send real `KeyEvent`s: Ctrl+C interrupts a command in Termux, Esc leaves vim's insert mode, and the arrows walk shell history
 - Esc, Tab, Home, End, Del and the arrow keys as real keys
-- About 13 ms from touch to redraw (median, Galaxy S23 Ultra); see the [spike report](docs/spike-report.md)
+- About 13 ms from touch to drawing the key (median, debug build on a Galaxy S23 Ultra, before the screen's own frame); see the [spike report](docs/spike-report.md)
 
 ## Planned
 
@@ -29,13 +29,13 @@ The full plan, in Greek, is in [PLAN.md](PLAN.md).
 
 ## Principles
 
-- **No INTERNET permission.** The keyboard cannot send what you type anywhere.
+- **No INTERNET permission.** The keyboard cannot open network connections, so it cannot upload what you type.
 - **Open source** under Apache-2.0.
-- **Everything Hacker's Keyboard did stays free.** Optional extras later (layout editor, themes) are sold on Google Play to pay for the work. They are in this same repo, and the F-Droid build unlocks everything for free.
+- **Every key, layout and modifier Hacker's Keyboard had stays free.** Optional extras later (layout editor, themes, word prediction) are sold on Google Play to pay for the work. They are in this same repo, and the `foss` build (built from source today, F-Droid planned) unlocks everything for free.
 
 ## Building
 
-Requirements: JDK 21 and the Android SDK (compile SDK 37, min SDK 26).
+Requirements: any JDK 17 or newer to start Gradle (it downloads the JDK 21 it runs on, and the JDK 17 toolchain, automatically) and the Android SDK (compile SDK 37, min SDK 26).
 
 ```sh
 ./gradlew assembleFossDebug     # F-Droid flavour, all features unlocked
