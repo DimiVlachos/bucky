@@ -48,7 +48,10 @@ Gate before every commit (`spotlessApply` first after any Kotlin edit):
 ./gradlew spotlessApply
 ./gradlew detekt :detekt-rules:test testFossDebugUnitTest testDebugUnitTest :app:architectureTest lintFossDebug assembleFossDebug assemblePlayDebug
 ./gradlew installFossDebug
+scripts/check-manifest-permissions.sh   # after assemble: no INTERNET / QUERY_ALL_PACKAGES
 ```
+
+CI (`.github/workflows/ci.yml`) runs the same gate, the site checks and a DCO check on every pull request; `main` requires it to pass.
 
 The Gradle daemon is pinned to JDK 21 (`gradle/gradle-daemon-jvm.properties`) because detekt 1.23 cannot run on JDK 25. Konsist gates live in `app/src/test/java/app/buckykeys/keyboard/architecture/` and run with `:app:architectureTest`. `config/detekt/baseline.xml` only shrinks (`BaselineBudgetTest`).
 
