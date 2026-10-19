@@ -42,16 +42,16 @@ Before posting:
 
 **Body:**
 
-> Hacker's Keyboard is still the keyboard people recommend for Termux because it sends real Ctrl/Esc/Tab/arrow keys the way a terminal expects. It's also a 2011 codebase that its author no longer maintains and that is falling behind current Android. The "Hacker's Keyboard alternatives?" issue has been open since 2021 without a maintained answer, so I'm writing a successor from scratch, in Kotlin on current APIs. I'm an Android developer, not a long-time HK user, which is exactly why I'm asking this sub what it needs instead of guessing.
+> Hacker's Keyboard is still the keyboard people recommend for Termux because it sends real Ctrl/Esc/Tab/arrow keys the way a terminal expects. It's also a 2011 codebase that its author no longer maintains and that is falling behind current Android. Several forks keep the old code alive (AlainKnaff's had releases this year), but none rewrites it for current Android, so I'm writing a successor from scratch, in Kotlin on current APIs. I'm an Android developer, not a long-time HK user, which is exactly why I'm asking this sub what it needs instead of guessing.
 >
 > **What works today (early build):**
 > - Full 5-row PC layout, with `~ | \` in the usual places
 > - Ctrl/Alt/Shift as one-shot modifiers that send real KeyEvents: Ctrl+C interrupts `sleep`, Esc leaves vim's insert mode, arrows recall history
-> - About 13 ms from touch to redraw (median, S23 Ultra)
+> - About 13 ms from touch to drawing the key (median, debug build on an S23 Ultra, before the screen's own frame)
 >
 > **Not yet:** long-press alternates, key repeat, F1–F12, Dvorak/Colemak/other layouts, per-app profiles
 >
-> **Ground rules:** Apache-2.0, no INTERNET permission, and everything Hacker's Keyboard did stays free. A paid "Pro" on Google Play later covers extras like a layout editor and themes, but all of it is in the same open-source repo, and the F-Droid build unlocks everything for free.
+> **Ground rules:** Apache-2.0, no INTERNET permission, and every key, layout and modifier Hacker's Keyboard had stays free. A paid "Pro" on Google Play later covers extras like a layout editor and themes, but all of it is in the same open-source repo, and the `foss` build (from source now, F-Droid planned) unlocks everything for free.
 >
 > I'd rather build what this sub needs than guess, so (comments here or issues on GitHub both work):
 > 1. What's the one thing a terminal keyboard gets wrong for you today?
@@ -65,6 +65,20 @@ Before posting:
 > Disclosure: I'm the developer.
 
 **Attach:** `site/public/hero-vim.png`
+
+---
+
+## 3. #875 follow-up correction (posted after the review)
+
+> A correction to my comment above. I wrote that nothing maintained has filled the gap, and that wasn't fair. @AlainKnaff's fork has had regular releases this year (1.42.9ak in September), and @codenameberyl and @jcb1ee have shipped builds too. If you need Hacker's Keyboard on a current phone today, those are the places to look.
+>
+> What I'm building is a different kind of thing: a new keyboard written from scratch on current Android APIs, not a patched version of the 2011 code. It's the direction Klaus suggested in #939: "putting the efforts into a more modern keyboard implementation".
+>
+> Two more corrections while I'm at it:
+> - "Everything HK did stays free" was too broad. I mean every key, layout and modifier. Word prediction may end up as a paid extra later.
+> - The 13 ms figure is touch-to-draw measured in a debug build. Add roughly one frame for the screen itself.
+>
+> The questions above still stand, and I'd especially like to hear from people who've tried the forks: what's still missing?
 
 ---
 

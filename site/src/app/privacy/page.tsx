@@ -11,8 +11,7 @@ export default function Privacy() {
       <h1 className="text-3xl font-semibold tracking-tight">Privacy</h1>
       <p>
         The waitlist stores your email address and the time you joined. That is all. It is used to
-        send you one email when the beta opens and one when the app launches, nothing else, and it
-        is never shared or sold.
+        send you one email when the beta opens, nothing else, and it is never shared or sold.
       </p>
       <p>
         To stop abuse, the waitlist counts sign-up attempts per network address for one hour. The
