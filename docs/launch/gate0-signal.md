@@ -34,6 +34,8 @@ Gate 0 check due: 2026-11-02 (a cloud routine posts a summary at 17:07 Athens ti
 
 Engaged people so far (concrete request, answer or interest, excluding Dimitris): EDGE223x, ExplanationNo5955, pfmiller0, AdImmediate2565, d333d, BillGossAU, netllama (#875), gsmitheidw1, Easy-Nothing-6735 (9). Under the strict Gate 0 wording (a concrete feature request or a beta-test offer) pfmiller0 and Easy-Nothing-6735 only show interest, which leaves 7 of the 8 needed. Objections or competitor use: vanshisnotgay, Different-Injury-884, rpheuts (built keyfold for the Samsung Fold). Counterpoint to the objection: Optimal-Savings-4505.
 
+Landing page (Vercel Web Analytics, through 2026-10-19 23:00 UTC): 28 visitors and 40 pageviews, all on 2026-10-19 and peaking 02:00–05:00 UTC, right after the posts. Referrers: none 23 (Reddit's app and GitHub often strip it), github.com 3, reddit 2, bing 1. Devices: 14 desktop, 13 mobile, 1 tablet. One visitor from GR is probably Dimitris. About 6 of 27 visitors signed up (≈ 22%), so the page converts; the limit is traffic: the r/termux post's 3.9K views produced at most about 28 visits.
+
 Where Gate 0 stands on 2026-10-20: Stop needs fewer than 25 signups **and** fewer than 3 substantive replies, and replies are already past 3, so Stop cannot trigger. Continue (a) needs 100 signups; Continue (b) needs 40 signups, 8 people and 25 stars; Extend needs 25–39 signups or two of those three. Only the people condition is close. If signups stay under 25, the outcome falls into the written judgement-call case.
 
 ## Feature requests (tally)
