@@ -6,6 +6,7 @@
   --color-board: #1e1f22; /* keyboard_background: page ground */
   --color-key: #2e3135; /* key_background: lifted surfaces, inputs */
   --color-key-pressed: #4a4f55; /* key_pressed: borders, hover */
+  --color-key-edge: #747a81; /* input borders: 3:1 against key and board */
   --color-label: #e8eaed; /* key_label: body text */
   --color-muted: #9aa0a6; /* secondary text */
   --color-latched: #3d5a80; /* key_modifier_active: the one accent */
