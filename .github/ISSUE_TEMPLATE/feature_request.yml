@@ -1,0 +1,22 @@
+name: Idea or feature request
+description: Something a terminal or coding keyboard should do.
+labels: [idea]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What gets in your way today
+      description: Describe the situation, not only the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you would like
+    validations:
+      required: true
+  - type: input
+    id: app
+    attributes:
+      label: Where you would use it
+      placeholder: Termux, an SSH client, an IDE app…

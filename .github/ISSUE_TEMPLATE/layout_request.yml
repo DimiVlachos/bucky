@@ -1,0 +1,29 @@
+name: Layout request
+description: Ask for a language, a variant (Dvorak, Colemak…) or a change to an existing layout.
+labels: [layout]
+body:
+  - type: input
+    id: layout
+    attributes:
+      label: Layout
+      placeholder: Dvorak, German QWERTZ, Greek polytonic…
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What you need it for
+      description: Which apps you type in, and which keys matter most.
+    validations:
+      required: true
+  - type: textarea
+    id: reference
+    attributes:
+      label: Reference
+      description: A link or picture of the layout as you expect it.
+  - type: checkboxes
+    id: tester
+    attributes:
+      label: Testing
+      options:
+        - label: I can test this layout on a real device when it is ready.

@@ -1,0 +1,35 @@
+name: Bug report
+description: Something types wrong, crashes, or behaves differently from a physical keyboard.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you pressed, what you expected, and what you got instead.
+    validations:
+      required: true
+  - type: input
+    id: app
+    attributes:
+      label: App you were typing in
+      placeholder: Termux 0.118, ConnectBot, Chrome…
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and Android version
+      placeholder: Galaxy S23 Ultra, Android 16 (One UI 8)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Bucky version or commit
+      placeholder: e.g. 0.1.0, or the commit you built from
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or logs
+      description: Optional. `adb logcat -b crash` output helps for crashes.
