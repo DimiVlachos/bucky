@@ -30,9 +30,11 @@ Gate 0 check due: 2026-11-02 (a cloud routine posts a summary at 17:07 Athens ti
 | Date | r/termux | #875 | Repo | Waitlist |
 |---|---|---|---|---|
 | 2026-10-19 (≈ half a day in) | 23 upvotes, 9 comments, 3.9K views | 0 replies, 1 🚀 | 5 stars (KaiRo-at, ShevT, Holton181, pfmiller0, litao91), 0 issues | not read yet (`ZCARD waitlist`, needs 2FA) |
-| 2026-10-20 | 25 comments (16 not by Dimitris); upvotes and views not re-read | 1 reply (netllama), 1 🚀 | 6 stars (+gsmitheidw), 0 issues | not read yet |
+| 2026-10-20 | 25 comments (16 not by Dimitris); upvotes and views not re-read | 1 reply (netllama), 1 🚀 | 6 stars (+gsmitheidw), 0 issues | 6 signups, all on 2026-10-19 (07:04–21:19 Athens), none since |
 
 Engaged people so far (concrete request, answer or interest, excluding Dimitris): EDGE223x, ExplanationNo5955, pfmiller0, AdImmediate2565, d333d, BillGossAU, netllama (#875), gsmitheidw1, Easy-Nothing-6735 (9). Under the strict Gate 0 wording (a concrete feature request or a beta-test offer) pfmiller0 and Easy-Nothing-6735 only show interest, which leaves 7 of the 8 needed. Objections or competitor use: vanshisnotgay, Different-Injury-884, rpheuts (built keyfold for the Samsung Fold). Counterpoint to the objection: Optimal-Savings-4505.
+
+Where Gate 0 stands on 2026-10-20: Stop needs fewer than 25 signups **and** fewer than 3 substantive replies, and replies are already past 3, so Stop cannot trigger. Continue (a) needs 100 signups; Continue (b) needs 40 signups, 8 people and 25 stars; Extend needs 25–39 signups or two of those three. Only the people condition is close. If signups stay under 25, the outcome falls into the written judgement-call case.
 
 ## Feature requests (tally)
 
