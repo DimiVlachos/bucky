@@ -16,7 +16,7 @@ Open an issue first for anything bigger than a small fix, so we can agree on the
 
 ## Checks
 
-Run these before opening a pull request.
+Run these before opening a pull request. CI runs the same checks on every pull request, plus a DCO sign-off check.
 
 ```sh
 ./gradlew spotlessApply
@@ -24,6 +24,8 @@ Run these before opening a pull request.
 ```
 
 Changes to `site/` run `cd site && npm test && npm run lint && npm run build`.
+
+After building, `scripts/check-manifest-permissions.sh` confirms neither app flavour requests INTERNET or QUERY_ALL_PACKAGES.
 
 ## Commits and sign-off (DCO)
 
