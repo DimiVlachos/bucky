@@ -39,15 +39,15 @@ export default function Home() {
 
       <figure className="flex flex-col gap-3">
         <Image
-          src="/hero-termux.png"
-          alt="Bucky Keys under a Termux session: a pipe command and a sleep interrupted with Ctrl+C"
+          src="/hero-vim.png"
+          alt="vim editing a backup script in Termux, with Bucky Keys below and its Ctrl key latched"
           width={1440}
-          height={1240}
+          height={2778}
           priority
-          className="w-full rounded-xl border border-key-pressed"
+          className="mx-auto w-full max-w-sm rounded-2xl border border-key-pressed"
         />
         <figcaption className="text-center text-sm text-muted">
-          Ctrl, then C. Termux gets a real ^C.
+          Real vim in Termux. Esc just left insert mode; Ctrl is latched for the next key.
         </figcaption>
       </figure>
 
