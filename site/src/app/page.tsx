@@ -39,7 +39,7 @@ export default function Home() {
 
       <figure className="flex flex-col gap-3">
         <Image
-          src="/hero.png"
+          src="/hero-termux.png"
           alt="Bucky Keys under a Termux session: a pipe command and a sleep interrupted with Ctrl+C"
           width={1440}
           height={1240}
