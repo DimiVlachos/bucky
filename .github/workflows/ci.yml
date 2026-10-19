@@ -73,7 +73,7 @@ jobs:
             21
       - uses: gradle/actions/setup-gradle@v4
       - name: Install Android platform 37
-        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37" > /dev/null
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-37.0" > /dev/null || test -d "$ANDROID_HOME/platforms/android-37.0"
       - name: Gate
         run: >
           ./gradlew spotlessCheck detekt :detekt-rules:test
