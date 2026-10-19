@@ -65,4 +65,4 @@ cd site && npm test && npm run lint && npm run build
 
 ## Git
 
-Branches are `feat/…`, `fix/…`, `chore/…`. Commits use a conventional subject, a body that explains why and lists the checks run, `git commit -s` (DCO, PLAN §8.2), and the session attribution lines.
+Branches are `feat/…`, `fix/…`, `chore/…`. Every change reaches `main` through a pull request: the `protect main` ruleset rejects direct pushes, force-pushes and deletion, and requires the CI checks `changes`, `android`, `site` and `dco` to pass. Merge with `gh pr merge --merge --delete-branch` once green. Commits use a conventional subject, a body that explains why and lists the checks run, `git commit -s` (DCO, PLAN §8.2), and the session attribution lines.
