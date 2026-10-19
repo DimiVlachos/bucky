@@ -14,7 +14,9 @@ Before posting:
 
 > **Rewriting it from scratch: what would you need from a successor?**
 >
-> This thread has been asking since 2021 for something that keeps Hacker's Keyboard's layout but runs on current Android. I'm building one from scratch rather than forking: new Kotlin code on today's APIs (target SDK 37), not a patched 2011 AOSP keyboard. <!-- optional: one sentence on your own HK use, only if true -->
+> This thread has been asking since 2021 for something that keeps Hacker's Keyboard's layout but runs on current Android, and nothing maintained has filled that gap. I'm a senior Android developer (https://dimvlachos.dev), and to be upfront, I'm not a long-time HK user. I'm building this because the demand is clearly here and nobody has answered it. That's also why I'm asking rather than assuming.
+>
+> It's written from scratch rather than forked: new Kotlin code on today's APIs (target SDK 37), not a patched 2011 AOSP keyboard.
 >
 > Where it stands, honestly: an early build that already types in Termux on my S23 Ultra. Ctrl, Alt and Shift are one-shot modifiers that send real key events, so Ctrl+C interrupts, Esc leaves vim's insert mode and the arrows walk shell history. The full 5-row layout has `~`, `|` and `\` where you expect them, and touch-to-screen latency is about 13 ms at the median. Not done yet: long-press, key repeat, F1–F12 and other layouts.
 >
@@ -40,7 +42,7 @@ Before posting:
 
 **Body:**
 
-> Hacker's Keyboard is still the keyboard people recommend for Termux because it sends real Ctrl/Esc/Tab/arrow keys the way a terminal expects. It's also a 2011 codebase that its author no longer maintains and that is falling behind current Android. So I'm writing a successor from scratch, in Kotlin on current APIs. <!-- optional: one sentence on how you use Termux, only if true -->
+> Hacker's Keyboard is still the keyboard people recommend for Termux because it sends real Ctrl/Esc/Tab/arrow keys the way a terminal expects. It's also a 2011 codebase that its author no longer maintains and that is falling behind current Android. The "Hacker's Keyboard alternatives?" issue has been open since 2021 without a maintained answer, so I'm writing a successor from scratch, in Kotlin on current APIs. I'm an Android developer, not a long-time HK user, which is exactly why I'm asking this sub what it needs instead of guessing.
 >
 > **What works today (early build):**
 > - Full 5-row PC layout, with `~ | \` in the usual places
