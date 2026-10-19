@@ -7,7 +7,7 @@ import "./globals.css";
 
 const title = "Bucky Keys — a real PC keyboard for Android";
 const description =
-  "Ctrl, Esc, Tab, arrows and F-keys that Termux, vim and SSH actually understand. Open source, no internet permission.";
+  "Ctrl, Esc, Tab and arrow keys that Termux, vim and SSH actually understand. In development: open source, no internet permission.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

@@ -27,8 +27,8 @@ const features = [
     ),
   },
   {
-    title: "Nothing leaves your phone",
-    body: "No internet permission. The keyboard cannot send what you type anywhere, and the source is open (Apache-2.0) so you can check.",
+    title: "No internet permission",
+    body: "The keyboard has no permission to open network connections, so it cannot upload what you type. The source is open (Apache-2.0) so you can check.",
     evidence: (
       <code className="font-mono text-sm text-label/70 line-through decoration-muted decoration-[1.5px]">
         android.permission.INTERNET
@@ -37,7 +37,7 @@ const features = [
   },
   {
     title: "Free where it counts",
-    body: "Everything Hacker's Keyboard did stays free, forever. Optional extras later pay for the work.",
+    body: "Every key, layout and modifier Hacker's Keyboard had stays free, forever. Optional extras later, such as a layout editor, pay for the work.",
     evidence: <code className="font-mono text-sm text-latched-bright">$0, forever</code>,
   },
 ];
@@ -62,9 +62,9 @@ export default function Home() {
               A real PC keyboard for Android.
             </h1>
             <p className="text-lg leading-relaxed text-pretty text-muted">
-              <Kbd latched>Ctrl</Kbd>, <Kbd>Esc</Kbd>, <Kbd>Tab</Kbd>, arrows and F-keys that
-              Termux, vim and SSH actually understand. The maintained successor Hacker&apos;s
-              Keyboard users have been asking for.
+              <Kbd latched>Ctrl</Kbd>, <Kbd>Esc</Kbd>, <Kbd>Tab</Kbd> and the arrows, as real keys
+              that Termux, vim and SSH actually understand. A from-scratch successor to
+              Hacker&apos;s Keyboard, in development now.
             </p>
             <div className="flex flex-col gap-3">
               <WaitlistForm />
