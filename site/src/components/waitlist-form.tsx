@@ -1,7 +1,7 @@
 // Client component: it tracks submit state and posts with fetch.
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 
 type Status = "idle" | "sending" | "joined" | "invalid" | "limited" | "failed";
 
@@ -14,6 +14,7 @@ const messages: Record<Exclude<Status, "idle" | "sending">, string> = {
 
 export function WaitlistForm() {
   const [status, setStatus] = useState<Status>("idle");
+  const emailId = useId();
 
   async function submit(form: FormData) {
     setStatus("sending");
@@ -35,9 +36,9 @@ export function WaitlistForm() {
   return (
     <form action={submit} className="flex flex-col gap-3">
       <div className="flex flex-col gap-2 sm:flex-row">
-        <label htmlFor="email" className="sr-only">Email</label>
+        <label htmlFor={emailId} className="sr-only">Email</label>
         <input
-          id="email"
+          id={emailId}
           name="email"
           type="email"
           required
@@ -49,7 +50,7 @@ export function WaitlistForm() {
         <button
           type="submit"
           disabled={status === "sending"}
-          className="rounded-md bg-latched px-5 py-3 font-medium text-label hover:bg-latched/80 disabled:opacity-60"
+          className="rounded-md bg-latched px-5 py-3 font-medium text-label shadow-[0_1px_0_0_rgb(255_255_255/0.08)_inset,0_6px_16px_-6px_rgb(0_0_0/0.6)] transition-[background-color,transform] duration-150 ease-out hover:bg-latched-hover active:translate-y-px disabled:opacity-60"
         >
           {status === "sending" ? "Joining…" : "Join the waitlist"}
         </button>
