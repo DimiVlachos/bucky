@@ -1,0 +1,88 @@
+{
+  "id": "pc_full_en_us",
+  "name": "PC Full (US)",
+  "rows": [
+    {
+      "keys": [
+        { "key": "ESC", "width": 1.25 },
+        { "chars": ["1", "!"] },
+        { "chars": ["2", "@"] },
+        { "chars": ["3", "#"] },
+        { "chars": ["4", "$"] },
+        { "chars": ["5", "%"] },
+        { "chars": ["6", "^"] },
+        { "chars": ["7", "&"] },
+        { "chars": ["8", "*"] },
+        { "chars": ["9", "("] },
+        { "chars": ["0", ")"] },
+        { "chars": ["-", "_"] },
+        { "chars": ["=", "+"] },
+        { "key": "BACKSPACE", "width": 1.75 }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "TAB", "width": 1.5 },
+        { "chars": ["q", "Q"] },
+        { "chars": ["w", "W"] },
+        { "chars": ["e", "E"] },
+        { "chars": ["r", "R"] },
+        { "chars": ["t", "T"] },
+        { "chars": ["y", "Y"] },
+        { "chars": ["u", "U"] },
+        { "chars": ["i", "I"] },
+        { "chars": ["o", "O"] },
+        { "chars": ["p", "P"] },
+        { "chars": ["[", "{"] },
+        { "chars": ["]", "}"] },
+        { "chars": ["\\", "|"], "width": 1.5 }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "CTRL", "width": 1.75 },
+        { "chars": ["a", "A"] },
+        { "chars": ["s", "S"] },
+        { "chars": ["d", "D"] },
+        { "chars": ["f", "F"] },
+        { "chars": ["g", "G"] },
+        { "chars": ["h", "H"] },
+        { "chars": ["j", "J"] },
+        { "chars": ["k", "K"] },
+        { "chars": ["l", "L"] },
+        { "chars": [";", ":"] },
+        { "chars": ["'", "\""] },
+        { "key": "ENTER", "width": 2.25 }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "SHIFT", "width": 1.5 },
+        { "chars": ["z", "Z"] },
+        { "chars": ["x", "X"] },
+        { "chars": ["c", "C"] },
+        { "chars": ["v", "V"] },
+        { "chars": ["b", "B"] },
+        { "chars": ["n", "N"] },
+        { "chars": ["m", "M"] },
+        { "chars": [",", "<"] },
+        { "chars": [".", ">"] },
+        { "chars": ["/", "?"] },
+        { "chars": ["`", "~"] },
+        { "key": "UP", "width": 1.25 },
+        { "key": "FORWARD_DEL", "width": 1.25 }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "ALT", "width": 1.5 },
+        { "chars": [" ", " "], "width": 6.75 },
+        { "key": "HOME", "width": 1.5 },
+        { "key": "END", "width": 1.5 },
+        { "key": "LEFT", "width": 1.25 },
+        { "key": "DOWN", "width": 1.25 },
+        { "key": "RIGHT", "width": 1.25 }
+      ]
+    }
+  ]
+}
