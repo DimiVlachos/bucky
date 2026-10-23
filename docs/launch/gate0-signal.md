@@ -22,6 +22,9 @@ Sources for the numbers: signups from `ZCARD waitlist` (Vercel → Storage → b
 |---|---|---|
 | klausw/hackerskeyboard#875 | 2026-10-19 | https://github.com/klausw/hackerskeyboard/issues/875#issuecomment-6257364796 |
 | r/termux (Showcase) | 2026-10-19 | https://www.reddit.com/r/termux/comments/1x9jwut/building_a_fromscratch_successor_to_hackers/ |
+| klausw/hackerskeyboard#875, replies to ketas and netllama (beta invites) | 2026-10-24 | https://github.com/klausw/hackerskeyboard/issues/875#issuecomment-6376726471, https://github.com/klausw/hackerskeyboard/issues/875#issuecomment-6376726761 |
+| klausw/hackerskeyboard#957 (landscape cut off on Android 15 and One UI 7) | 2026-10-24 | https://github.com/klausw/hackerskeyboard/issues/957#issuecomment-6376789455 |
+| r/termux update with a 32 s Termux video (Showcase) | 2026-10-24 | https://www.reddit.com/r/termux/comments/1xdtizy/hackers_keyboard_successor_one_week_in_what_you/ |
 
 Gate 0 check due: 2026-11-02 (a cloud routine posts a summary at 17:07 Athens time).
 
