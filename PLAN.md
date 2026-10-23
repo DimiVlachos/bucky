@@ -138,6 +138,13 @@ On-device prediction και autocorrect (Pro), mic key που εναλλάσσε
 
 Μοντέλο σε Kotlin: `sealed interface KeyDef` με `Char(primary, shifted, alternates)`, `Special(code: KeyCode)`, `Modifier(kind: ModifierKind)`, `LayoutSwitch(targetId)`. Πλάτος σε μονάδες, ύψος σειράς από τις ρυθμίσεις. Ο parser χρησιμοποιεί kotlinx.serialization και επιστρέφει `Result<Layout>` με δομημένα σφάλματα (διαδρομή στο JSON και αιτία). Τα built-in layouts είναι assets, τα custom του χρήστη ζουν σε `filesDir/layouts`.
 
+Κανόνες του format (`LayoutParser`, εβδομάδα 3):
+
+- Κάθε πλήκτρο έχει ακριβώς ένα από τα `chars`, `key` ή `switchTo`. Το `key` παίρνει ονόματα του `KeyCode` (`ESC`, `F1`, `HOME`) και του `ModifierKind` (`CTRL`, `ALT`, `SHIFT`, `FN`).
+- `chars` με ένα string παίρνει ως shifted το κεφαλαίο του. Το `longPress` επιτρέπεται μόνο μαζί με `chars`.
+- Το `label` είναι προαιρετικό: default είναι ο πρώτος χαρακτήρας, κενό για το space, και σταθερές ετικέτες για τα special keys (Esc, ⌫, Ctrl). Το `width` είναι προαιρετικό, default 1, πάντα θετικό.
+- Άγνωστα πεδία απορρίπτονται, ώστε ένα typo όπως `widht` να μην περνά σιωπηλά. Κάθε σφάλμα έχει JSON path, π.χ. `$.rows[1].keys[3].key`, και αιτία.
+
 ### 4.4 Engine: από το άγγιγμα στο InputConnection
 
 `KeyboardEngine` σε καθαρό Kotlin, χωρίς Android imports εκτός από `KeyEvent` σταθερές. Δέχεται pointer δεδομένα ως primitives, `onPointer(pointerId, x, y, action, sink)` (ο χρόνος προστίθεται μαζί με key repeat και long-press στην εβδομάδα 4), τα αντιστοιχίζει σε πλήκτρο μέσω προϋπολογισμένης γεωμετρίας και εκπέμπει μέσω `InputSink` (`commitText(text)`, `sendKey(keyCode, metaState)`). Primitives και sink αντί για αντικείμενα `PointerEvent` και `InputCommand`, ώστε το `onTouchEvent` να μένει χωρίς allocations (βλ. 4.12 και 13). Οι εντολές που εκπέμπονται:
