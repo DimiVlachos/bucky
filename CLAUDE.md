@@ -11,7 +11,7 @@ Conventions follow Dimitris's other Android apps. When a convention is unclear, 
 | Module | Holds | May depend on |
 |---|---|---|
 | `:app` | Manifest, `play`/`foss` flavors, Hilt `Application`, `BuckyImeService`, flavor `BillingModule` | everything |
-| `:ime` | Layout model, `KeyboardGeometry`, `KeyboardEngine`, `InputDispatcher`, `KeyboardView` | core-ktx, Timber |
+| `:ime` | Layout model and JSON parser, `KeyboardGeometry`, `KeyboardEngine`, `InputDispatcher`, `KeyboardView` | core-ktx, Timber, kotlinx-serialization-json |
 | `:settings` | Compose settings and onboarding | `:billing` |
 | `:billing` | `ProEntitlement`, `BillingRepository` | coroutines |
 | `:billing-play` | Play implementation (`playImplementation` only) | `:billing` |
