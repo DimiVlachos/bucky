@@ -72,6 +72,9 @@
 | Built-in προφίλ για Termux, ConnectBot, JuiceSSH, Termius | Ρύθμιση ύψους και split mode σε πλάτος 600dp+ | Layout editor (v1.1, Pro) |
 | Material You dynamic colors, light και dark | Προεπισκόπηση πλήκτρου μέσα στο view, όχι PopupWindow | Custom per-app προφίλ (v1.1, Pro) |
 | Onboarding 3 βημάτων: enable, select, try | Backup ρυθμίσεων σε αρχείο (v1.1, Pro) | Physical keyboard remapping |
+| Προαιρετική μόνιμη σειρά F1 έως F12, εκτός από το Fn layer (αίτημα από #875 και r/termux) | | |
+| Προαιρετική επιπλέον σειρά με όποια πλήκτρα ή σύμβολα διαλέξει ο χρήστης, δωρεάν (ο layout editor μένει Pro) | | |
+| Landscape με δικό του ύψος. Το πλάτος μετριέται από το window και τα insets σε κάθε layout pass, με χειροκίνητη ρύθμιση πλάτους και δεξιού padding ως fallback για OEM builds (hackerskeyboard#957) | | |
 | TalkBack υποστήριξη με ExploreByTouchHelper | | |
 | Flavors `play` και `foss`, Pro gating με Play Billing | | |
 | Σελίδα Play, privacy policy, Data Safety, IzzyOnDroid και F-Droid submission | | |
@@ -261,8 +264,8 @@ Plugins: `com.android.application`, `org.jetbrains.kotlin.android`, `org.jetbrai
 | 2 | Spike και go/no-go | Repo, modules, `InputMethodService` skeleton, Canvas view με στατικό layout που πληκτρολογεί σε Termux, μέτρηση latency | Ctrl+C και Esc δουλεύουν στο Termux, Gate 0 αποφασισμένο |
 | 3 | Engine | Layout model και parser, γεωμετρία, touch σε πλήκτρο, `commitText` και `sendKeyEvent`, PC Full EN | Πληκτρολόγηση σε Termux και σε browser χωρίς λάθη χαρακτήρων |
 | 4 | Engine | Modifiers state machine, chording, key repeat, long-press alternates, Backspace/Delete ως KeyEvents | Ctrl+Alt+Del, Ctrl+Shift+βελάκι και long-press σωστά σε Termux και σε Google Docs |
-| 5 | Engine | Προεπισκόπηση μέσα στο view, `onComputeInsets`, insets gesture navigation, haptics, landscape | Μηδενικές allocations στο draw path, σωστή συμπεριφορά σε gesture και 3-button navigation |
-| 6 | Layouts και θέμα | 4-row, compact, αριθμητικό, EL, Dvorak, Colemak, UK, Material You light/dark | Όλα τα layouts φορτώνουν από JSON, εναλλαγή EL/EN με πλήκτρο γλώσσας |
+| 5 | Engine | Προεπισκόπηση μέσα στο view, `onComputeInsets`, insets gesture navigation, haptics, landscape με fallback πλάτους και padding | Μηδενικές allocations στο draw path, σωστή συμπεριφορά σε gesture και 3-button navigation |
+| 6 | Layouts και θέμα | 4-row, compact, αριθμητικό, EL, Dvorak, Colemak, UK, σειρά F1 έως F12, επιπλέον σειρά χρήστη, Material You light/dark | Όλα τα layouts φορτώνουν από JSON, εναλλαγή EL/EN με πλήκτρο γλώσσας |
 | 7 | Settings | Compose settings app, DataStore, ροή ρυθμίσεων στο IME, επιλογή layouts, ύψος, number row | Κάθε ρύθμιση εφαρμόζεται ζωντανά στο IME χωρίς restart |
 | 8 | Onboarding και προφίλ | Onboarding 3 βημάτων, built-in προφίλ ανά εφαρμογή, password και number inputType handling, split mode 600dp+ | Νέος χρήστης ενεργοποιεί και επιλέγει το IME σε κάτω από 60 δευτερόλεπτα |
 | 9 | Ποιότητα | ExploreByTouchHelper, crash-proofing με fallback layout, performance pass, Logcat latency metrics | TalkBack διαβάζει κάθε πλήκτρο, κανένα crash σε fuzz χειροκίνητης χρήσης 30 λεπτών |
