@@ -12,8 +12,11 @@ class LayoutParserTest {
     private fun parseKeys(vararg keys: String): List<KeySpec> =
         LayoutParser.parse(layoutWithKeys(*keys)).getOrThrow().rows.single().keys
 
-    private fun failureOf(json: String): LayoutParseException =
-        LayoutParser.parse(json).exceptionOrNull() as LayoutParseException
+    private fun failureOf(json: String): LayoutParseException {
+        val error = LayoutParser.parse(json).exceptionOrNull()
+        assertTrue("expected a LayoutParseException, got $error", error is LayoutParseException)
+        return error as LayoutParseException
+    }
 
     @Test
     fun `a layout keeps its id and name`() {
@@ -165,6 +168,32 @@ class LayoutParserTest {
         assertEquals(
             "$.rows[0].keys[0].width",
             failureOf(layoutWithKeys("""{ "key": "TAB", "width": "wide" }""")).path,
+        )
+    }
+
+    @Test
+    fun `long press needs a character key`() {
+        assertEquals(
+            "$.rows[0].keys[0].longPress",
+            failureOf(layoutWithKeys("""{ "key": "TAB", "longPress": ["x"] }""")).path,
+        )
+    }
+
+    @Test
+    fun `a width too large for a float is rejected`() {
+        assertEquals(
+            "$.rows[0].keys[0].width",
+            failureOf(layoutWithKeys("""{ "key": "TAB", "width": 1e40 }""")).path,
+        )
+    }
+
+    @Test
+    fun `rows and keys must be objects and chars an array`() {
+        assertEquals("$.rows[0]", failureOf("""{ "id": "t", "name": "T", "rows": [ 1 ] }""").path)
+        assertEquals("$.rows[0].keys[0]", failureOf(layoutWithKeys("\"q\"")).path)
+        assertEquals(
+            "$.rows[0].keys[0].chars",
+            failureOf(layoutWithKeys("""{ "chars": "q" }""")).path,
         )
     }
 }
