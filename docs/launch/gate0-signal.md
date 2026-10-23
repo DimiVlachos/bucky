@@ -40,7 +40,7 @@ Engaged people so far (concrete request, answer or interest, excluding Dimitris)
 
 Landing page (Vercel Web Analytics, through 2026-10-19 23:00 UTC): 28 visitors and 40 pageviews, all on 2026-10-19 and peaking 02:00–05:00 UTC, right after the posts. Referrers: none 23 (Reddit's app and GitHub often strip it), github.com 3, reddit 2, bing 1. Devices: 14 desktop, 13 mobile, 1 tablet. One visitor from GR is probably Dimitris. About 6 of 27 visitors signed up (≈ 22%), so the page converts; the limit is traffic: the r/termux post's 3.9K views produced at most about 28 visits.
 
-Landing page, by day (Vercel Web Analytics, UTC): 10-19 29 visitors, 10-20 17, 10-21 9, 10-22 8, 10-23 3, 10-24 0 (66 in total). Signups follow the same decay: 3 in the five days after the posts' first day.
+Landing page, by day (Vercel Web Analytics, UTC, read 2026-10-23 about 23:20 UTC): 10-19 29 visitors, 10-20 17, 10-21 9, 10-22 8, 10-23 3 (66 in total). Signups follow the same decay: 3 in the four days after the posts' first day. The 9 signups are not checked against Dimitris's own test signups.
 
 Where Gate 0 stands on 2026-10-24: the people condition is met (8 of 8). Stars are 9 of 25 and signups 9 of 40, both well short. With one of the three conditions met and signups under 25, the outcome is still heading for the judgement-call case unless traffic rises before 2026-11-02.
 
@@ -52,10 +52,11 @@ Where Gate 0 stands on 2026-10-20: Stop needs fewer than 25 signups **and** fewe
 |---|---|---|---|
 | More language layouts (Estonian) | 1 | #875 ketas (6.9" phone, already runs a full custom layout) | Layouts are JSON data (week 6 adds EL and others); Estonian is cheap to add |
 | Custom / own layouts (more keys by default) | 1 (+1 pointing to HeliBoard, which has it) | r/termux EDGE223x, Proteu__ | Planned (JSON layouts, week 3). PLAN makes the editor Pro; reconsider, since HeliBoard offers it free |
-| Configurable extra row inside the keyboard, any key or symbol | 1 (+1 who keeps Termux's own row) | r/termux d333d, BillGossAU | Not in PLAN; candidate for week 4–6 |
+| Configurable extra row inside the keyboard, any key or symbol | 1 (+1 who keeps Termux's own row) | r/termux d333d, BillGossAU | In PLAN v1 since 2026-10-24 (free, week 6) |
 | Clipboard manager, pasting into password fields | 1 | r/termux ExplanationNo5955 | Not in PLAN v1; keep password-field clips out of history if built |
+| Landscape cut off on the right on Android 15 and One UI 7 | 1 thread (#957, opened by netllama; several Samsung users) | hackerskeyboard#957 | Width from the measure pass plus a manual width and padding fallback, in PLAN v1 since 2026-10-24 (week 5) |
 | Floating keyboard on tablets (movable and smaller; split is not enough) | 1 | r/termux AdImmediate2565 | PLAN has split mode for tablets, not floating |
-| Easy access to F1–F12 (one asks for a dedicated row) | 2 | #875 netllama, r/termux gsmitheidw1 (F10 in Midnight Commander) | PLAN has an Fn layer, not built yet; reconsider a row |
+| Easy access to F1–F12 (one asks for a dedicated row) | 2 | #875 netllama, r/termux gsmitheidw1 (F10 in Midnight Commander) | Fn layer plus an optional permanent F-key row, in PLAN v1 since 2026-10-24 (week 6) |
 | Home, End and Esc on the main layer, not behind Fn | 1 (+1 whose Termux extra-keys row has them) | r/termux EDGE223x (vim, helix), BillGossAU | PLAN's PC Full layout has them (v1) |
 
 ## Notable replies
