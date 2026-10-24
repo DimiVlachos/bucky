@@ -14,3 +14,8 @@ public fun cappedRowHeightPx(
 
 private const val LANDSCAPE_MAX_FRACTION = 0.5f
 private const val PORTRAIT_MAX_FRACTION = 0.6f
+
+public fun compactRowHeightPx(fullRowPx: Int): Int = fullRowPx * FULL_MAIN_ROWS / COMPACT_ROWS
+
+private const val FULL_MAIN_ROWS = 5
+private const val COMPACT_ROWS = 4

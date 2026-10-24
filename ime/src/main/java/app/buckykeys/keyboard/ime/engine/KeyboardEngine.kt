@@ -37,11 +37,21 @@ public class KeyboardEngine(
 
     public var languageSwipe: Boolean = false
 
+    public var autoShift: Boolean = false
+        private set
+
+    public fun setAutoShift(on: Boolean) {
+        autoShift = on
+    }
+
     public var lockedMask: Int = 0
         private set
 
     public val modifierMask: Int
-        get() = oneShotMask or lockedMask or heldMask
+        get() = oneShotMask or lockedMask or heldMask or autoMask
+
+    private val autoMask: Int
+        get() = if (autoShift) bit(ModifierKind.SHIFT) else 0
 
     public val nextDeadline: Long
         get() = if (timerPointer == NO_POINTER) NO_DEADLINE else timerAt
@@ -99,7 +109,11 @@ public class KeyboardEngine(
             timerAt = timeMs + REPEAT_INTERVAL_MS
         } else {
             timerPointer = NO_POINTER
-            if (def is KeyDef.Char) longPress(pointerId, def, sink)
+            when (def) {
+                is KeyDef.Char -> longPress(pointerId, def, sink)
+                is KeyDef.LayoutSwitch -> holdSwitch(pointerId, def)
+                else -> Unit
+            }
         }
     }
 
@@ -111,6 +125,7 @@ public class KeyboardEngine(
         switchRequest = null
         oneShotMask = 0
         lockedMask = 0
+        autoShift = false
     }
 
     private fun releaseAllPointers() {
@@ -250,6 +265,13 @@ public class KeyboardEngine(
         }
     }
 
+    private fun holdSwitch(pointerId: Int, def: KeyDef.LayoutSwitch) {
+        val target = def.holdTargetId ?: return
+        pointerConsumed[pointerId] = true
+        longPressCount++
+        switchRequest = target
+    }
+
     private fun commitPopup(key: Int, sink: InputSink) {
         val selected = popup.selected
         closePopup()
@@ -285,7 +307,11 @@ public class KeyboardEngine(
         }
 
     private fun longPresses(def: KeyDef): Boolean =
-        def is KeyDef.Char && (def.alternates.isNotEmpty() || def.shifted != def.primary)
+        when (def) {
+            is KeyDef.Char -> def.alternates.isNotEmpty() || def.shifted != def.primary
+            is KeyDef.LayoutSwitch -> def.holdTargetId != null
+            else -> false
+        }
 
     private fun startHold(kind: ModifierKind) {
         val bit = bit(kind)
@@ -315,22 +341,27 @@ public class KeyboardEngine(
 
     private fun release(key: Int, chorded: Boolean, usesFn: Boolean, sink: InputSink) {
         when (val def = acting(key, usesFn)) {
-            is KeyDef.Modifier -> if (!chorded) tapModifier(bit(def.kind))
+            is KeyDef.Modifier -> if (!chorded) tapModifier(def.kind)
             is KeyDef.LayoutSwitch -> switchRequest = def.targetId
             is KeyDef.Dead -> {
+                val auto = autoShift
                 pressDead(key, def, sink)
                 afterKey()
+                autoShift = auto
             }
             is KeyDef.Char,
             is KeyDef.Special -> {
                 emit(def, sink)
                 afterKey()
+                geometry.spec(key).then?.let { switchRequest = it }
             }
         }
     }
 
-    private fun tapModifier(bit: Int) {
+    private fun tapModifier(kind: ModifierKind) {
+        val bit = bit(kind)
         when {
+            kind == ModifierKind.SHIFT && autoShift -> autoShift = false
             lockedMask and bit != 0 -> lockedMask = lockedMask and bit.inv()
             oneShotMask and bit != 0 -> {
                 oneShotMask = oneShotMask and bit.inv()
@@ -342,6 +373,7 @@ public class KeyboardEngine(
 
     private fun afterKey() {
         oneShotMask = 0
+        autoShift = false
         chordedMask = chordedMask or heldMask
     }
 
@@ -419,12 +451,16 @@ public class KeyboardEngine(
             meta = meta or KeyEvent.META_CTRL_ON or KeyEvent.META_CTRL_LEFT_ON
         if (isActive(ModifierKind.ALT))
             meta = meta or KeyEvent.META_ALT_ON or KeyEvent.META_ALT_LEFT_ON
-        if (forceShift || isActive(ModifierKind.SHIFT))
+        if (forceShift || userShift())
             meta = meta or KeyEvent.META_SHIFT_ON or KeyEvent.META_SHIFT_LEFT_ON
         return meta
     }
 
     private fun isActive(kind: ModifierKind): Boolean = modifierMask and bit(kind) != 0
+
+    // Auto shift only capitalises letters; key events carry the user's own Shift.
+    private fun userShift(): Boolean =
+        (oneShotMask or lockedMask or heldMask) and bit(ModifierKind.SHIFT) != 0
 
     private fun bit(kind: ModifierKind): Int = 1 shl kind.ordinal
 

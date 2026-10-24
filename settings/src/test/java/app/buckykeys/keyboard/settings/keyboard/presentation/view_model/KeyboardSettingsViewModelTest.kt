@@ -1,6 +1,7 @@
 package app.buckykeys.keyboard.settings.keyboard.presentation.view_model
 
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
+import app.buckykeys.keyboard.settings.keyboard.domain.model.OutsideTerminals
 import app.buckykeys.keyboard.settings.keyboard.presentation.state.KeyboardSettingsState
 import app.buckykeys.keyboard.settings.keyboard.presentation.view_model.fake.FakeExtraRowInterpreter
 import app.buckykeys.keyboard.settings.keyboard.presentation.view_model.fake.FakeKeyboardSettingsRepository
@@ -60,6 +61,19 @@ class KeyboardSettingsViewModelTest {
             backgroundScope.launch { viewModel.state.collect {} }
             viewModel.onLabelScaleChange(120)
             assertEquals(120, repository.stored.value.labelScalePercent)
+        }
+
+    @Test
+    fun `an outside terminals change is saved`() =
+        runTest(dispatcher) {
+            val viewModel = KeyboardSettingsViewModel(repository, FakeExtraRowInterpreter())
+            backgroundScope.launch { viewModel.state.collect {} }
+            viewModel.onOutsideTerminalsChange(OutsideTerminals.FULL)
+            viewModel.onAutoCapitalizeChange(false)
+            viewModel.onDoubleSpacePeriodChange(false)
+            assertEquals(OutsideTerminals.FULL, repository.stored.value.outsideTerminals)
+            assertEquals(false, repository.stored.value.autoCapitalize)
+            assertEquals(false, repository.stored.value.doubleSpacePeriod)
         }
 
     @Test

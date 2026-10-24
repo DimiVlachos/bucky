@@ -13,8 +13,10 @@ import app.buckykeys.keyboard.settings.core.presentation.theme.BuckyTheme
 import app.buckykeys.keyboard.settings.keyboard.domain.model.ExtraRowPreview
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardLanguage
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
+import app.buckykeys.keyboard.settings.keyboard.domain.model.OutsideTerminals
 import app.buckykeys.keyboard.settings.keyboard.presentation.components.CheckboxRow
 import app.buckykeys.keyboard.settings.keyboard.presentation.components.ExtraRowEditor
+import app.buckykeys.keyboard.settings.keyboard.presentation.components.RadioRow
 import app.buckykeys.keyboard.settings.keyboard.presentation.components.SectionTitle
 import app.buckykeys.keyboard.settings.keyboard.presentation.components.SettingSlider
 import app.buckykeys.keyboard.settings.keyboard.presentation.components.SwitchRow
@@ -30,6 +32,9 @@ internal fun KeyboardSettingsScreen(
     onKeyPreviewChange: (Boolean) -> Unit,
     onHapticsChange: (Boolean) -> Unit,
     onFKeyRowChange: (Boolean) -> Unit,
+    onOutsideTerminalsChange: (OutsideTerminals) -> Unit,
+    onAutoCapitalizeChange: (Boolean) -> Unit,
+    onDoubleSpacePeriodChange: (Boolean) -> Unit,
     extraRowDraft: ExtraRowDraftState,
     extraRowPreview: ExtraRowPreview,
     onExtraRowSave: () -> Unit,
@@ -101,8 +106,48 @@ internal fun KeyboardSettingsScreen(
             preview = extraRowPreview,
             onSave = onExtraRowSave,
         )
+        SectionTitle(stringResource(R.string.settings_apps))
+        Text(
+            text = stringResource(R.string.settings_outside_terminals),
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        Column {
+            OutsideTerminals.entries.forEach { choice ->
+                RadioRow(
+                    text = stringResource(choice.labelRes()),
+                    description =
+                        if (choice == OutsideTerminals.OTHER_KEYBOARD) {
+                            stringResource(R.string.settings_outside_other_hint)
+                        } else {
+                            null
+                        },
+                    selected = settings.outsideTerminals == choice,
+                    onClick = { onOutsideTerminalsChange(choice) },
+                )
+            }
+        }
+        val helpersApply = settings.outsideTerminals != OutsideTerminals.FULL
+        SwitchRow(
+            text = stringResource(R.string.settings_auto_capitalize),
+            checked = settings.autoCapitalize,
+            onCheckedChange = onAutoCapitalizeChange,
+            enabled = helpersApply,
+        )
+        SwitchRow(
+            text = stringResource(R.string.settings_double_space_period),
+            checked = settings.doubleSpacePeriod,
+            onCheckedChange = onDoubleSpacePeriodChange,
+            enabled = helpersApply,
+        )
     }
 }
+
+private fun OutsideTerminals.labelRes(): Int =
+    when (this) {
+        OutsideTerminals.COMPACT -> R.string.settings_outside_compact
+        OutsideTerminals.FULL -> R.string.settings_outside_full
+        OutsideTerminals.OTHER_KEYBOARD -> R.string.settings_outside_other
+    }
 
 private fun KeyboardLanguage.labelRes(): Int =
     when (this) {
@@ -117,6 +162,9 @@ private fun KeyboardSettingsScreenPreview() {
         KeyboardSettingsScreen(
             KeyboardSettings.defaults("el"),
             { _, _ -> },
+            {},
+            {},
+            {},
             {},
             {},
             {},

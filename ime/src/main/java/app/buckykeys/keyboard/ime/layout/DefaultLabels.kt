@@ -8,7 +8,14 @@ internal object DefaultLabels {
             is KeyDef.Dead -> def.primary
             is KeyDef.Special -> special(def.code)
             is KeyDef.Modifier -> modifier(def.kind)
-            is KeyDef.LayoutSwitch -> def.targetId
+            is KeyDef.LayoutSwitch ->
+                when (def.targetId) {
+                    BuiltInLayouts.PAGE_SYMBOLS -> "?123"
+                    BuiltInLayouts.PAGE_LETTERS -> "ABC"
+                    BuiltInLayouts.PAGE_SYMBOLS_MORE -> "=\\<"
+                    BuiltInLayouts.OTHER_KEYBOARD -> "⌨"
+                    else -> def.targetId
+                }
         }
 
     private fun special(code: KeyCode): String =

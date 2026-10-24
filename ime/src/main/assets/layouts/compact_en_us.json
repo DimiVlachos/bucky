@@ -1,0 +1,58 @@
+{
+  "id": "compact_en_us",
+  "name": "Compact (US)",
+  "language": "English (US)",
+  "rows": [
+    {
+      "keys": [
+        { "chars": ["q", "Q"], "longPress": ["1"] },
+        { "chars": ["w", "W"], "longPress": ["2"] },
+        { "chars": ["e", "E"], "longPress": ["3", "E", "è", "é", "ê", "ë", "ē", "ę", "ě", "€"] },
+        { "chars": ["r", "R"], "longPress": ["4", "R", "ř"] },
+        { "chars": ["t", "T"], "longPress": ["5", "T", "ť", "þ"] },
+        { "chars": ["y", "Y"], "longPress": ["6", "Y", "ý", "ÿ"] },
+        { "chars": ["u", "U"], "longPress": ["7", "U", "ù", "ú", "û", "ü", "ū", "ů"] },
+        { "chars": ["i", "I"], "longPress": ["8", "I", "ì", "í", "î", "ï", "ī", "ı"] },
+        { "chars": ["o", "O"], "longPress": ["9", "O", "ò", "ó", "ô", "ö", "õ", "ø", "œ", "ō"] },
+        { "chars": ["p", "P"], "longPress": ["0"] }
+      ]
+    },
+    {
+      "inset": 0.5,
+      "keys": [
+        { "chars": ["a", "A"], "longPress": ["A", "à", "á", "â", "ä", "ã", "å", "æ", "ā"] },
+        { "chars": ["s", "S"], "longPress": ["S", "ś", "š", "ş", "ß"] },
+        { "chars": ["d", "D"], "longPress": ["D", "ď", "ð"] },
+        { "chars": ["f", "F"] },
+        { "chars": ["g", "G"], "longPress": ["G", "ğ"] },
+        { "chars": ["h", "H"] },
+        { "chars": ["j", "J"] },
+        { "chars": ["k", "K"] },
+        { "chars": ["l", "L"], "longPress": ["L", "ł"] }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "SHIFT", "width": 1.5 },
+        { "chars": ["z", "Z"], "longPress": ["Z", "ź", "ż", "ž"] },
+        { "chars": ["x", "X"] },
+        { "chars": ["c", "C"], "longPress": ["C", "ç", "ć", "č"] },
+        { "chars": ["v", "V"] },
+        { "chars": ["b", "B"] },
+        { "chars": ["n", "N"], "longPress": ["N", "ñ", "ń", "ň"] },
+        { "chars": ["m", "M"] },
+        { "key": "BACKSPACE", "width": 1.5 }
+      ]
+    },
+    {
+      "keys": [
+        { "switchTo": "@page:symbols", "width": 1.5 },
+        { "chars": [","], "longPress": ["!"] },
+        { "switchTo": "@keyboard", "holdTo": "@full" },
+        { "chars": [" ", " "], "width": 4 },
+        { "chars": ["."], "longPress": ["?"] },
+        { "key": "ENTER", "width": 1.5 }
+      ]
+    }
+  ]
+}

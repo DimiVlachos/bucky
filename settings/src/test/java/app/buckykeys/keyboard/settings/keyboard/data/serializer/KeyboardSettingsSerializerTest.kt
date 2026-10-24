@@ -3,6 +3,7 @@ package app.buckykeys.keyboard.settings.keyboard.data.serializer
 import androidx.datastore.core.CorruptionException
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardLanguage
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
+import app.buckykeys.keyboard.settings.keyboard.domain.model.OutsideTerminals
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import kotlinx.coroutines.runBlocking
@@ -104,6 +105,29 @@ class KeyboardSettingsSerializerTest {
     @Test
     fun `an out of range label size is clamped`() {
         assertEquals(80, read("""{ "labelScalePercent": 5 }""").labelScalePercent)
+    }
+
+    @Test
+    fun `settings saved before profiles load with compact`() {
+        val settings = read("""{ "rowHeightDp": 48 }""")
+        assertEquals(OutsideTerminals.COMPACT, settings.outsideTerminals)
+        assertEquals(true, settings.autoCapitalize)
+    }
+
+    @Test
+    fun `an unknown outside terminals value falls back to compact`() {
+        assertEquals(
+            OutsideTerminals.COMPACT,
+            read("""{ "outsideTerminals": "SIDEWAYS" }""").outsideTerminals,
+        )
+    }
+
+    @Test
+    fun `a saved outside terminals value loads`() {
+        assertEquals(
+            OutsideTerminals.OTHER_KEYBOARD,
+            read("""{ "outsideTerminals": "OTHER_KEYBOARD" }""").outsideTerminals,
+        )
     }
 
     @Test
