@@ -2,6 +2,7 @@ package app.buckykeys.keyboard.settings.keyboard.presentation.view_model
 
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
 import app.buckykeys.keyboard.settings.keyboard.presentation.state.KeyboardSettingsState
+import app.buckykeys.keyboard.settings.keyboard.presentation.view_model.fake.FakeExtraRowInterpreter
 import app.buckykeys.keyboard.settings.keyboard.presentation.view_model.fake.FakeKeyboardSettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,7 +38,7 @@ class KeyboardSettingsViewModelTest {
     @Test
     fun `the state carries the stored settings`() =
         runTest(dispatcher) {
-            val viewModel = KeyboardSettingsViewModel(repository)
+            val viewModel = KeyboardSettingsViewModel(repository, FakeExtraRowInterpreter())
             backgroundScope.launch { viewModel.state.collect {} }
             assertEquals(KeyboardSettingsState(settings = defaults), viewModel.state.value)
         }
@@ -45,7 +46,7 @@ class KeyboardSettingsViewModelTest {
     @Test
     fun `a change is saved and shows up in the state`() =
         runTest(dispatcher) {
-            val viewModel = KeyboardSettingsViewModel(repository)
+            val viewModel = KeyboardSettingsViewModel(repository, FakeExtraRowInterpreter())
             backgroundScope.launch { viewModel.state.collect {} }
             viewModel.onRowHeightChange(52)
             assertEquals(52, viewModel.state.value.settings?.rowHeightDp)
@@ -55,7 +56,7 @@ class KeyboardSettingsViewModelTest {
     @Test
     fun `a failed save sets the error flag instead of crashing`() =
         runTest(dispatcher) {
-            val viewModel = KeyboardSettingsViewModel(repository)
+            val viewModel = KeyboardSettingsViewModel(repository, FakeExtraRowInterpreter())
             backgroundScope.launch { viewModel.state.collect {} }
             repository.failUpdates = true
             viewModel.onHapticsChange(false)
@@ -66,11 +67,19 @@ class KeyboardSettingsViewModelTest {
     @Test
     fun `the error flag clears once shown`() =
         runTest(dispatcher) {
-            val viewModel = KeyboardSettingsViewModel(repository)
+            val viewModel = KeyboardSettingsViewModel(repository, FakeExtraRowInterpreter())
             backgroundScope.launch { viewModel.state.collect {} }
             repository.failUpdates = true
             viewModel.onHapticsChange(false)
             viewModel.onSaveErrorShown()
             assertFalse(viewModel.state.value.saveFailed)
         }
+
+    @Test
+    fun `the extra row preview splits the text into words for the interpreter`() {
+        val interpreter = FakeExtraRowInterpreter()
+        val viewModel = KeyboardSettingsViewModel(repository, interpreter)
+        viewModel.previewExtraRow("  ESC   git ")
+        assertEquals(listOf("ESC", "git"), interpreter.lastWords)
+    }
 }

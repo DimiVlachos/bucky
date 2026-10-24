@@ -227,4 +227,33 @@ class ExtraRowsTest {
         assertEquals(15, row.size)
         assertEquals(List(15) { KeyDef.Special(KeyCode.ESC) }, row.map { it.def })
     }
+
+    @Test
+    fun `parsing reports the keys it accepts with their labels`() {
+        val parsed = parseExtraRow(listOf("ESC", "ctrl", "~", "SPACE"))
+        assertEquals(listOf("Esc", "Ctrl", "~", "␣"), parsed.keys.map { it.label })
+        assertEquals(emptyList<String>(), parsed.unknown)
+        assertEquals(false, parsed.overLimit)
+    }
+
+    @Test
+    fun `parsing reports words that are not keys`() {
+        val parsed = parseExtraRow(listOf("git", "ESC", "status", "FN"))
+        assertEquals(listOf("Esc"), parsed.keys.map { it.label })
+        assertEquals(listOf("git", "status", "FN"), parsed.unknown)
+    }
+
+    @Test
+    fun `parsing reports more than fifteen keys`() {
+        val parsed = parseExtraRow(List(16) { "/" })
+        assertEquals(15, parsed.keys.size)
+        assertEquals(true, parsed.overLimit)
+    }
+
+    @Test
+    fun `parsing reads a pasted termux line`() {
+        val parsed = parseExtraRow(listOf("[['ESC','/','-'],['TAB','CTRL']]"))
+        assertEquals(listOf("Esc", "/", "-", "Tab", "Ctrl"), parsed.keys.map { it.label })
+        assertEquals(emptyList<String>(), parsed.unknown)
+    }
 }

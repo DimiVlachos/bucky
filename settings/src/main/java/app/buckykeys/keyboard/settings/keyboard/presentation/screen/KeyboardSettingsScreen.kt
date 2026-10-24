@@ -9,6 +9,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import app.buckykeys.keyboard.settings.R
 import app.buckykeys.keyboard.settings.core.presentation.theme.BuckyTheme
+import app.buckykeys.keyboard.settings.keyboard.domain.model.ExtraRowPreview
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardLanguage
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
 import app.buckykeys.keyboard.settings.keyboard.presentation.components.CheckboxRow
@@ -28,6 +29,7 @@ internal fun KeyboardSettingsScreen(
     onHapticsChange: (Boolean) -> Unit,
     onFKeyRowChange: (Boolean) -> Unit,
     extraRowDraft: ExtraRowDraftState,
+    extraRowPreview: ExtraRowPreview,
     onExtraRowSave: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(BuckyTheme.spacing.medium)) {
@@ -81,7 +83,12 @@ internal fun KeyboardSettingsScreen(
             checked = settings.fKeyRow,
             onCheckedChange = onFKeyRowChange,
         )
-        ExtraRowEditor(saved = settings.extraRow, draft = extraRowDraft, onSave = onExtraRowSave)
+        ExtraRowEditor(
+            saved = settings.extraRow,
+            draft = extraRowDraft,
+            preview = extraRowPreview,
+            onSave = onExtraRowSave,
+        )
     }
 }
 
@@ -104,6 +111,7 @@ private fun KeyboardSettingsScreenPreview() {
             {},
             {},
             ExtraRowDraftState(null),
+            ExtraRowPreview(emptyList(), emptyList(), overLimit = false),
             {},
         )
     }
