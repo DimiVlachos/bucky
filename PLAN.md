@@ -94,7 +94,7 @@ On-device prediction και autocorrect (Pro), mic key που εναλλάσσε
 ```
 :app             Manifest, flavors play/foss, Hilt Application, το InputMethodService, wiring
 :ime             Layout model και parser, KeyboardEngine, InputDispatcher, KeyboardView (Canvas), theming tokens
-:settings        Compose: onboarding, settings, προφίλ ανά εφαρμογή, Pro screen, layout editor (v1.1)
+:settings        KeyboardSettings και το DataStore repository τους, Compose: onboarding, settings, προφίλ ανά εφαρμογή, Pro screen, layout editor (v1.1)
 :billing         Interfaces: ProEntitlement, BillingRepository, sealed BillingOutcome
 :billing-play    Υλοποίηση με Play Billing Library
 :billing-foss    Υλοποίηση που επιστρέφει πάντα Unlocked
@@ -140,14 +140,14 @@ On-device prediction και autocorrect (Pro), mic key που εναλλάσσε
 
 Κανόνες του format (`LayoutParser`, εβδομάδα 3):
 
-- Κάθε πλήκτρο έχει ακριβώς ένα από τα `chars`, `key` ή `switchTo`. Το `key` παίρνει ονόματα του `KeyCode` (`ESC`, `F1`, `HOME`) και του `ModifierKind` (`CTRL`, `ALT`, `SHIFT`, `FN`).
+- Κάθε πλήκτρο έχει ακριβώς ένα από τα `chars`, `key` ή `switchTo`. Το `key` παίρνει ονόματα του `KeyCode` (`ESC`, `F1`, `HOME`) και του `ModifierKind` (`CTRL`, `ALT`, `SHIFT`). Το `FN` υπάρχει στο `ModifierKind`, αλλά απορρίπτεται από τον parser και από τη σειρά του χρήστη μέχρι να υπάρξει layer Fn (απόφαση 2026-10-24).
 - `chars` με ένα string παίρνει ως shifted το κεφαλαίο του. Το `longPress` επιτρέπεται μόνο μαζί με `chars`· κάθε στοιχείο του που είναι όνομα `KeyCode` (`F1`, `ESC`) γίνεται το αντίστοιχο πλήκτρο, οτιδήποτε άλλο γίνεται χαρακτήρας με κεφαλαίο το uppercase του. Το PC Full έχει F1 έως F12 ως long-press στη σειρά αριθμών.
 - Το `label` είναι προαιρετικό: default είναι ο πρώτος χαρακτήρας, κενό για το space, και σταθερές ετικέτες για τα special keys (Esc, ⌫, Ctrl). Το `width` είναι προαιρετικό, default 1, πάντα θετικό.
 - `dead` ορίζει dead key με ένα ή δύο σημάδια (π.χ. `["΄", "¨"]` για τόνο και διαλυτικά). Ο parser υπολογίζει κατά τη φόρτωση, με Unicode NFKD/NFC, σε τι συντίθεται κάθε γράμμα του layout με κάθε σημάδι, άρα δεν υπάρχει πίνακας ανά γλώσσα να συντηρείται και το engine κάνει μόνο lookup. Σημάδι και μετά γράμμα χωρίς σύνθεση δίνει και τα δύο, το ίδιο σημάδι δύο φορές ή σημάδι και space δίνει το σημάδι, Backspace το ακυρώνει.
 - `latin` δίνει σε μη λατινικό πλήκτρο το λατινικό γράμμα της θέσης του, για Ctrl και Alt: Ctrl+ψ στέλνει Ctrl+C όπως σε PC με ελληνική διάταξη.
-- `switchTo: "@language"` είναι το πλήκτρο 🌐, που περνά στην επόμενη γλώσσα. Το PC Full EN και το PC Full EL έχουν τα ίδια πλήκτρα στις ίδιες θέσεις, και ένα test το επιβάλλει.
+- `switchTo: "@language"` είναι το πλήκτρο 🌐, που περνά στην επόμενη γλώσσα. Το PC Full EN και το PC Full EL έχουν τα ίδια πλήκτρα στις ίδιες θέσεις, και ένα test το επιβάλλει. Στο ελληνικό layout το € είναι long-press στο ε (απόφαση 2026-10-24).
 - Επιπλέον σειρές (`Layout.withExtraRows`, ρυθμίσεις «Σειρά F1–F12» και «Δική σας σειρά»): η σειρά F1 έως F12 μπαίνει πάνω πάνω, η σειρά του χρήστη ακριβώς από κάτω, πιο κοντά στα κύρια πλήκτρα επειδή χρησιμοποιείται συχνότερα. Η σειρά του χρήστη είναι λέξεις χωρισμένες με κενά, με τα ονόματα των extra keys του Termux (`ESC TAB CTRL ALT ~ | / - HOME END PGUP PGDN BKSP DEL INS`, χωρίς διάκριση πεζών), ώστε όποιος έχει ήδη ρυθμίσει το Termux να την αντιγράφει. Μόνο ονόματα πλήκτρων, modifiers και μεμονωμένοι χαρακτήρες· λέξεις όπως `git` αγνοούνται, γιατί θα ήταν snippets (v1.1, Pro). Έως 15 πλήκτρα, ίσου πλάτους. Αποθηκεύεται με κουμπί και όχι σε κάθε πάτημα, γιατί το πεδίο πληκτρολογείται με το ίδιο το πληκτρολόγιο.
-- Άγνωστα πεδία απορρίπτονται, ώστε ένα typo όπως `widht` να μην περνά σιωπηλά. Κάθε σφάλμα έχει JSON path, π.χ. `$.rows[1].keys[3].key`, και αιτία.
+- Άγνωστα πεδία απορρίπτονται, ώστε ένα typo όπως `widht` να μην περνά σιωπηλά. Απόφαση 2026-10-24: μένει έτσι· ξανασυζητιέται όταν έρθουν τα layouts του χρήστη στο v1.1. Κάθε σφάλμα έχει JSON path, π.χ. `$.rows[1].keys[3].key`, και αιτία.
 
 ### 4.4 Engine: από το άγγιγμα στο InputConnection
 
@@ -171,7 +171,7 @@ Key repeat για Backspace, Delete, βελάκια και space: αρχική �
 - `onStartInputView(info, restarting)`: διαβάζει `EditorInfo.packageName`, `inputType` και `imeOptions`, επιλέγει προφίλ και layout. Σε password variation απενεργοποιεί την προεπισκόπηση πλήκτρου. Σε number/phone inputType γυρίζει σε αριθμητικό layout αν το προφίλ δεν λέει αλλιώς.
 - `onComputeInsets`: ορίζει `contentTopInsets` και `visibleTopInsets` ώστε το window να καλύπτει την περιοχή προεπισκόπησης αλλά η touchable region να είναι μόνο τα πλήκτρα.
 - Insets για gesture navigation: ο χειρισμός γίνεται με `ViewCompat.setOnApplyWindowInsetsListener` και `WindowInsetsCompat`, προσθέτοντας ως padding το κάτω, το αριστερό και το δεξί inset από navigation bar, tappable element και display cutout (στο landscape η navigation bar με 3 κουμπιά είναι στο πλάι), χωρίς deprecated `systemUiVisibility` APIs.
-- `onEvaluateFullscreenMode` επιστρέφει πάντα false: κανένα extract UI στο landscape, η εφαρμογή μένει ορατή πάνω από το πληκτρολόγιο. Στο landscape οι σειρές είναι 34dp (`values-land`) μέχρι τη ρύθμιση ύψους της εβδομάδας 7, ώστε το πληκτρολόγιο να πιάνει περίπου 45% της οθόνης.
+- `onEvaluateFullscreenMode` επιστρέφει πάντα false: κανένα extract UI στο landscape, η εφαρμογή μένει ορατή πάνω από το πληκτρολόγιο. Το ύψος σειράς είναι ρύθμιση ανά προσανατολισμό: `rowHeightDp` στο portrait (default 48dp, εύρος 36 έως 64dp) και `landscapeRowHeightDp` στο landscape (default 34dp, εύρος 26 έως 56dp). Με το default του landscape το πληκτρολόγιο πιάνει περίπου 45% της οθόνης.
 - Enter: τιμά το `imeOptions` action (Go, Search, Send) εκτός αν το προφίλ ορίζει raw `KEYCODE_ENTER`, που είναι το default για τερματικά.
 - Μέγεθος οθόνης: επαναϋπολογισμός γεωμετρίας σε `onSizeChanged` και `onConfigurationChanged`. Πλάτος κάτω από 600dp είναι phone mode, 600dp και πάνω επιτρέπει split mode. Το Jetpack WindowManager για fold posture μένει για το v1.1.
 - `onDestroy`: ακυρώνει το `serviceScope`.
@@ -189,7 +189,7 @@ Material 3 με dynamic color, MVVM με `StateFlow`. Οθόνες v1: Onboardin
 
 ### 4.8 Persistence
 
-Οι ρυθμίσεις ζουν στο `:settings` (`keyboard/domain/model/KeyboardSettings`, `KeyboardSettingsRepository` και `KeyboardSettingsRepositoryImpl` στο `keyboard/data`), όχι στο `:ime`: το `:settings` δεν επιτρέπεται να εξαρτάται από το `:ime`, και το `:ime` μένει χωρίς persistence. Το `BuckyImeService` στο `:app` συλλέγει το `Flow`, περνά απλές τιμές στο `KeyboardView` (γλώσσες, ύψος σειράς ανά προσανατολισμό, preview, haptics) και σε κάθε αλλαγή ξαναφτιάχνει το view με `setInputView`. Οι default γλώσσες είναι EN, και EN με EL όταν η γλώσσα του συστήματος είναι ελληνικά. Με μία γλώσσα το πλήκτρο 🌐 αφαιρείται κατά τη φόρτωση και το space παίρνει το πλάτος του. DataStore με custom `Serializer<T>` που χρησιμοποιεί kotlinx.serialization JSON. Έτσι έχουμε typed, migratable ρυθμίσεις χωρίς την protobuf toolchain. `ReplaceFileCorruptionHandler` επιστρέφει defaults σε `CorruptionException`. Τα layouts αποθηκεύονται ως JSON αρχεία σε `filesDir/layouts` μέσω `AtomicFile`. Όχι Room: δεν υπάρχουν σχέσεις, και η αρχικοποίηση βάσης στο ξεκίνημα του IME προσθέτει latency χωρίς αντάλλαγμα. Οι αλλαγές ρυθμίσεων φτάνουν στο IME μέσω του `Flow` του DataStore στο ίδιο process.
+Οι ρυθμίσεις ζουν στο `:settings` (`keyboard/domain/model/KeyboardSettings`, `KeyboardSettingsRepository` και `KeyboardSettingsRepositoryImpl` στο `keyboard/data`), όχι στο `:ime`: το `:settings` δεν επιτρέπεται να εξαρτάται από το `:ime`, και το `:ime` μένει χωρίς persistence. Το `BuckyImeService` στο `:app` συλλέγει το `Flow`, περνά απλές τιμές στο `KeyboardView` (γλώσσες, ύψος σειράς ανά προσανατολισμό, preview, haptics, σειρά F1 έως F12 από το `fKeyRow` και σειρά χρήστη από το `extraRow`, που προστίθενται σε κάθε layout με `Layout.withExtraRows`) και σε κάθε αλλαγή ξαναφτιάχνει το view με `setInputView`. Οι default γλώσσες είναι EN, και EN με EL όταν η γλώσσα του συστήματος είναι ελληνικά. Με μία γλώσσα το πλήκτρο 🌐 αφαιρείται κατά τη φόρτωση και το space παίρνει το πλάτος του. DataStore με custom `Serializer<T>` που χρησιμοποιεί kotlinx.serialization JSON. Έτσι έχουμε typed, migratable ρυθμίσεις χωρίς την protobuf toolchain. Το `@Serializable` μένει πάνω στο domain model `KeyboardSettings`, χωρίς ξεχωριστό data model και mapper (απόφαση 2026-10-24): τα πεδία είναι απλές τιμές και ένα δεύτερο αντίγραφο θα ήταν μόνο boilerplate. `ReplaceFileCorruptionHandler` επιστρέφει defaults σε `CorruptionException`. Τα layouts αποθηκεύονται ως JSON αρχεία σε `filesDir/layouts` μέσω `AtomicFile`. Όχι Room: δεν υπάρχουν σχέσεις, και η αρχικοποίηση βάσης στο ξεκίνημα του IME προσθέτει latency χωρίς αντάλλαγμα. Οι αλλαγές ρυθμίσεων φτάνουν στο IME μέσω του `Flow` του DataStore στο ίδιο process.
 
 ### 4.9 DI και Coroutines
 
@@ -229,7 +229,7 @@ Play Billing Library, τελευταία major έκδοση (επιβεβαίω�
 
 ### 4.13 Accessibility
 
-`ExploreByTouchHelper` (androidx.customview) εκθέτει κάθε πλήκτρο ως virtual view με content description, ώστε το TalkBack να δουλεύει με explore-by-touch. `announceForAccessibility` στην εναλλαγή layout και κατάστασης modifier. Ελάχιστο ύψος πλήκτρου 48dp στο default του portrait· στο landscape 34dp μέχρι τη ρύθμιση ύψους. High-contrast θέμα στο v1.1.
+`ExploreByTouchHelper` (androidx.customview) εκθέτει κάθε πλήκτρο ως virtual view με content description, ώστε το TalkBack να δουλεύει με explore-by-touch. `announceForAccessibility` στην εναλλαγή layout και κατάστασης modifier. Ύψος πλήκτρου 48dp στο default του portrait και 34dp στο default του landscape· ο χρήστης το αλλάζει με τις ρυθμίσεις `rowHeightDp` (36 έως 64dp) και `landscapeRowHeightDp` (26 έως 56dp). High-contrast θέμα στο v1.1.
 
 ### 4.14 Privacy και permissions
 
@@ -250,22 +250,24 @@ Play Billing Library, τελευταία major έκδοση (επιβεβαίω�
 
 Pin τις τελευταίες stable εκδόσεις από Google Maven και Maven Central την ημέρα του setup. Δεν γράφω αριθμούς εκδόσεων εδώ για να μην παλιώσουν.
 
-Plugins: `com.android.application`, `org.jetbrains.kotlin.android`, `org.jetbrains.kotlin.plugin.compose`, `org.jetbrains.kotlin.plugin.serialization`, `com.google.devtools.ksp`, `com.google.dagger.hilt.android`.
+Plugins: `com.android.application`, `com.android.library`, `org.jetbrains.kotlin.plugin.compose`, `org.jetbrains.kotlin.plugin.serialization`, `com.google.devtools.ksp`, `com.google.dagger.hilt.android`, και για τα εργαλεία `org.jetbrains.kotlin.jvm` (`:detekt-rules`), `com.diffplug.spotless`, `io.gitlab.arturbosch.detekt`. Το AGP 9 έχει ενσωματωμένο Kotlin, άρα όχι `org.jetbrains.kotlin.android`.
 
 | Σκοπός | Artifact | Module |
 |---|---|---|
-| Core KTX | `androidx.core:core-ktx` | όλα |
-| Lifecycle σε Service | `androidx.lifecycle:lifecycle-service` | :app |
+| Core KTX | `androidx.core:core-ktx` | :app, :ime, :settings |
+| Lifecycle σε Service | `androidx.lifecycle:lifecycle-service` (όχι ακόμη· το service έχει δικό του `CoroutineScope`) | :app |
 | Lifecycle runtime Compose | `androidx.lifecycle:lifecycle-runtime-compose` (`collectAsStateWithLifecycle`· ViewModel μέσω `by viewModels()` στο Activity, χωρίς `lifecycle-viewmodel-compose`) | :settings |
 | DataStore (custom serializer) | `androidx.datastore:datastore` | :settings |
 | JSON | `org.jetbrains.kotlinx:kotlinx-serialization-json` (και το plugin `org.jetbrains.kotlin.plugin.serialization` στο :settings) | :ime, :settings |
-| Coroutines | `org.jetbrains.kotlinx:kotlinx-coroutines-android` | όλα |
-| Compose | `androidx.compose:compose-bom`, `androidx.compose.material3:material3`, `androidx.compose.ui:ui`, `androidx.compose.ui:ui-tooling-preview`, `androidx.activity:activity-compose` | :settings |
-| Navigation (αν stable) | `androidx.navigation3:navigation3-runtime`, `androidx.navigation3:navigation3-ui` | :settings |
-| Hilt | `com.google.dagger:hilt-android`, `com.google.dagger:hilt-android-compiler` (ksp), `androidx.hilt:hilt-navigation-compose` | :app, :settings |
-| Accessibility helper | `androidx.customview:customview` | :ime |
-| Play Billing | `com.android.billingclient:billing-ktx` | :billing-play |
-| In-App Review | `com.google.android.play:review-ktx` | :app (play) |
+| Coroutines | `org.jetbrains.kotlinx:kotlinx-coroutines-android` στο :app, `kotlinx-coroutines-core` ως `api` στο :billing, transitively μέσω DataStore στο :settings | :app, :billing, :settings |
+| Compose | `androidx.compose:compose-bom`, `androidx.compose.material3:material3`, `androidx.compose.ui:ui`, `androidx.compose.ui:ui-tooling-preview` (και `ui-tooling` στο debug), `androidx.activity:activity-compose` | :settings |
+| Navigation (αν stable, όχι ακόμη) | `androidx.navigation3:navigation3-runtime`, `androidx.navigation3:navigation3-ui` | :settings |
+| Hilt | `com.google.dagger:hilt-android`, `com.google.dagger:hilt-android-compiler` (ksp)· `androidx.hilt:hilt-navigation-compose` μόνο αν προστεθεί Navigation | :app, :settings |
+| Accessibility helper (εβδομάδα 9) | `androidx.customview:customview` | :ime |
+| Logging | `com.jakewharton.timber:timber` | :app, :ime |
+| Play Billing (εβδομάδα 10) | `com.android.billingclient:billing-ktx` | :billing-play |
+| In-App Review (εβδομάδα 10) | `com.google.android.play:review-ktx` | :app (play) |
+| Tests και εργαλεία | `junit:junit`, `com.lemonappdev:konsist` (μόνο :app), `io.gitlab.arturbosch.detekt:detekt-api` και `detekt-test` (:detekt-rules) | όλα |
 | Baseline Profiles (v1.1) | `androidx.profileinstaller:profileinstaller` | :app |
 
 ## 5. Χρονοδιάγραμμα: 14 εβδομάδες, περίπου 17 ώρες η καθεμία
@@ -286,6 +288,8 @@ Plugins: `com.android.application`, `org.jetbrains.kotlin.android`, `org.jetbrai
 | 12 | Beta και store | Διορθώσεις, screenshots, listing, privacy policy, Data Safety, trader declaration, IzzyOnDroid submission, F-Droid merge request | Listing εγκεκριμένο στο Play, APK στο IzzyOnDroid |
 | 13 | Launch | Production σε staged rollout 20%, 50%, 100% μέσα σε 5 ημέρες, ανακοινώσεις (βλ. 7.5) | v1.0 στο 100%, crash-free πάνω από 99.5% στα Play vitals |
 | 14 | Buffer | Ό,τι γλίστρησε, πρώτες διορθώσεις από reviews | Backlog για v1.1 γραμμένο |
+
+Κατάσταση στις 2026-10-24: οι εβδομάδες 1 έως 4 έχουν κλείσει. Η εβδομάδα 5 έχει κλείσει, εκτός από το χειροκίνητο fallback πλάτους και δεξιού padding για OEM builds (hackerskeyboard#957), που δεν έχει γίνει ακόμη. Από την εβδομάδα 6 έχουν γίνει το EL με dead key τόνου, το πλήκτρο 🌐, η σειρά F1 έως F12 και η σειρά του χρήστη· λείπουν UK, Dvorak, Colemak, αριθμητικό, compact και Material You. Από την εβδομάδα 7 έχουν γίνει οι ρυθμίσεις σε DataStore με ζωντανή εφαρμογή, οι γλώσσες, το ύψος σε portrait και landscape, η προεπισκόπηση και τα haptics· λείπει η επιλογή layout ανά γλώσσα.
 
 Συνολικά 210 με 280 ώρες. Το απρόβλεπτο κομμάτι είναι η εβδομάδα 11: τα OEM quirks (ύψος keyboard στο One UI, insets σε MIUI, συμπεριφορά σε foldable) δεν μπορούν να εκτιμηθούν πριν τα δεις. Αν η beta βγάλει περισσότερα από 10 blockers, μετακινείται το launch κατά μία εβδομάδα και καταναλώνεται το buffer. Δεν προστίθεται κανένα feature για να «αξιοποιηθεί» η καθυστέρηση.
 

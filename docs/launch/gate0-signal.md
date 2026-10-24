@@ -50,7 +50,7 @@ Where Gate 0 stands on 2026-10-20: Stop needs fewer than 25 signups **and** fewe
 
 | Request | Count | Sources | Plan status |
 |---|---|---|---|
-| More language layouts (Estonian) | 1 | #875 ketas (6.9" phone, already runs a full custom layout) | Layouts are JSON data (week 6 adds EL and others); Estonian is cheap to add |
+| More language layouts (Estonian) | 1 | #875 ketas (6.9" phone, already runs a full custom layout) | Layouts are JSON data; EL shipped 2026-10-24 (PC Full EL with tonos dead key and the 🌐 key), so Estonian is cheap to add |
 | Custom / own layouts (more keys by default) | 1 (+1 pointing to HeliBoard, which has it) | r/termux EDGE223x, Proteu__ | Planned (JSON layouts, week 3). PLAN makes the editor Pro; reconsider, since HeliBoard offers it free |
 | Configurable extra row inside the keyboard, any key or symbol | 1 (+1 who keeps Termux's own row) | r/termux d333d, BillGossAU | Built 2026-10-24: settings → «Your own row», Termux extra-keys names |
 | Clipboard manager, pasting into password fields | 1 | r/termux ExplanationNo5955 | Not in PLAN v1; keep password-field clips out of history if built |
