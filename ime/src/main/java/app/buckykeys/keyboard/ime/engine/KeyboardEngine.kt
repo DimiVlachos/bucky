@@ -9,8 +9,15 @@ public class KeyboardEngine(private val geometry: KeyboardGeometry) {
 
     private val pointerKeys = IntArray(MAX_POINTERS) { NO_KEY }
 
-    public var modifierMask: Int = 0
+    private var oneShotMask = 0
+    private var heldMask = 0
+    private var chordedMask = 0
+
+    public var lockedMask: Int = 0
         private set
+
+    public val modifierMask: Int
+        get() = oneShotMask or lockedMask or heldMask
 
     public fun onPointer(
         pointerId: Int,
@@ -21,13 +28,18 @@ public class KeyboardEngine(private val geometry: KeyboardGeometry) {
     ) {
         if (pointerId !in 0 until MAX_POINTERS) return
         when (action) {
-            PointerAction.DOWN -> pointerKeys[pointerId] = geometry.keyAt(x, y)
+            PointerAction.DOWN -> press(pointerId, geometry.keyAt(x, y))
             PointerAction.MOVE -> Unit
-            PointerAction.CANCEL -> pointerKeys[pointerId] = NO_KEY
+            PointerAction.CANCEL -> {
+                endHold(pointerKeys[pointerId])
+                pointerKeys[pointerId] = NO_KEY
+            }
             PointerAction.UP -> {
                 val key = pointerKeys[pointerId]
                 pointerKeys[pointerId] = NO_KEY
-                if (key != NO_KEY && geometry.keyAt(x, y) == key) release(key, sink)
+                if (key == NO_KEY) return
+                val chorded = endHold(key)
+                if (geometry.keyAt(x, y) == key) release(key, chorded, sink)
             }
         }
     }
@@ -36,22 +48,57 @@ public class KeyboardEngine(private val geometry: KeyboardGeometry) {
 
     public fun reset() {
         pointerKeys.fill(NO_KEY)
-        modifierMask = 0
+        oneShotMask = 0
+        lockedMask = 0
+        heldMask = 0
+        chordedMask = 0
     }
 
-    private fun release(key: Int, sink: InputSink) {
+    private fun press(pointerId: Int, key: Int) {
+        pointerKeys[pointerId] = key
+        val def = if (key == NO_KEY) null else geometry.spec(key).def
+        if (def is KeyDef.Modifier) heldMask = heldMask or bit(def.kind)
+    }
+
+    private fun endHold(key: Int): Boolean {
+        val def = if (key == NO_KEY) null else geometry.spec(key).def
+        if (def !is KeyDef.Modifier) return false
+        val bit = bit(def.kind)
+        val chorded = chordedMask and bit != 0
+        heldMask = heldMask and bit.inv()
+        chordedMask = chordedMask and bit.inv()
+        return chorded
+    }
+
+    private fun release(key: Int, chorded: Boolean, sink: InputSink) {
         when (val def = geometry.spec(key).def) {
-            is KeyDef.Modifier -> modifierMask = modifierMask xor bit(def.kind)
+            is KeyDef.Modifier -> if (!chorded) tapModifier(bit(def.kind))
             is KeyDef.Char -> {
                 emitChar(def, sink)
-                modifierMask = 0
+                afterKey()
             }
             is KeyDef.Special -> {
                 sink.sendKey(KeyCodes.forSpecial(def.code), metaState())
-                modifierMask = 0
+                afterKey()
             }
             is KeyDef.LayoutSwitch -> Unit
         }
+    }
+
+    private fun tapModifier(bit: Int) {
+        when {
+            lockedMask and bit != 0 -> lockedMask = lockedMask and bit.inv()
+            oneShotMask and bit != 0 -> {
+                oneShotMask = oneShotMask and bit.inv()
+                lockedMask = lockedMask or bit
+            }
+            else -> oneShotMask = oneShotMask or bit
+        }
+    }
+
+    private fun afterKey() {
+        oneShotMask = 0
+        chordedMask = chordedMask or heldMask
     }
 
     private fun emitChar(def: KeyDef.Char, sink: InputSink) {
