@@ -3,6 +3,7 @@ package app.buckykeys.keyboard.settings.home.presentation.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -19,6 +20,7 @@ internal fun HomeScreen(setup: @Composable () -> Unit, settings: @Composable () 
             modifier =
                 Modifier.fillMaxSize()
                     .padding(innerPadding)
+                    .imePadding()
                     .verticalScroll(rememberScrollState())
                     .padding(BuckyTheme.spacing.large),
             verticalArrangement = Arrangement.spacedBy(BuckyTheme.spacing.large),

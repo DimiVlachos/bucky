@@ -5,10 +5,14 @@ import androidx.lifecycle.viewModelScope
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardLanguage
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
 import app.buckykeys.keyboard.settings.keyboard.domain.repository.KeyboardSettingsRepository
+import app.buckykeys.keyboard.settings.keyboard.presentation.state.KeyboardSettingsState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.io.IOException
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -17,12 +21,17 @@ internal class KeyboardSettingsViewModel
 @Inject
 constructor(private val repository: KeyboardSettingsRepository) : ViewModel() {
 
-    val state: StateFlow<KeyboardSettings?> =
-        repository.settings.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
-            null,
-        )
+    private val saveFailed = MutableStateFlow(false)
+
+    val state: StateFlow<KeyboardSettingsState> =
+        combine(repository.settings, saveFailed) { settings, failed ->
+                KeyboardSettingsState(settings = settings, saveFailed = failed)
+            }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
+                KeyboardSettingsState(),
+            )
 
     fun onLanguageChange(language: KeyboardLanguage, enabled: Boolean) {
         update { it.withLanguage(language, enabled) }
@@ -52,8 +61,18 @@ constructor(private val repository: KeyboardSettingsRepository) : ViewModel() {
         update { it.withExtraRow(text) }
     }
 
+    fun onSaveErrorShown() {
+        saveFailed.value = false
+    }
+
     private fun update(transform: (KeyboardSettings) -> KeyboardSettings) {
-        viewModelScope.launch { repository.update(transform) }
+        viewModelScope.launch {
+            try {
+                repository.update(transform)
+            } catch (e: IOException) {
+                saveFailed.value = true
+            }
+        }
     }
 
     private companion object {
