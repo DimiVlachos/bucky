@@ -84,4 +84,32 @@ class BuiltInLayoutsTest {
         assertEquals("ϊ", chars.getValue("ι").composed["¨"])
         assertEquals("Ϋ", chars.getValue("υ").composedShifted["¨"])
     }
+
+    @Test
+    fun `every greek capital vowel composes with the tonos and the dialytika`() {
+        val chars = greekChars()
+        mapOf("α" to "Ά", "ε" to "Έ", "η" to "Ή", "ι" to "Ί", "ο" to "Ό", "υ" to "Ύ", "ω" to "Ώ")
+            .forEach { (vowel, accented) ->
+                assertEquals(vowel, accented, chars.getValue(vowel).composedShifted["΄"])
+            }
+        assertEquals("ϋ", chars.getValue("υ").composed["¨"])
+        assertEquals("Ϊ", chars.getValue("ι").composedShifted["¨"])
+        assertEquals("Ϋ", chars.getValue("υ").composedShifted["¨"])
+    }
+
+    @Test
+    fun `greek epsilon offers the euro sign on long press`() {
+        assertEquals(
+            listOf(KeyDef.Char("έ", "Έ"), KeyDef.Char("€", "€")),
+            greekChars().getValue("ε").alternates,
+        )
+    }
+
+    private fun greekChars(): Map<String, KeyDef.Char> =
+        LayoutParser.parse(asset(BuiltInLayouts.PC_FULL_EL))
+            .getOrThrow()
+            .rows
+            .flatMap { it.keys }
+            .mapNotNull { it.def as? KeyDef.Char }
+            .associateBy { it.primary }
 }

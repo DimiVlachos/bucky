@@ -15,6 +15,9 @@ public object LayoutParser {
     private val keyFields =
         setOf("chars", "dead", "key", "switchTo", "label", "width", "longPress", "latin")
     private val keyKinds = listOf("chars", "dead", "key", "switchTo")
+    private const val LATIN_KEYS =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-=[];',./\\`"
+    private val keyNameLike = Regex("[A-Z][A-Z0-9_]+")
 
     public fun parse(json: String): Result<Layout> =
         try {
@@ -56,7 +59,7 @@ public object LayoutParser {
                 "chars" -> chars(obj, path)
                 "dead" -> dead(obj, path)
                 "key" -> named(obj.string("key", path), "$path.key")
-                "switchTo" -> KeyDef.LayoutSwitch(obj.string("switchTo", path))
+                "switchTo" -> switchTo(obj.string("switchTo", path), "$path.switchTo")
                 else -> fail(path, "needs exactly one of chars, dead, key or switchTo")
             }
         if (def !is KeyDef.Char && "longPress" in obj) fail("$path.longPress", "needs chars")
@@ -72,7 +75,13 @@ public object LayoutParser {
         val chars = obj.strings("chars", path)
         if (chars.size !in 1..2) fail("$path.chars", "needs one or two strings")
         val alternates =
-            if ("longPress" in obj) obj.strings("longPress", path).map(::alternate) else emptyList()
+            if ("longPress" in obj) {
+                obj.strings("longPress", path).mapIndexed { index, name ->
+                    alternate(name, "$path.longPress[$index]")
+                }
+            } else {
+                emptyList()
+            }
         return KeyDef.Char(
             chars[0],
             chars.getOrElse(1) { chars[0].uppercase() },
@@ -84,6 +93,10 @@ public object LayoutParser {
     private fun dead(obj: JsonObject, path: String): KeyDef.Dead {
         val marks = obj.strings("dead", path)
         if (marks.size !in 1..2) fail("$path.dead", "needs one or two strings")
+        marks.forEachIndexed { index, mark ->
+            if (!DeadKeys.composes(mark))
+                fail("$path.dead[$index]", "dead mark has no combining form")
+        }
         return KeyDef.Dead(marks[0], marks.getOrElse(1) { marks[0] }, latin(obj, path))
     }
 
@@ -91,6 +104,9 @@ public object LayoutParser {
         if ("latin" !in obj) return null
         val latin = obj.string("latin", path)
         if (latin.length != 1) fail("$path.latin", "needs exactly one character")
+        if (latin !in LATIN_KEYS) {
+            fail("$path.latin", "needs an ASCII letter, digit or US punctuation key")
+        }
         return latin
     }
 
@@ -121,14 +137,36 @@ public object LayoutParser {
     private fun compositions(base: String, marks: List<String>): Map<String, String> =
         marks.mapNotNull { mark -> DeadKeys.compose(base, mark)?.let { mark to it } }.toMap()
 
-    private fun alternate(name: String): KeyDef =
-        KeyCode.entries.firstOrNull { it.name == name }?.let { KeyDef.Special(it) }
-            ?: KeyDef.Char(name, name.uppercase())
+    private fun switchTo(target: String, path: String): KeyDef.LayoutSwitch {
+        if (target != BuiltInLayouts.NEXT_LANGUAGE) {
+            fail(path, "unsupported switch target \"$target\"")
+        }
+        return KeyDef.LayoutSwitch(target)
+    }
+
+    private fun alternate(name: String, path: String): KeyDef {
+        KeyCode.entries
+            .firstOrNull { it.name == name }
+            ?.let {
+                return KeyDef.Special(it)
+            }
+        val upper = name.uppercase()
+        val looksLikeKeyName =
+            keyNameLike.matches(name) ||
+                KeyCode.entries.any { it.name == upper } ||
+                ModifierKind.entries.any { it.name == upper }
+        if (looksLikeKeyName) fail(path, "unknown key \"$name\"")
+        return KeyDef.Char(name, upper)
+    }
 
     private fun named(name: String, path: String): KeyDef =
         KeyCode.entries.firstOrNull { it.name == name }?.let { KeyDef.Special(it) }
-            ?: ModifierKind.entries.firstOrNull { it.name == name }?.let { KeyDef.Modifier(it) }
+            ?: ModifierKind.entries.firstOrNull { it.name == name }?.let { modifier(it, path) }
             ?: fail(path, "unknown key \"$name\"")
+
+    private fun modifier(kind: ModifierKind, path: String): KeyDef.Modifier =
+        if (kind == ModifierKind.FN) fail(path, "FN is not supported yet")
+        else KeyDef.Modifier(kind)
 
     private fun width(element: JsonElement, path: String): Float {
         val value =

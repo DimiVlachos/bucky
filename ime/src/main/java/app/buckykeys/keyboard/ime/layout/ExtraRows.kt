@@ -1,7 +1,9 @@
 package app.buckykeys.keyboard.ime.layout
 
+import java.text.BreakIterator
+
 public fun Layout.withExtraRows(fKeyRow: Boolean, userKeys: List<String>): Layout {
-    val user = userKeys.mapNotNull(::userKey).take(MAX_USER_KEYS)
+    val user = userKeys.flatMap(::termuxItems).mapNotNull(::userKey).take(MAX_USER_KEYS)
     val extra =
         listOfNotNull(if (fKeyRow) fKeys else null, if (user.isEmpty()) null else sharedRow(user))
     return if (extra.isEmpty()) this else copy(rows = extra + rows)
@@ -9,14 +11,29 @@ public fun Layout.withExtraRows(fKeyRow: Boolean, userKeys: List<String>): Layou
 
 private const val ROW_UNITS = 15f
 private const val MAX_USER_KEYS = 15
+private const val SPACE_LABEL = "␣"
+private const val TERMUX_PUNCTUATION = "[]'\""
 
-private val termuxAliases =
+private val whitespace = Regex("\\s+")
+private val quoted = Regex("'([^']+)'|\"([^\"]+)\"")
+
+private val termuxAliases: Map<String, KeyDef> =
     mapOf(
-        "PGUP" to KeyCode.PAGE_UP,
-        "PGDN" to KeyCode.PAGE_DOWN,
-        "BKSP" to KeyCode.BACKSPACE,
-        "DEL" to KeyCode.FORWARD_DEL,
-        "INS" to KeyCode.INSERT,
+        "ESCAPE" to KeyDef.Special(KeyCode.ESC),
+        "CONTROL" to KeyDef.Modifier(ModifierKind.CTRL),
+        "RETURN" to KeyDef.Special(KeyCode.ENTER),
+        "DELETE" to KeyDef.Special(KeyCode.FORWARD_DEL),
+        "DEL" to KeyDef.Special(KeyCode.FORWARD_DEL),
+        "PAGEUP" to KeyDef.Special(KeyCode.PAGE_UP),
+        "PGUP" to KeyDef.Special(KeyCode.PAGE_UP),
+        "PAGEDOWN" to KeyDef.Special(KeyCode.PAGE_DOWN),
+        "PGDOWN" to KeyDef.Special(KeyCode.PAGE_DOWN),
+        "PGDN" to KeyDef.Special(KeyCode.PAGE_DOWN),
+        "BKSP" to KeyDef.Special(KeyCode.BACKSPACE),
+        "INS" to KeyDef.Special(KeyCode.INSERT),
+        "BACKSLASH" to KeyDef.Char("\\", "\\"),
+        "QUOTE" to KeyDef.Char("\"", "\""),
+        "APOSTROPHE" to KeyDef.Char("'", "'"),
     )
 
 private val fKeys: Row =
@@ -26,11 +43,29 @@ private val fKeys: Row =
             .map(KeyDef::Special),
     )
 
+private fun termuxItems(entry: String): List<String> =
+    entry.split(whitespace).flatMap { word ->
+        when {
+            word.isEmpty() -> emptyList()
+            graphemeCount(word) == 1 -> listOf(word)
+            quoted.containsMatchIn(word) ->
+                quoted
+                    .findAll(word)
+                    .map { it.groupValues[1].ifEmpty { it.groupValues[2] } }
+                    .toList()
+            else ->
+                word
+                    .split(',')
+                    .map { it.trim { c -> c in TERMUX_PUNCTUATION } }
+                    .filter { it.isNotEmpty() }
+        }
+    }
+
 private fun userKey(token: String): KeyDef? {
-    val name = token.trim().uppercase()
-    if (name.isEmpty()) return null
+    val name = token.uppercase()
+    if (name == "SPACE") return KeyDef.Char(" ", " ")
     termuxAliases[name]?.let {
-        return KeyDef.Special(it)
+        return it
     }
     KeyCode.entries
         .firstOrNull { it.name == name }
@@ -40,11 +75,23 @@ private fun userKey(token: String): KeyDef? {
     ModifierKind.entries
         .firstOrNull { it.name == name }
         ?.let {
-            return KeyDef.Modifier(it)
+            return if (it == ModifierKind.FN) null else KeyDef.Modifier(it)
         }
-    val text = token.trim()
-    return if (text.codePointCount(0, text.length) == 1) KeyDef.Char(text, text) else null
+    if (graphemeCount(token) != 1) return null
+    val upper = token.uppercase()
+    return KeyDef.Char(token, if (graphemeCount(upper) == 1) upper else token)
+}
+
+private fun graphemeCount(text: String): Int {
+    val iterator = BreakIterator.getCharacterInstance()
+    iterator.setText(text)
+    var count = 0
+    while (iterator.next() != BreakIterator.DONE) count++
+    return count
 }
 
 private fun sharedRow(defs: List<KeyDef>): Row =
-    Row(defs.map { KeySpec(it, DefaultLabels.of(it), ROW_UNITS / defs.size) })
+    Row(defs.map { KeySpec(it, label(it), ROW_UNITS / defs.size) })
+
+private fun label(def: KeyDef): String =
+    if (def is KeyDef.Char && def.primary == " ") SPACE_LABEL else DefaultLabels.of(def)
