@@ -35,4 +35,18 @@ class LayoutTransformsTest {
         val once = pcFull.withoutLanguageKey()
         assertEquals(once, once.withoutLanguageKey())
     }
+
+    @Test
+    fun `a row holding only the language key is dropped`() {
+        val layout =
+            Layout(
+                "t",
+                "T",
+                listOf(
+                    Row(listOf(KeySpec(KeyDef.Special(KeyCode.ESC), "Esc"))),
+                    Row(listOf(KeySpec(KeyDef.LayoutSwitch(BuiltInLayouts.NEXT_LANGUAGE), "🌐"))),
+                ),
+            )
+        assertEquals(layout.rows.take(1), layout.withoutLanguageKey().rows)
+    }
 }
