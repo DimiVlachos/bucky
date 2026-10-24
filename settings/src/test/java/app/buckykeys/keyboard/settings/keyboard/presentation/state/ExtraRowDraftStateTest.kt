@@ -1,8 +1,6 @@
 package app.buckykeys.keyboard.settings.keyboard.presentation.state
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ExtraRowDraftStateTest {
@@ -10,25 +8,22 @@ class ExtraRowDraftStateTest {
     private val saved = listOf("ESC", "TAB")
 
     @Test
-    fun `an untouched draft shows the saved row and is unchanged`() {
-        val draft = ExtraRowDraftState(null)
-        assertEquals("ESC TAB", draft.display(saved))
-        assertFalse(draft.changed(saved))
+    fun `an untouched draft shows the saved row`() {
+        assertEquals("ESC TAB", ExtraRowDraftState(null).display(saved))
     }
 
     @Test
-    fun `editing to different words is a change`() {
+    fun `an edited draft shows what was typed`() {
         val draft = ExtraRowDraftState(null)
         draft.edit("ESC TAB CTRL")
-        assertTrue(draft.changed(saved))
         assertEquals("ESC TAB CTRL", draft.display(saved))
     }
 
     @Test
-    fun `extra spaces alone are not a change`() {
+    fun `an edited draft can be emptied`() {
         val draft = ExtraRowDraftState(null)
-        draft.edit("  ESC   TAB ")
-        assertFalse(draft.changed(saved))
+        draft.edit("")
+        assertEquals("", draft.display(saved))
     }
 
     @Test
@@ -37,6 +32,5 @@ class ExtraRowDraftStateTest {
         draft.edit("ESC")
         draft.reset()
         assertEquals("ESC TAB", draft.display(saved))
-        assertFalse(draft.changed(saved))
     }
 }
