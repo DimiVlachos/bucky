@@ -29,6 +29,9 @@ internal fun KeyboardSettingsEntry(
             onKeyPreviewChange = viewModel::onKeyPreviewChange,
             onHapticsChange = viewModel::onHapticsChange,
             onFKeyRowChange = viewModel::onFKeyRowChange,
+            onOutsideTerminalsChange = viewModel::onOutsideTerminalsChange,
+            onAutoCapitalizeChange = viewModel::onAutoCapitalizeChange,
+            onDoubleSpacePeriodChange = viewModel::onDoubleSpacePeriodChange,
             extraRowDraft = extraRowDraft,
             extraRowPreview = extraRowPreview,
             onExtraRowSave = {

@@ -31,4 +31,12 @@
     <string name="settings_extra_row_unknown">Not a key: %1$s</string>
     <string name="settings_extra_row_limit">Only the first %1$d keys are used.</string>
     <string name="settings_extra_row_termux_default">Use Termux\'s default keys</string>
+    <string name="settings_apps">Apps</string>
+    <string name="settings_outside_terminals">Outside terminal apps</string>
+    <string name="settings_outside_compact">Compact layout</string>
+    <string name="settings_outside_full">Full layout</string>
+    <string name="settings_outside_other">Switch to my other keyboard</string>
+    <string name="settings_outside_other_hint">To get Bucky back in Termux, use the keyboard switcher button.</string>
+    <string name="settings_auto_capitalize">Capital at the start of a sentence</string>
+    <string name="settings_double_space_period">Double space for a full stop</string>
 </resources>
