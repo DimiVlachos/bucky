@@ -243,7 +243,7 @@ Play Billing Library, τελευταία major έκδοση (επιβεβαίω�
 - Flavor dimension `distribution` με `play` και `foss`, ίδιο applicationId.
 - R8 ενεργό και στα δύο flavors. Οι consumer rules της kotlinx.serialization καλύπτουν το serialization.
 - Signing: Play App Signing με upload key για το `play`, δικό μας release key για το `foss` (GitHub Releases, IzzyOnDroid). Το F-Droid χτίζει και υπογράφει μόνο του από το `foss` flavor.
-- GitHub Actions: σε κάθε PR build και στα δύο flavors, Android Lint, unit tests. Σε tag: AAB για Play internal track και APK για GitHub Release με checksums, upload στο Play με Gradle Play Publisher ή fastlane supply.
+- GitHub Actions: σε κάθε PR build και στα δύο flavors, Android Lint, unit tests. Σε tag: AAB για Play internal track και APK για GitHub Release με checksums, upload στο Play με Gradle Play Publisher ή fastlane supply. Μέχρι να γίνει αυτό, το `foss` release APK χτίζεται και υπογράφεται τοπικά με `assembleFossRelease`: τα στοιχεία του κλειδιού διαβάζονται από Gradle properties ή από το `local.properties` (εκτός git), και το APK ανεβαίνει χειροκίνητα με `.sha256`.
 - Δομή `fastlane/metadata/android/` για περιγραφές και screenshots, που διαβάζουν και το F-Droid και το IzzyOnDroid.
 
 ### 4.16 Εξαρτήσεις Gradle
@@ -289,7 +289,7 @@ Plugins: `com.android.application`, `com.android.library`, `org.jetbrains.kotlin
 | 13 | Launch | Production σε staged rollout 20%, 50%, 100% μέσα σε 5 ημέρες, ανακοινώσεις (βλ. 7.5) | v1.0 στο 100%, crash-free πάνω από 99.5% στα Play vitals |
 | 14 | Buffer | Ό,τι γλίστρησε, πρώτες διορθώσεις από reviews | Backlog για v1.1 γραμμένο |
 
-Κατάσταση στις 2026-10-24: οι εβδομάδες 1 έως 4 έχουν κλείσει. Η εβδομάδα 5 έχει κλείσει, εκτός από το χειροκίνητο fallback πλάτους και δεξιού padding για OEM builds (hackerskeyboard#957), που δεν έχει γίνει ακόμη. Από την εβδομάδα 6 έχουν γίνει το EL με dead key τόνου, το πλήκτρο 🌐, η σειρά F1 έως F12 και η σειρά του χρήστη· λείπουν UK, Dvorak, Colemak, αριθμητικό, compact και Material You. Από την εβδομάδα 7 έχουν γίνει οι ρυθμίσεις σε DataStore με ζωντανή εφαρμογή, οι γλώσσες, το ύψος σε portrait και landscape, η προεπισκόπηση και τα haptics· λείπει η επιλογή layout ανά γλώσσα.
+Κατάσταση στις 2026-10-24: οι εβδομάδες 1 έως 4 έχουν κλείσει. Η εβδομάδα 5 έχει κλείσει, εκτός από το χειροκίνητο fallback πλάτους και δεξιού padding για OEM builds (hackerskeyboard#957), που δεν έχει γίνει ακόμη. Από την εβδομάδα 6 έχουν γίνει το EL με dead key τόνου, το πλήκτρο 🌐, η σειρά F1 έως F12 και η σειρά του χρήστη· λείπουν UK, Dvorak, Colemak, αριθμητικό, compact και Material You. Από την εβδομάδα 7 έχουν γίνει οι ρυθμίσεις σε DataStore με ζωντανή εφαρμογή, οι γλώσσες, το ύψος σε portrait και landscape, η προεπισκόπηση και τα haptics· λείπει η επιλογή layout ανά γλώσσα. Στις 2026-10-24 βγήκε το πρώτο alpha, `v0.1.0-alpha1`, ως pre-release στο GitHub (βλ. 7.5).
 
 Συνολικά 210 με 280 ώρες. Το απρόβλεπτο κομμάτι είναι η εβδομάδα 11: τα OEM quirks (ύψος keyboard στο One UI, insets σε MIUI, συμπεριφορά σε foldable) δεν μπορούν να εκτιμηθούν πριν τα δεις. Αν η beta βγάλει περισσότερα από 10 blockers, μετακινείται το launch κατά μία εβδομάδα και καταναλώνεται το buffer. Δεν προστίθεται κανένα feature για να «αξιοποιηθεί» η καθυστέρηση.
 
@@ -356,6 +356,8 @@ Pro, one-time: layout editor και απεριόριστα custom layouts, custo
 ### 7.5 Ακολουθία launch
 
 Εβδομάδα 10: internal testing. Εβδομάδα 11 με 12: closed testing με 30 με 50 άτομα από waitlist και #875, δύο εβδομάδες. Εβδομάδα 13: production σε staged rollout 20%, 50%, 100% μέσα σε πέντε ημέρες, και την ίδια μέρα του 100%: σχόλιο στο #875, posts σε r/termux, r/androidapps, r/fossdroid, Show HN, Fediverse, blog post, email στο waitlist.
+
+Αλλαγή στις 2026-10-24: πριν από το internal testing βγαίνουν alpha builds του `foss` ως pre-releases στο GitHub (πρώτο το `v0.1.0-alpha1`), ώστε να έρθει πραγματικό feedback από το #875 και το r/termux πριν από το Gate 0 και όχι στην εβδομάδα 11. Τα pre-releases δεν γίνονται «Latest», άρα όποιος θέλει σταθερή έκδοση δεν τα βρίσκει κατά λάθος. Κάθε νέο alpha ανεβάζει το `versionCode` και υπογράφεται με το ίδιο foss release key. Το waitlist μένει για το Play beta, και το site δεν δείχνει το alpha πριν από το Gate 0, ώστε το gate να μετρά αυτό που σχεδιάστηκε να μετρά.
 
 ### 7.6 Μετά το launch
 
@@ -435,14 +437,14 @@ Maintenance mode σημαίνει: ενημέρωση targetSdk κάθε χρό�
 ## 12. Ανοιχτές ερωτήσεις
 
 1. Όνομα και domain: αποφασίστηκε Bucky / `buckykeys.app` (18/10/2026). Μένει ο έλεγχος TMview και USPTO.
-2. Ποιες γλώσσες πέρα από EN και EL στο v1; Κάθε γλώσσα είναι data, αλλά χρειάζεται native tester.
+2. Ποιες γλώσσες πέρα από EN και EL στο v1; Κάθε γλώσσα είναι data, αλλά χρειάζεται native tester. Ζητήθηκε Estonian από τον ketas στο #875, που προσφέρθηκε να το δοκιμάσει.
 3. Αγορά μεταχειρισμένων συσκευών για το device matrix (ένα Samsung μεσαίας κατηγορίας, ένα Xiaomi, ένα foldable) ή αποκλειστική εξάρτηση από beta testers;
-4. Hosting για landing page και privacy policy: GitHub Pages ή Vercel;
+4. Hosting για landing page και privacy policy: αποφασίστηκε Vercel (buckykeys.app, με το waitlist στο Upstash Redis).
 5. Επαγγελματική διεύθυνση για το trader declaration.
 
 ## 13. Συμβάσεις υλοποίησης (για το Claude Code)
 
-- Αυτό το αρχείο είναι η πηγή αλήθειας για scope και αρχιτεκτονική. Αναφορά σε αυτό από το CLAUDE.md. Κάθε αλλαγή scope ή νέο module ενημερώνει πρώτα το PLAN.md.
+- Αυτό το αρχείο είναι το τρέχον πλάνο για scope και αρχιτεκτονική, όχι συμβόλαιο. Οι αποφάσεις του αμφισβητούνται και βελτιώνονται όσο δουλεύουμε· αλλαγές σε αρχιτεκτονική ή scope συμφωνούνται πρώτα. Μόλις συμφωνηθεί μια αλλαγή scope, ένα νέο module ή μια διαφορετική προσέγγιση, το PLAN.md ενημερώνεται στο ίδιο commit. Αναφορά σε αυτό από το CLAUDE.md.
 - Kotlin official code style. Explicit API mode στα library modules. Κανένα `!!`. Nullable τιμές λύνονται στα όρια (InputConnection, EditorInfo, parsing), όχι στο εσωτερικό του engine.
 - Κανένα deprecated API. Έλεγχος `@Deprecated` σε κάθε κλήση πλαισίου, προτίμηση σε `WindowInsetsCompat`, `ViewCompat`, `ServiceLifecycleDispatcher`.
 - Το `:ime` δεν εισάγει Compose, billing ή Play Services. Το `KeyboardEngine` δεν έχει Android imports εκτός από σταθερές `KeyEvent`.
@@ -450,5 +452,5 @@ Maintenance mode σημαίνει: ενημέρωση targetSdk κάθε χρό�
 - Σφάλματα ως sealed types ή `Result`, ποτέ exceptions ως control flow πέρα από τα όρια.
 - Καμία allocation σε `onDraw` και `onTouchEvent`. Κάθε αλλαγή στο `KeyboardView` συνοδεύεται από χειροκίνητο έλεγχο latency σε συσκευή και σημείωση στο PR.
 - Κανένα string hardcoded στο UI, όλα σε resources, EL και EN από το v1.
-- Κώδικας χωρίς inline σχόλια. Η τεκμηρίωση ζει σε αυτό το αρχείο και σε KDoc μόνο για δημόσια API των modules.
+- Κώδικας χωρίς σχόλια και χωρίς KDoc, εκτός από ένα μονόγραμμο «γιατί» όταν δεν είναι προφανές. Η τεκμηρίωση ζει σε αυτό το αρχείο.
 - Commits με DCO sign-off, conventional commits.

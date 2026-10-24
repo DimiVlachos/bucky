@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Download the alpha
+    url: https://github.com/DimiVlachos/bucky/releases
+    about: The latest test build (APK) is on GitHub Releases.
   - name: Security report
     url: https://github.com/DimiVlachos/bucky/security/advisories/new
     about: Report a vulnerability privately, not as a public issue.
