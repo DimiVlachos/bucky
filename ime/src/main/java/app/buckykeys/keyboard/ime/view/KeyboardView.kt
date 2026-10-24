@@ -23,6 +23,7 @@ import app.buckykeys.keyboard.ime.layout.FallbackLayout
 import app.buckykeys.keyboard.ime.layout.KeyDef
 import app.buckykeys.keyboard.ime.layout.Layout
 import app.buckykeys.keyboard.ime.layout.ModifierKind
+import kotlin.math.roundToInt
 import timber.log.Timber
 
 public fun interface LanguageChangeListener {
@@ -52,6 +53,8 @@ public class KeyboardView(
     private val labelMaxSizePx = rowHeightPx * LABEL_HEIGHT_FRACTION
 
     public val keysTop: Int = rowHeightPx
+
+    private val keysEdgeGapPx = gapPx.roundToInt()
 
     private val longPressMs = ViewConfiguration.getLongPressTimeout().toLong()
 
@@ -125,7 +128,7 @@ public class KeyboardView(
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         setMeasuredDimension(
             MeasureSpec.getSize(widthMeasureSpec),
-            keysTop + layout.rows.size * rowHeightPx + paddingBottom,
+            keysTop + keysEdgeGapPx + layout.rows.size * rowHeightPx + paddingBottom,
         )
     }
 
@@ -133,8 +136,10 @@ public class KeyboardView(
         rebuildGeometryIfNeeded()
     }
 
+    private fun lastKeyX(): Float = (geometry.widthPx - 1).coerceAtLeast(0).toFloat()
+
     private fun rebuildGeometryIfNeeded() {
-        val contentWidth = (width - paddingLeft - paddingRight).coerceAtLeast(0)
+        val contentWidth = (width - paddingLeft - paddingRight - 2 * keysEdgeGapPx).coerceAtLeast(0)
         if (contentWidth == geometry.widthPx && geometryLanguage == languageIndex) return
         geometry = KeyboardGeometry(layout, contentWidth, rowHeightPx)
         geometryLanguage = languageIndex
@@ -231,7 +236,10 @@ public class KeyboardView(
     override fun onDraw(canvas: Canvas) {
         canvas.drawRect(0f, keysTop.toFloat(), width.toFloat(), height.toFloat(), backgroundPaint)
         canvas.save()
-        canvas.translate(paddingLeft.toFloat(), keysTop.toFloat())
+        canvas.translate(
+            (paddingLeft + keysEdgeGapPx).toFloat(),
+            (keysTop + keysEdgeGapPx).toFloat(),
+        )
         val rects = geometry.rects
         val mask = engine.modifierMask
         val locked = engine.lockedMask
@@ -457,8 +465,8 @@ public class KeyboardView(
     private fun dispatch(event: MotionEvent, index: Int, action: PointerAction) {
         engine.onPointer(
             event.getPointerId(index),
-            event.getX(index) - paddingLeft,
-            event.getY(index) - keysTop,
+            (event.getX(index) - paddingLeft - keysEdgeGapPx).coerceIn(0f, lastKeyX()),
+            (event.getY(index) - keysTop - keysEdgeGapPx).coerceAtLeast(0f),
             action,
             event.eventTime,
             sink,
