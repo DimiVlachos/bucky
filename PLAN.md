@@ -147,7 +147,7 @@ On-device prediction και autocorrect (Pro), mic key που εναλλάσσε
 
 ### 4.4 Engine: από το άγγιγμα στο InputConnection
 
-`KeyboardEngine` σε καθαρό Kotlin, χωρίς Android imports εκτός από `KeyEvent` σταθερές. Δέχεται pointer δεδομένα ως primitives, `onPointer(pointerId, x, y, action, sink)` (ο χρόνος προστίθεται μαζί με key repeat και long-press στην εβδομάδα 4), τα αντιστοιχίζει σε πλήκτρο μέσω προϋπολογισμένης γεωμετρίας και εκπέμπει μέσω `InputSink` (`commitText(text)`, `sendKey(keyCode, metaState)`). Primitives και sink αντί για αντικείμενα `PointerEvent` και `InputCommand`, ώστε το `onTouchEvent` να μένει χωρίς allocations (βλ. 4.12 και 13). Οι εντολές που εκπέμπονται:
+`KeyboardEngine` σε καθαρό Kotlin, χωρίς Android imports εκτός από `KeyEvent` σταθερές. Δέχεται pointer δεδομένα ως primitives, `onPointer(pointerId, x, y, action, timeMs, sink)`, τα αντιστοιχίζει σε πλήκτρο μέσω προϋπολογισμένης γεωμετρίας και εκπέμπει μέσω `InputSink` (`commitText(text)`, `sendKey(keyCode, metaState)`). Primitives και sink αντί για αντικείμενα `PointerEvent` και `InputCommand`, ώστε το `onTouchEvent` να μένει χωρίς allocations (βλ. 4.12 και 13). Οι εντολές που εκπέμπονται:
 
 - `commitText(text)` για απλούς χαρακτήρες.
 - `sendKey(keyCode, metaState)` για special keys και για οποιονδήποτε χαρακτήρα όταν είναι ενεργό Ctrl ή Alt.
@@ -158,7 +158,7 @@ On-device prediction και autocorrect (Pro), mic key που εναλλάσσε
 
 Modifiers, ένα state machine ανά modifier: `Off`, με tap γίνεται `OneShot`, με δεύτερο tap `Locked`, με τρίτο `Off`. Το `OneShot` καταναλώνεται στο επόμενο πλήκτρο. Chording: όταν ένας pointer κρατά modifier και άλλος pointer πατά πλήκτρο, ο modifier εφαρμόζεται μόνο σε εκείνο το πάτημα. Η ανίχνευση γίνεται με tracking ανά pointer id.
 
-Key repeat για Backspace, Delete, βελάκια και space: αρχική καθυστέρηση 400 ms και μετά κάθε 50 ms, με coroutine στο `Dispatchers.Main.immediate` που ακυρώνεται σε `ACTION_UP` ή `ACTION_CANCEL`. Long-press στα 300 ms ανοίγει πλέγμα alternates, ολίσθηση επιλέγει, άφημα επιβεβαιώνει. Auto-capitalization κλειστό εξ ορισμού, με επιλογή που χρησιμοποιεί `InputConnection.getCursorCapsMode`.
+Key repeat για Backspace, Delete, βελάκια και space: αρχική καθυστέρηση 400 ms και μετά κάθε 50 ms. Ο χρόνος μπαίνει στο engine ως όρισμα (`onPointer(..., timeMs, sink)`, `onTick(timeMs, sink)`), και το engine δίνει την επόμενη προθεσμία με `nextDeadline`. Το view προγραμματίζει ένα προκατασκευασμένο `Runnable` με `postDelayed`. Όχι coroutine: το `:ime` δεν εξαρτάται από coroutines, και ένα `launch` σε κάθε πάτημα θα δέσμευε `Job` μέσα στο `onTouchEvent`. Το πρώτο repeat στα 400 ms μετρά ως το πάτημα, άρα ένα γρήγορο tap στέλνει ένα event στο άφημα και ένα κράτημα δεν στέλνει επιπλέον event στο άφημα. Ένας one-shot modifier ισχύει για όλα τα repeats και καθαρίζει στο άφημα. Ολίσθηση εκτός πλήκτρου ή πάτημα άλλου πλήκτρου σταματά το repeat· πάτημα modifier όχι, ώστε Shift στη μέση ενός ← να επεκτείνει την επιλογή. Long-press στα 300 ms ανοίγει πλέγμα alternates, ολίσθηση επιλέγει, άφημα επιβεβαιώνει. Auto-capitalization κλειστό εξ ορισμού, με επιλογή που χρησιμοποιεί `InputConnection.getCursorCapsMode`.
 
 ### 4.5 InputMethodService: lifecycle, insets, EditorInfo
 

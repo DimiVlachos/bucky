@@ -49,6 +49,8 @@ public class KeyboardView(
     private var labelSize = FloatArray(0)
     private var modifierBits = IntArray(0)
     private var pendingDownTime = NO_PENDING
+    private var scheduledDeadline = KeyboardEngine.NO_DEADLINE
+    private val repeatTick = Runnable { onRepeatTick() }
 
     init {
         setBackgroundColor(ContextCompat.getColor(context, R.color.keyboard_background))
@@ -75,6 +77,7 @@ public class KeyboardView(
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         geometry = KeyboardGeometry(layout, w, rowHeightPx)
         engine = KeyboardEngine(geometry)
+        scheduleRepeat()
         val count = geometry.keyCount
         labelX = FloatArray(count)
         labelY = FloatArray(count)
@@ -147,6 +150,8 @@ public class KeyboardView(
                     performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                     if (latencyLogging) pendingDownTime = event.eventTime
                 }
+                MotionEvent.ACTION_MOVE ->
+                    for (i in 0 until event.pointerCount) dispatch(event, i, PointerAction.MOVE)
                 MotionEvent.ACTION_UP,
                 MotionEvent.ACTION_POINTER_UP ->
                     dispatch(event, event.actionIndex, PointerAction.UP)
@@ -157,13 +162,42 @@ public class KeyboardView(
             Timber.e(e, "onTouchEvent: engine failed, resetting")
             engine.reset()
         }
+        scheduleRepeat()
         invalidate()
         return true
     }
 
     public fun resetState() {
         engine.reset()
+        scheduleRepeat()
         invalidate()
+    }
+
+    override fun onDetachedFromWindow() {
+        removeCallbacks(repeatTick)
+        scheduledDeadline = KeyboardEngine.NO_DEADLINE
+        super.onDetachedFromWindow()
+    }
+
+    private fun onRepeatTick() {
+        scheduledDeadline = KeyboardEngine.NO_DEADLINE
+        try {
+            engine.onTick(SystemClock.uptimeMillis(), sink)
+        } catch (e: RuntimeException) {
+            Timber.e(e, "onRepeatTick: engine failed, resetting")
+            engine.reset()
+        }
+        scheduleRepeat()
+    }
+
+    private fun scheduleRepeat() {
+        val deadline = engine.nextDeadline
+        if (deadline == scheduledDeadline) return
+        removeCallbacks(repeatTick)
+        scheduledDeadline = deadline
+        if (deadline != KeyboardEngine.NO_DEADLINE) {
+            postDelayed(repeatTick, (deadline - SystemClock.uptimeMillis()).coerceAtLeast(0L))
+        }
     }
 
     private fun dispatch(event: MotionEvent, index: Int, action: PointerAction) {
@@ -172,6 +206,7 @@ public class KeyboardView(
             event.getX(index),
             event.getY(index),
             action,
+            event.eventTime,
             sink,
         )
     }
