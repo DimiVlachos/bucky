@@ -4,4 +4,15 @@
     <string name="onboarding_enable">Ενεργοποίηση πληκτρολογίου</string>
     <string name="onboarding_choose">Επιλογή πληκτρολογίου</string>
     <string name="onboarding_try">Δοκιμάστε να πληκτρολογήσετε εδώ</string>
+    <string name="settings_languages">Γλώσσες</string>
+    <string name="settings_language_en_us">Αγγλικά (ΗΠΑ)</string>
+    <string name="settings_language_el">Ελληνικά</string>
+    <string name="settings_languages_hint">Εναλλαγή με το πλήκτρο 🌐. Τουλάχιστον μία μένει ενεργή.</string>
+    <string name="settings_size">Μέγεθος</string>
+    <string name="settings_row_height">Ύψος πλήκτρων</string>
+    <string name="settings_landscape_row_height">Ύψος πλήκτρων σε οριζόντια θέση</string>
+    <string name="settings_dp">%1$d dp</string>
+    <string name="settings_feedback">Απόκριση</string>
+    <string name="settings_key_preview">Εμφάνιση του πλήκτρου πάνω από το δάχτυλο</string>
+    <string name="settings_haptics">Δόνηση στο πάτημα</string>
 </resources>

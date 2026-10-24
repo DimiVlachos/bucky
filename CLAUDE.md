@@ -12,7 +12,7 @@ Conventions follow Dimitris's other Android apps. When a convention is unclear, 
 |---|---|---|
 | `:app` | Manifest, `play`/`foss` flavors, Hilt `Application`, `BuckyImeService`, flavor `BillingModule` | everything |
 | `:ime` | Layout model and JSON parser, `KeyboardGeometry`, `KeyboardEngine`, `InputDispatcher`, `KeyboardView` | core-ktx, Timber, kotlinx-serialization-json |
-| `:settings` | Compose settings and onboarding | `:billing` |
+| `:settings` | Compose settings and onboarding, `KeyboardSettings` and its DataStore repository | `:billing`, DataStore, kotlinx-serialization, Hilt |
 | `:billing` | `ProEntitlement`, `BillingRepository` | coroutines |
 | `:billing-play` | Play implementation (`playImplementation` only) | `:billing` |
 | `:billing-foss` | Always-unlocked implementation (`fossImplementation` only) | `:billing` |
