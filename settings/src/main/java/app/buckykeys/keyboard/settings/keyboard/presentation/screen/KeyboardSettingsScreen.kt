@@ -30,13 +30,16 @@ internal fun KeyboardSettingsScreen(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(BuckyTheme.spacing.medium)) {
         SectionTitle(stringResource(R.string.settings_languages))
+        val requiredDescription = stringResource(R.string.settings_language_required)
         KeyboardLanguage.entries.forEach { language ->
             val checked = language in settings.languages
+            val enabled = !checked || settings.languages.size > 1
             CheckboxRow(
                 text = stringResource(language.labelRes()),
                 checked = checked,
-                enabled = !checked || settings.languages.size > 1,
+                enabled = enabled,
                 onCheckedChange = { onLanguageChange(language, it) },
+                stateDescription = if (enabled) null else requiredDescription,
             )
         }
         Text(
@@ -49,13 +52,13 @@ internal fun KeyboardSettingsScreen(
             text = stringResource(R.string.settings_row_height),
             valueDp = settings.rowHeightDp,
             range = KeyboardSettings.ROW_HEIGHT_RANGE,
-            onValueChange = onRowHeightChange,
+            onValueChangeFinished = onRowHeightChange,
         )
         HeightSlider(
             text = stringResource(R.string.settings_landscape_row_height),
             valueDp = settings.landscapeRowHeightDp,
             range = KeyboardSettings.LANDSCAPE_ROW_HEIGHT_RANGE,
-            onValueChange = onLandscapeRowHeightChange,
+            onValueChangeFinished = onLandscapeRowHeightChange,
         )
         SectionTitle(stringResource(R.string.settings_feedback))
         SwitchRow(
