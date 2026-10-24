@@ -1,36 +1,45 @@
 package app.buckykeys.keyboard.settings.keyboard.presentation.state
 
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
+import androidx.compose.ui.text.TextRange
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ExtraRowDraftStateTest {
 
-    private val saved = listOf("ESC", "TAB")
+    private fun draft() = ExtraRowDraftState(TextFieldState())
 
     @Test
-    fun `an untouched draft shows the saved row`() {
-        assertEquals("ESC TAB", ExtraRowDraftState(null).display(saved))
+    fun `syncing shows the saved row with the cursor at the end`() {
+        val draft = draft()
+        draft.syncTo("ESC TAB")
+        assertEquals("ESC TAB", draft.text)
+        assertEquals(TextRange(7), draft.textField.selection)
     }
 
     @Test
-    fun `an edited draft shows what was typed`() {
-        val draft = ExtraRowDraftState(null)
-        draft.edit("ESC TAB CTRL")
-        assertEquals("ESC TAB CTRL", draft.display(saved))
+    fun `syncing the same saved row again keeps an unsaved edit`() {
+        val draft = draft()
+        draft.syncTo("ESC")
+        draft.textField.setTextAndPlaceCursorAtEnd("ESC TAB")
+        draft.syncTo("ESC")
+        assertEquals("ESC TAB", draft.text)
     }
 
     @Test
-    fun `an edited draft can be emptied`() {
-        val draft = ExtraRowDraftState(null)
-        draft.edit("")
-        assertEquals("", draft.display(saved))
+    fun `a newly saved row replaces the field`() {
+        val draft = draft()
+        draft.syncTo("ESC")
+        draft.syncTo("ESC TAB")
+        assertEquals("ESC TAB", draft.text)
     }
 
     @Test
-    fun `reset goes back to the saved row`() {
-        val draft = ExtraRowDraftState(null)
-        draft.edit("ESC")
-        draft.reset()
-        assertEquals("ESC TAB", draft.display(saved))
+    fun `filling puts the cursor at the end`() {
+        val draft = draft()
+        draft.fill("ESC / -")
+        assertEquals("ESC / -", draft.text)
+        assertEquals(TextRange(7), draft.textField.selection)
     }
 }
