@@ -21,7 +21,7 @@ internal fun BuckyTopBar(title: String) {
             Modifier.fillMaxWidth()
                 .zIndex(1f)
                 .shadow(8.dp)
-                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .background(MaterialTheme.colorScheme.background)
                 .statusBarsPadding()
                 .padding(
                     horizontal = BuckyTheme.spacing.large,

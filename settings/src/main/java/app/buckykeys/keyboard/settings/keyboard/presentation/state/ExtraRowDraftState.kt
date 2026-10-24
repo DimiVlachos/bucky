@@ -14,12 +14,7 @@ internal class ExtraRowDraftState(text: String?) {
     var text: String? by mutableStateOf(text)
         private set
 
-    var focused: Boolean by mutableStateOf(false)
-
     fun display(saved: List<String>): String = text ?: saved.joinToString(" ")
-
-    fun changed(saved: List<String>): Boolean =
-        text?.normalized()?.let { it != saved.joinToString(" ") } == true
 
     fun edit(value: String) {
         text = value
@@ -43,8 +38,3 @@ internal class ExtraRowDraftState(text: String?) {
 @Composable
 internal fun rememberExtraRowDraftState(): ExtraRowDraftState =
     rememberSaveable(saver = ExtraRowDraftState.Saver) { ExtraRowDraftState(null) }
-
-private val Whitespace = Regex("\\s+")
-
-private fun String.normalized(): String =
-    split(Whitespace).filter { it.isNotEmpty() }.joinToString(" ")
