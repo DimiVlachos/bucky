@@ -8,6 +8,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,16 +17,19 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.unit.dp
 import app.buckykeys.keyboard.settings.R
 import app.buckykeys.keyboard.settings.core.presentation.components.keepVisibleWhenFocused
 import app.buckykeys.keyboard.settings.core.presentation.theme.BuckyTheme
 import app.buckykeys.keyboard.settings.keyboard.domain.model.ExtraRowPreview
+import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
 import app.buckykeys.keyboard.settings.keyboard.presentation.state.ExtraRowDraftState
 
 @Composable
@@ -60,7 +64,13 @@ internal fun ExtraRowEditor(
                 }
             }
         },
-        supportingText = { ExtraRowSupportingText(text = text, preview = preview) },
+        supportingText = {
+            ExtraRowSupportingText(
+                text = text,
+                preview = preview,
+                onUseTermuxDefault = { draft.edit(KeyboardSettings.TERMUX_DEFAULT_EXTRA_ROW) },
+            )
+        },
         keyboardOptions =
             KeyboardOptions(
                 capitalization = KeyboardCapitalization.None,
@@ -73,10 +83,22 @@ internal fun ExtraRowEditor(
 }
 
 @Composable
-private fun ExtraRowSupportingText(text: String, preview: ExtraRowPreview) {
+private fun ExtraRowSupportingText(
+    text: String,
+    preview: ExtraRowPreview,
+    onUseTermuxDefault: () -> Unit,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(BuckyTheme.spacing.extraSmall)) {
         when {
-            text.isBlank() -> Text(stringResource(R.string.settings_extra_row_hint))
+            text.isBlank() -> {
+                Text(stringResource(R.string.settings_extra_row_hint))
+                TextButton(
+                    onClick = onUseTermuxDefault,
+                    contentPadding = PaddingValues(0.dp),
+                ) {
+                    Text(stringResource(R.string.settings_extra_row_termux_default))
+                }
+            }
             preview.labels.isNotEmpty() ->
                 Text(
                     text =
