@@ -16,6 +16,7 @@ import app.buckykeys.keyboard.settings.keyboard.presentation.components.ExtraRow
 import app.buckykeys.keyboard.settings.keyboard.presentation.components.HeightSlider
 import app.buckykeys.keyboard.settings.keyboard.presentation.components.SectionTitle
 import app.buckykeys.keyboard.settings.keyboard.presentation.components.SwitchRow
+import app.buckykeys.keyboard.settings.keyboard.presentation.state.ExtraRowDraftState
 
 @Composable
 internal fun KeyboardSettingsScreen(
@@ -26,7 +27,8 @@ internal fun KeyboardSettingsScreen(
     onKeyPreviewChange: (Boolean) -> Unit,
     onHapticsChange: (Boolean) -> Unit,
     onFKeyRowChange: (Boolean) -> Unit,
-    onExtraRowSave: (String) -> Unit,
+    extraRowDraft: ExtraRowDraftState,
+    onExtraRowSave: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(BuckyTheme.spacing.medium)) {
         SectionTitle(stringResource(R.string.settings_languages))
@@ -79,7 +81,7 @@ internal fun KeyboardSettingsScreen(
             checked = settings.fKeyRow,
             onCheckedChange = onFKeyRowChange,
         )
-        ExtraRowEditor(saved = settings.extraRow, onSave = onExtraRowSave)
+        ExtraRowEditor(saved = settings.extraRow, draft = extraRowDraft, onSave = onExtraRowSave)
     }
 }
 
@@ -93,6 +95,16 @@ private fun KeyboardLanguage.labelRes(): Int =
 @Composable
 private fun KeyboardSettingsScreenPreview() {
     BuckyTheme(darkTheme = true) {
-        KeyboardSettingsScreen(KeyboardSettings.defaults("el"), { _, _ -> }, {}, {}, {}, {}, {}, {})
+        KeyboardSettingsScreen(
+            KeyboardSettings.defaults("el"),
+            { _, _ -> },
+            {},
+            {},
+            {},
+            {},
+            {},
+            ExtraRowDraftState(null),
+            {},
+        )
     }
 }
