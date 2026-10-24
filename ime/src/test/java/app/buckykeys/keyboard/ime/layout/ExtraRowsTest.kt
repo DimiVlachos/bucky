@@ -103,4 +103,128 @@ class ExtraRowsTest {
         assertEquals(KeyDef.Special(KeyCode.ESC), rows[1].keys.single().def)
         assertEquals(base.rows, rows.drop(2))
     }
+
+    private fun userRow(vararg keys: String): List<KeySpec> =
+        base.withExtraRows(fKeyRow = false, userKeys = keys.toList()).rows.first().keys
+
+    @Test
+    fun `termux names and aliases map to their keys`() {
+        assertEquals(
+            listOf(
+                KeyDef.Char(" ", " "),
+                KeyDef.Special(KeyCode.ESC),
+                KeyDef.Modifier(ModifierKind.CTRL),
+                KeyDef.Special(KeyCode.ENTER),
+                KeyDef.Special(KeyCode.ENTER),
+                KeyDef.Special(KeyCode.FORWARD_DEL),
+                KeyDef.Special(KeyCode.PAGE_UP),
+                KeyDef.Special(KeyCode.PAGE_UP),
+                KeyDef.Special(KeyCode.PAGE_DOWN),
+                KeyDef.Special(KeyCode.PAGE_DOWN),
+                KeyDef.Char("\\", "\\"),
+                KeyDef.Char("\"", "\""),
+                KeyDef.Char("'", "'"),
+                KeyDef.Special(KeyCode.INSERT),
+                KeyDef.Special(KeyCode.UP),
+            ),
+            userRow(
+                    "SPACE",
+                    "escape",
+                    "Control",
+                    "RETURN",
+                    "ENTER",
+                    "DELETE",
+                    "PAGEUP",
+                    "PAGE_UP",
+                    "PAGEDOWN",
+                    "PGDOWN",
+                    "BACKSLASH",
+                    "QUOTE",
+                    "APOSTROPHE",
+                    "INS",
+                    "up",
+                )
+                .map { it.def },
+        )
+        assertEquals(
+            listOf(
+                KeyDef.Special(KeyCode.DOWN),
+                KeyDef.Special(KeyCode.LEFT),
+                KeyDef.Special(KeyCode.RIGHT),
+            ),
+            userRow("DOWN", "LEFT", "RIGHT").map { it.def },
+        )
+    }
+
+    @Test
+    fun `the space key gets a visible label`() {
+        assertEquals("␣", userRow("SPACE").single().label)
+    }
+
+    @Test
+    fun `a pasted termux extra-keys line becomes one row in order`() {
+        val pasted =
+            "[['ESC','/','-','HOME','UP','END','PGUP'],['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN']]"
+        assertEquals(
+            listOf(
+                KeyDef.Special(KeyCode.ESC),
+                KeyDef.Char("/", "/"),
+                KeyDef.Char("-", "-"),
+                KeyDef.Special(KeyCode.HOME),
+                KeyDef.Special(KeyCode.UP),
+                KeyDef.Special(KeyCode.END),
+                KeyDef.Special(KeyCode.PAGE_UP),
+                KeyDef.Special(KeyCode.TAB),
+                KeyDef.Modifier(ModifierKind.CTRL),
+                KeyDef.Modifier(ModifierKind.ALT),
+                KeyDef.Special(KeyCode.LEFT),
+                KeyDef.Special(KeyCode.DOWN),
+                KeyDef.Special(KeyCode.RIGHT),
+                KeyDef.Special(KeyCode.PAGE_DOWN),
+            ),
+            userRow(pasted).map { it.def },
+        )
+    }
+
+    @Test
+    fun `a termux line split on spaces after commas still parses`() {
+        assertEquals(
+            listOf(KeyDef.Special(KeyCode.ESC), KeyDef.Char(",", ","), KeyDef.Special(KeyCode.TAB)),
+            userRow("[['ESC',", "\",\",", "'TAB']]").map { it.def },
+        )
+    }
+
+    @Test
+    fun `brackets and quotes typed alone stay characters`() {
+        assertEquals(
+            listOf(KeyDef.Char("[", "["), KeyDef.Char("'", "'"), KeyDef.Char(",", ",")),
+            userRow("[", "'", ",").map { it.def },
+        )
+    }
+
+    @Test
+    fun `a character built from a letter and a combining accent counts as one key`() {
+        assertEquals(KeyDef.Char("e\u0301", "E\u0301"), userRow("e\u0301").single().def)
+    }
+
+    @Test
+    fun `a single letter shifts to its uppercase`() {
+        assertEquals(
+            listOf(KeyDef.Char("a", "A"), KeyDef.Char("ß", "ß")),
+            userRow("a", "ß").map { it.def },
+        )
+    }
+
+    @Test
+    fun `the fn modifier is skipped`() {
+        assertEquals(listOf(KeyDef.Special(KeyCode.ESC)), userRow("FN", "ESC").map { it.def })
+    }
+
+    @Test
+    fun `the fifteen key cap counts only valid keys`() {
+        val keys = List(10) { "git" } + List(15) { "ESC" } + listOf("TAB")
+        val row = userRow(*keys.toTypedArray())
+        assertEquals(15, row.size)
+        assertEquals(List(15) { KeyDef.Special(KeyCode.ESC) }, row.map { it.def })
+    }
 }
