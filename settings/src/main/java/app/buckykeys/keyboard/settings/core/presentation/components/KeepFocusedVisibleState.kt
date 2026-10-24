@@ -46,10 +46,17 @@ internal fun Modifier.scrollFocusedIntoView(
     margin: Dp,
 ): Modifier {
     val marginPx = with(LocalDensity.current) { margin.toPx() }
+    val lastHeight = remember { intArrayOf(UNMEASURED) }
     return onGloballyPositioned { viewport ->
+        val height = viewport.size.height
+        val shrank = lastHeight[0] != UNMEASURED && height < lastHeight[0]
+        lastHeight[0] = height
+        if (!shrank) return@onGloballyPositioned
         val target = state.target?.takeIf { it.isAttached } ?: return@onGloballyPositioned
         val bottom = viewport.localBoundingBoxOf(target, clipBounds = false).bottom
         val overflow = bottom + marginPx - viewport.size.height
         if (overflow > 0f) scrollState.dispatchRawDelta(overflow)
     }
 }
+
+private const val UNMEASURED = -1
