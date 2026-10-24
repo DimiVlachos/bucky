@@ -25,7 +25,9 @@ import androidx.lifecycle.repeatOnLifecycle
 import app.buckykeys.keyboard.settings.core.presentation.theme.BuckyTheme
 import app.buckykeys.keyboard.settings.home.presentation.components.AboutFooter
 import app.buckykeys.keyboard.settings.home.presentation.screen.HomeScreen
+import app.buckykeys.keyboard.settings.keyboard.presentation.entry.ExtraRowSaveBarEntry
 import app.buckykeys.keyboard.settings.keyboard.presentation.entry.KeyboardSettingsEntry
+import app.buckykeys.keyboard.settings.keyboard.presentation.state.rememberExtraRowDraftState
 import app.buckykeys.keyboard.settings.keyboard.presentation.view_model.KeyboardSettingsViewModel
 import app.buckykeys.keyboard.settings.onboarding.data.source.SetupStateReader
 import app.buckykeys.keyboard.settings.onboarding.presentation.screen.OnboardingSection
@@ -45,6 +47,7 @@ public class SettingsActivity : ComponentActivity() {
         setContent {
             BuckyTheme {
                 var tryText by rememberSaveable { mutableStateOf("") }
+                val extraRowDraft = rememberExtraRowDraftState()
                 var setup by remember { mutableStateOf(setupReader.read()) }
                 val lifecycleOwner = LocalLifecycleOwner.current
                 LaunchedEffect(lifecycleOwner) {
@@ -69,8 +72,9 @@ public class SettingsActivity : ComponentActivity() {
                             },
                         )
                     },
-                    settings = { KeyboardSettingsEntry(keyboardSettings) },
+                    settings = { KeyboardSettingsEntry(keyboardSettings, extraRowDraft) },
                     footer = { AboutFooter(versionName(), ::openSource) },
+                    bottomBar = { ExtraRowSaveBarEntry(keyboardSettings, extraRowDraft) },
                 )
             }
         }
