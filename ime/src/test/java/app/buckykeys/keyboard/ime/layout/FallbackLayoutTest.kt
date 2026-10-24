@@ -4,9 +4,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class SpikeLayoutTest {
+class FallbackLayoutTest {
 
-    private val layout = SpikeLayout.pcFullEnUs
+    private val layout = FallbackLayout.pcFullEnUs
 
     @Test
     fun `every row spans fifteen units`() {

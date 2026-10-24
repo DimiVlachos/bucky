@@ -5,12 +5,12 @@ import app.buckykeys.keyboard.ime.engine.fake.FakeInputSink
 import app.buckykeys.keyboard.ime.engine.fake.FakeInputSink.Emitted.Key
 import app.buckykeys.keyboard.ime.engine.fake.FakeInputSink.Emitted.Text
 import app.buckykeys.keyboard.ime.geometry.KeyboardGeometry
+import app.buckykeys.keyboard.ime.layout.FallbackLayout
 import app.buckykeys.keyboard.ime.layout.KeyDef
 import app.buckykeys.keyboard.ime.layout.KeySpec
 import app.buckykeys.keyboard.ime.layout.Layout
 import app.buckykeys.keyboard.ime.layout.ModifierKind
 import app.buckykeys.keyboard.ime.layout.Row
-import app.buckykeys.keyboard.ime.layout.SpikeLayout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -21,7 +21,7 @@ class KeyboardEngineTest {
     private val ctrl = KeyEvent.META_CTRL_ON or KeyEvent.META_CTRL_LEFT_ON
     private val shift = KeyEvent.META_SHIFT_ON or KeyEvent.META_SHIFT_LEFT_ON
 
-    private var geometry = KeyboardGeometry(SpikeLayout.pcFullEnUs, 1080, 120)
+    private var geometry = KeyboardGeometry(FallbackLayout.pcFullEnUs, 1080, 120)
     private var engine = KeyboardEngine(geometry)
     private val sink = FakeInputSink()
 
