@@ -188,7 +188,7 @@ Material 3 με dynamic color, MVVM με `StateFlow`. Οθόνες v1: Onboardin
 
 ### 4.8 Persistence
 
-DataStore με custom `Serializer<T>` που χρησιμοποιεί kotlinx.serialization JSON. Έτσι έχουμε typed, migratable ρυθμίσεις χωρίς την protobuf toolchain. `ReplaceFileCorruptionHandler` επιστρέφει defaults σε `CorruptionException`. Τα layouts αποθηκεύονται ως JSON αρχεία σε `filesDir/layouts` μέσω `AtomicFile`. Όχι Room: δεν υπάρχουν σχέσεις, και η αρχικοποίηση βάσης στο ξεκίνημα του IME προσθέτει latency χωρίς αντάλλαγμα. Οι αλλαγές ρυθμίσεων φτάνουν στο IME μέσω του `Flow` του DataStore στο ίδιο process.
+Οι ρυθμίσεις ζουν στο `:settings` (`keyboard/domain/model/KeyboardSettings`, `KeyboardSettingsRepository` και `KeyboardSettingsRepositoryImpl` στο `keyboard/data`), όχι στο `:ime`: το `:settings` δεν επιτρέπεται να εξαρτάται από το `:ime`, και το `:ime` μένει χωρίς persistence. Το `BuckyImeService` στο `:app` συλλέγει το `Flow`, περνά απλές τιμές στο `KeyboardView` (γλώσσες, ύψος σειράς ανά προσανατολισμό, preview, haptics) και σε κάθε αλλαγή ξαναφτιάχνει το view με `setInputView`. Οι default γλώσσες είναι EN, και EN με EL όταν η γλώσσα του συστήματος είναι ελληνικά. Με μία γλώσσα το πλήκτρο 🌐 αφαιρείται κατά τη φόρτωση και το space παίρνει το πλάτος του. DataStore με custom `Serializer<T>` που χρησιμοποιεί kotlinx.serialization JSON. Έτσι έχουμε typed, migratable ρυθμίσεις χωρίς την protobuf toolchain. `ReplaceFileCorruptionHandler` επιστρέφει defaults σε `CorruptionException`. Τα layouts αποθηκεύονται ως JSON αρχεία σε `filesDir/layouts` μέσω `AtomicFile`. Όχι Room: δεν υπάρχουν σχέσεις, και η αρχικοποίηση βάσης στο ξεκίνημα του IME προσθέτει latency χωρίς αντάλλαγμα. Οι αλλαγές ρυθμίσεων φτάνουν στο IME μέσω του `Flow` του DataStore στο ίδιο process.
 
 ### 4.9 DI και Coroutines
 
@@ -255,9 +255,9 @@ Plugins: `com.android.application`, `org.jetbrains.kotlin.android`, `org.jetbrai
 |---|---|---|
 | Core KTX | `androidx.core:core-ktx` | όλα |
 | Lifecycle σε Service | `androidx.lifecycle:lifecycle-service` | :app |
-| Lifecycle runtime, ViewModel Compose | `androidx.lifecycle:lifecycle-runtime-ktx`, `androidx.lifecycle:lifecycle-viewmodel-compose` | :settings |
-| DataStore (custom serializer) | `androidx.datastore:datastore` | :ime |
-| JSON | `org.jetbrains.kotlinx:kotlinx-serialization-json` | :ime |
+| Lifecycle runtime Compose | `androidx.lifecycle:lifecycle-runtime-compose` (`collectAsStateWithLifecycle`· ViewModel μέσω `by viewModels()` στο Activity, χωρίς `lifecycle-viewmodel-compose`) | :settings |
+| DataStore (custom serializer) | `androidx.datastore:datastore` | :settings |
+| JSON | `org.jetbrains.kotlinx:kotlinx-serialization-json` (και το plugin `org.jetbrains.kotlin.plugin.serialization` στο :settings) | :ime, :settings |
 | Coroutines | `org.jetbrains.kotlinx:kotlinx-coroutines-android` | όλα |
 | Compose | `androidx.compose:compose-bom`, `androidx.compose.material3:material3`, `androidx.compose.ui:ui`, `androidx.compose.ui:ui-tooling-preview`, `androidx.activity:activity-compose` | :settings |
 | Navigation (αν stable) | `androidx.navigation3:navigation3-runtime`, `androidx.navigation3:navigation3-ui` | :settings |
