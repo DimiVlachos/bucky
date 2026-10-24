@@ -64,9 +64,14 @@ public object LayoutParser {
     private fun chars(obj: JsonObject, path: String): KeyDef.Char {
         val chars = obj.strings("chars", path)
         if (chars.size !in 1..2) fail("$path.chars", "needs one or two strings")
-        val alternates = if ("longPress" in obj) obj.strings("longPress", path) else emptyList()
+        val alternates =
+            if ("longPress" in obj) obj.strings("longPress", path).map(::alternate) else emptyList()
         return KeyDef.Char(chars[0], chars.getOrElse(1) { chars[0].uppercase() }, alternates)
     }
+
+    private fun alternate(name: String): KeyDef =
+        KeyCode.entries.firstOrNull { it.name == name }?.let { KeyDef.Special(it) }
+            ?: KeyDef.Char(name, name.uppercase())
 
     private fun named(name: String, path: String): KeyDef =
         KeyCode.entries.firstOrNull { it.name == name }?.let { KeyDef.Special(it) }

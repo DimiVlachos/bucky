@@ -3,7 +3,11 @@ package app.buckykeys.keyboard.ime.geometry
 import app.buckykeys.keyboard.ime.layout.KeySpec
 import app.buckykeys.keyboard.ime.layout.Layout
 
-public class KeyboardGeometry(layout: Layout, widthPx: Int, private val rowHeightPx: Int) {
+public class KeyboardGeometry(
+    layout: Layout,
+    public val widthPx: Int,
+    private val rowHeightPx: Int,
+) {
 
     private val specs: List<KeySpec> = layout.rows.flatMap { it.keys }
     private val rowStarts: IntArray = IntArray(layout.rows.size + 1)
