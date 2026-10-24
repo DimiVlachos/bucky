@@ -3,11 +3,13 @@ package app.buckykeys.keyboard
 import android.inputmethodservice.InputMethodService
 import android.inputmethodservice.InputMethodService.Insets
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import app.buckykeys.keyboard.billing.domain.repository.BillingRepository
 import app.buckykeys.keyboard.ime.dispatch.InputDispatcher
 import app.buckykeys.keyboard.ime.layout.BuiltInLayouts
 import app.buckykeys.keyboard.ime.layout.Layout
 import app.buckykeys.keyboard.ime.view.KeyboardView
+import app.buckykeys.keyboard.ime.view.isPasswordInput
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -43,6 +45,13 @@ class BuckyImeService : InputMethodService() {
                 latencyLogging = BuildConfig.DEBUG,
             )
             .also { keyboardView = it }
+
+    override fun onEvaluateFullscreenMode(): Boolean = false
+
+    override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
+        super.onStartInputView(info, restarting)
+        keyboardView?.previewEnabled = !isPasswordInput(info?.inputType ?: 0)
+    }
 
     override fun onComputeInsets(outInsets: Insets) {
         super.onComputeInsets(outInsets)
