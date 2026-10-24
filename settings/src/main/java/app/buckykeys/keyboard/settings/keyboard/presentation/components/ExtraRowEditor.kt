@@ -130,7 +130,7 @@ internal fun ExtraRowEditor(
             decorator.Decoration {
                 Box(
                     modifier =
-                        Modifier.extendIntoPadding(start = edge, end = 0.dp)
+                        Modifier.extendIntoPadding(start = edge, end = END_EXTENSION)
                             .horizontalFadingEdges(scroll, start = edge, end = END_FADE),
                 ) {
                     innerTextField()
@@ -198,8 +198,9 @@ private fun ExtraRowSupportingText(
 
 private const val ENTER_MS = 150
 private const val FILL_MS = 200
-private val START_EDGE = 12.dp
-private val END_FADE = 16.dp
+private val START_EDGE = 10.dp
+private val END_EXTENSION = 6.dp
+private val END_FADE = 12.dp
 private const val SWAP_OUT_MS = 100
 private const val SWAP_IN_MS = 150
 private const val EXIT_MS = 120
