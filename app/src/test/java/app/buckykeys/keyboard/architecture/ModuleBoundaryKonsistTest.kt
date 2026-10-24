@@ -21,6 +21,23 @@ class ModuleBoundaryKonsistTest {
         }
     }
 
+    private val forbiddenInImeRuntime =
+        listOf(
+            "app.buckykeys.keyboard.settings",
+            "androidx.datastore",
+            "dagger",
+            "javax.inject",
+            "kotlinx.coroutines",
+            "androidx.lifecycle",
+        )
+
+    @Test
+    fun `ime never imports settings, datastore, dependency injection, coroutines or lifecycle`() {
+        Konsist.scopeFromModule("ime").files.assertFalse(strict = false) { file ->
+            file.imports.any { import -> forbiddenInImeRuntime.any { import.name.startsWith(it) } }
+        }
+    }
+
     @Test
     fun `keyboard engine imports nothing from android except KeyEvent`() {
         Konsist.scopeFromPackage("app.buckykeys.keyboard.ime.engine..", moduleName = "ime")
