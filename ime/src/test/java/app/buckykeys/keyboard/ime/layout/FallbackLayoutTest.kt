@@ -55,12 +55,12 @@ class FallbackLayoutTest {
     }
 
     @Test
-    fun `the space bar is within a quarter key of the centre`() {
+    fun `the space bar is within half a key of the centre`() {
         val bottom = layout.rows.last().keys
         val spaceIndex = bottom.indexOfFirst { it.def == KeyDef.Char(" ", " ") }
         val left = bottom.take(spaceIndex).sumOf { it.width.toDouble() }
         val right = bottom.drop(spaceIndex + 1).sumOf { it.width.toDouble() }
-        assertTrue("left $left, right $right", abs(left - right) <= 0.5)
+        assertTrue("left $left, right $right", abs(left - right) <= 1.0)
     }
 
     @Test

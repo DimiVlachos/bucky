@@ -1006,6 +1006,77 @@ class KeyboardEngineTest {
         assertEquals(listOf(Text("C")), sink.emitted)
     }
 
+    @Test
+    fun `fn then a number sends the f key and clears fn`() {
+        tap("Fn")
+        tap("1")
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_F1, 0)), sink.emitted)
+        assertEquals(0, engine.modifierMask)
+    }
+
+    @Test
+    fun `a locked fn keeps sending f keys`() {
+        tap("Fn")
+        tap("Fn")
+        tap("1")
+        tap("2")
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_F1, 0), Key(KeyEvent.KEYCODE_F2, 0)), sink.emitted)
+    }
+
+    @Test
+    fun `holding fn while pressing up sends page up`() {
+        down("Fn", pointer = 0)
+        tap("↑", pointer = 1)
+        up("Fn", pointer = 0)
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_PAGE_UP, 0)), sink.emitted)
+        assertEquals(0, engine.modifierMask)
+    }
+
+    @Test
+    fun `ctrl and fn together send ctrl with the f key`() {
+        tap("Ctrl")
+        tap("Fn")
+        tap("5")
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_F5, ctrl)), sink.emitted)
+    }
+
+    @Test
+    fun `fn then a key without an fn variant types the key`() {
+        tap("Fn")
+        tap("c")
+        assertEquals(listOf(Text("c")), sink.emitted)
+        assertEquals(0, engine.modifierMask)
+    }
+
+    @Test
+    fun `fn and an arrow repeat the fn variant`() {
+        tap("Fn")
+        down("↓", pointer = 0)
+        tick(400L)
+        tick(450L)
+        up("↓", pointer = 0)
+        assertEquals(
+            listOf(Key(KeyEvent.KEYCODE_PAGE_DOWN, 0), Key(KeyEvent.KEYCODE_PAGE_DOWN, 0)),
+            sink.emitted,
+        )
+    }
+
+    @Test
+    fun `letting go of fn before the key still sends the fn variant`() {
+        down("Fn", pointer = 0)
+        down("1", pointer = 1)
+        up("Fn", pointer = 0)
+        up("1", pointer = 1)
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_F1, 0)), sink.emitted)
+    }
+
+    @Test
+    fun `fn on the number row does not open the long-press popup`() {
+        tap("Fn")
+        down("1", pointer = 0)
+        assertEquals(KeyboardEngine.NO_DEADLINE, engine.nextDeadline)
+    }
+
     private fun swipeSpace(by: Float) {
         val (x, y) = centre("")
         engine.onPointer(0, x, y, PointerAction.DOWN, now, sink)

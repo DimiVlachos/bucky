@@ -83,7 +83,7 @@ private fun userKey(token: String): KeyDef? {
     ModifierKind.entries
         .firstOrNull { it.name == name }
         ?.let {
-            return if (it == ModifierKind.FN) null else KeyDef.Modifier(it)
+            return KeyDef.Modifier(it)
         }
     if (graphemeCount(token) != 1) return null
     val upper = token.uppercase()

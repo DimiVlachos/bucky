@@ -216,8 +216,11 @@ class ExtraRowsTest {
     }
 
     @Test
-    fun `the fn modifier is skipped`() {
-        assertEquals(listOf(KeyDef.Special(KeyCode.ESC)), userRow("FN", "ESC").map { it.def })
+    fun `the fn modifier can go in the row`() {
+        assertEquals(
+            listOf(KeyDef.Modifier(ModifierKind.FN), KeyDef.Special(KeyCode.ESC)),
+            userRow("FN", "ESC").map { it.def },
+        )
     }
 
     @Test
@@ -239,8 +242,8 @@ class ExtraRowsTest {
     @Test
     fun `parsing reports words that are not keys`() {
         val parsed = parseExtraRow(listOf("git", "ESC", "status", "FN"))
-        assertEquals(listOf("Esc"), parsed.keys.map { it.label })
-        assertEquals(listOf("git", "status", "FN"), parsed.unknown)
+        assertEquals(listOf("Esc", "Fn"), parsed.keys.map { it.label })
+        assertEquals(listOf("git", "status"), parsed.unknown)
     }
 
     @Test

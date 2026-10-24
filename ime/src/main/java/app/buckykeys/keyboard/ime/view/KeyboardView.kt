@@ -110,6 +110,10 @@ public class KeyboardView(
     private var labelSmall = BooleanArray(0)
     private var modifierBits = IntArray(0)
     private var hintLabels = emptyArray<String>()
+    private var fnLabels = emptyArray<String>()
+    private var fnSmall = BooleanArray(0)
+    private var fnSize = FloatArray(0)
+    private var fnY = FloatArray(0)
     private var hintX = FloatArray(0)
     private var hintY = FloatArray(0)
     private var spaceKey = NO_SPACE_KEY
@@ -186,6 +190,10 @@ public class KeyboardView(
         spaceKey = NO_SPACE_KEY
         val rects = geometry.rects
         hintLabels = Array(count) { hintOf(geometry.spec(it).def) }
+        fnLabels = Array(count) { geometry.spec(it).fn?.let(DefaultLabels::of).orEmpty() }
+        fnSmall = BooleanArray(count) { isSmall(fnLabels[it]) }
+        fnSize = FloatArray(count)
+        fnY = FloatArray(count)
         hintX = FloatArray(count) { rects[it * 4 + 2] - gapPx - 2 * labelPaddingPx }
         hintY =
             FloatArray(count) { rects[it * 4 + 1] + gapPx + labelPaddingPx - hintPaint.ascent() }
@@ -215,8 +223,25 @@ public class KeyboardView(
                 (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f - (paint.ascent() + paint.descent()) / 2f
             modifierBits[i] = if (def is KeyDef.Modifier) 1 shl def.kind.ordinal else 0
             if (engine.languageSwipe && def is KeyDef.Char && def.primary == " ") spaceKey = i
+            if (fnLabels[i].isNotEmpty()) buildFnLabel(i, rects)
         }
         if (spaceKey != NO_SPACE_KEY) buildSpaceLabel(rects)
+    }
+
+    private fun buildFnLabel(i: Int, rects: FloatArray) {
+        val paint = if (fnSmall[i]) smallLabelPaint else labelPaint
+        fnSize[i] =
+            fitLabel(
+                paint,
+                if (fnSmall[i]) smallLabelSizePx else labelSizePx,
+                fnLabels[i],
+                fnLabels[i],
+                rects[i * 4 + 2] - rects[i * 4],
+                labelMaxSizePx,
+            )
+        paint.textSize = fnSize[i]
+        fnY[i] =
+            (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f - (paint.ascent() + paint.descent()) / 2f
     }
 
     private fun hintOf(def: KeyDef): String {
@@ -298,6 +323,7 @@ public class KeyboardView(
         val locked = engine.lockedMask
         val shifted = mask and (1 shl ModifierKind.SHIFT.ordinal) != 0
         val deadShifted = engine.deadKeyShifted
+        val fnActive = mask and (1 shl ModifierKind.FN.ordinal) != 0
         for (i in 0 until geometry.keyCount) {
             val fill =
                 when {
@@ -316,23 +342,7 @@ public class KeyboardView(
                 cornerPx,
                 fill,
             )
-            if (i == spaceKey) {
-                spaceLabelPaint.textSize = spaceLabelSize
-                canvas.drawText(layout.language, labelX[i], spaceLabelY, spaceLabelPaint)
-                continue
-            }
-            val spec = geometry.spec(i)
-            val label =
-                when (val def = spec.def) {
-                    is KeyDef.Char -> if (shifted) def.shifted else spec.label
-                    is KeyDef.Dead -> if (deadShifted) def.shifted else spec.label
-                    else -> spec.label
-                }
-            val paint = if (labelSmall[i]) smallLabelPaint else labelPaint
-            paint.textSize = labelSize[i]
-            canvas.drawText(label, labelX[i], labelY[i], paint)
-            if (hintLabels[i].isNotEmpty())
-                canvas.drawText(hintLabels[i], hintX[i], hintY[i], hintPaint)
+            drawLabel(canvas, i, shifted, deadShifted, fnActive)
             if (modifierBits[i] and locked != 0) drawLockBar(canvas, i)
         }
         drawPreview(canvas, shifted)
@@ -343,6 +353,38 @@ public class KeyboardView(
             pendingDownTime = NO_PENDING
             post(logLatency)
         }
+    }
+
+    private fun drawLabel(
+        canvas: Canvas,
+        i: Int,
+        shifted: Boolean,
+        deadShifted: Boolean,
+        fnActive: Boolean,
+    ) {
+        if (fnActive && fnLabels[i].isNotEmpty()) {
+            val paint = if (fnSmall[i]) smallLabelPaint else labelPaint
+            paint.textSize = fnSize[i]
+            canvas.drawText(fnLabels[i], labelX[i], fnY[i], paint)
+            return
+        }
+        if (i == spaceKey) {
+            spaceLabelPaint.textSize = spaceLabelSize
+            canvas.drawText(layout.language, labelX[i], spaceLabelY, spaceLabelPaint)
+            return
+        }
+        val spec = geometry.spec(i)
+        val label =
+            when (val def = spec.def) {
+                is KeyDef.Char -> if (shifted) def.shifted else spec.label
+                is KeyDef.Dead -> if (deadShifted) def.shifted else spec.label
+                else -> spec.label
+            }
+        val paint = if (labelSmall[i]) smallLabelPaint else labelPaint
+        paint.textSize = labelSize[i]
+        canvas.drawText(label, labelX[i], labelY[i], paint)
+        if (hintLabels[i].isNotEmpty())
+            canvas.drawText(hintLabels[i], hintX[i], hintY[i], hintPaint)
     }
 
     private fun drawLockBar(canvas: Canvas, key: Int) {
