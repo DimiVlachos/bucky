@@ -47,6 +47,8 @@ public data class KeyboardSettings(
         public val ROW_HEIGHT_RANGE: IntRange = 36..64
         public val LANDSCAPE_ROW_HEIGHT_RANGE: IntRange = 26..56
         public const val MAX_EXTRA_ROW_WORDS: Int = 64
+        public const val TERMUX_DEFAULT_EXTRA_ROW: String =
+            "ESC / - HOME UP END PGUP TAB CTRL ALT LEFT DOWN RIGHT PGDN"
         private val WHITESPACE = Regex("\\s+")
 
         public fun defaults(systemLanguage: String): KeyboardSettings =
