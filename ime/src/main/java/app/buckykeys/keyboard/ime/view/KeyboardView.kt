@@ -212,6 +212,11 @@ public class KeyboardView(
         invalidate()
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        ViewCompat.requestApplyInsets(this)
+    }
+
     override fun onDetachedFromWindow() {
         removeCallbacks(timerTick)
         removeCallbacks(nextLanguage)
