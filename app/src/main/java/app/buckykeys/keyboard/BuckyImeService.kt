@@ -4,12 +4,12 @@ import android.content.res.Configuration
 import android.inputmethodservice.InputMethodService
 import android.inputmethodservice.InputMethodService.Insets
 import android.os.Build
-import android.text.InputType
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import app.buckykeys.keyboard.billing.domain.repository.BillingRepository
 import app.buckykeys.keyboard.ime.dispatch.InputDispatcher
 import app.buckykeys.keyboard.ime.geometry.cappedRowHeightPx
+import app.buckykeys.keyboard.ime.geometry.compactRowHeightPx
 import app.buckykeys.keyboard.ime.layout.BuiltInLayouts
 import app.buckykeys.keyboard.ime.layout.FallbackLayout
 import app.buckykeys.keyboard.ime.layout.Layout
@@ -21,7 +21,7 @@ import app.buckykeys.keyboard.ime.view.KeyboardView
 import app.buckykeys.keyboard.ime.view.LanguageChangeListener
 import app.buckykeys.keyboard.ime.view.isPasswordInput
 import app.buckykeys.keyboard.profile.Profile
-import app.buckykeys.keyboard.profile.TERMINAL_PACKAGES
+import app.buckykeys.keyboard.profile.fieldFlags
 import app.buckykeys.keyboard.profile.profileFor
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
 import app.buckykeys.keyboard.settings.keyboard.domain.repository.KeyboardSettingsRepository
@@ -74,6 +74,8 @@ class BuckyImeService : InputMethodService() {
 
     private var forcedFull = false
 
+    private var autoCapitalizeField = false
+
     private val layouts = mutableMapOf<String, Layout>()
 
     private val dispatcher = InputDispatcher { currentInputConnection }
@@ -86,6 +88,7 @@ class BuckyImeService : InputMethodService() {
             BuiltInLayouts.FULL_LAYOUT -> {
                 forcedFull = true
                 applyProfile(Profile.FULL)
+                configureField(currentInputEditorInfo)
             }
         }
     }
@@ -107,7 +110,7 @@ class BuckyImeService : InputMethodService() {
                     preload(latest)
                     settings = latest
                     languageIndex = languageIndex.coerceIn(0, maxOf(0, latest.languages.lastIndex))
-                    refreshView()
+                    if (isInputViewShown) startField(currentInputEditorInfo) else refreshView()
                 }
         }
     }
@@ -123,7 +126,7 @@ class BuckyImeService : InputMethodService() {
                 sink = dispatcher,
                 latencyLogging = BuildConfig.DEBUG,
                 rowHeightPx =
-                    if (compact) compactRowHeightPx()
+                    if (compact) compactRowHeightPx(rowHeightPx(fullRowCount()))
                     else rowHeightPx(languages.maxOf { it.rows.size }),
                 haptics = settings.haptics,
                 labelScale = settings.labelScalePercent / PERCENT,
@@ -142,6 +145,10 @@ class BuckyImeService : InputMethodService() {
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
+        startField(info)
+    }
+
+    private fun startField(info: EditorInfo?) {
         val packageName = info?.packageName
         if (packageName != lastPackage) {
             lastPackage = packageName
@@ -201,23 +208,17 @@ class BuckyImeService : InputMethodService() {
 
     private fun applyProfile(next: Profile) {
         profile = next
-        if (keyboardView == null || viewProfile == profile) {
-            keyboardView?.resetState()
-            return
-        }
-        rebuildView()
+        refreshView()
     }
 
     private fun configureField(info: EditorInfo?) {
         val inputType = info?.inputType ?: 0
-        dispatcher.rawEnter = info?.packageName in TERMINAL_PACKAGES
+        val flags = fieldFlags(profile, info?.packageName, inputType, settings)
+        dispatcher.rawEnter = flags.rawEnter
         dispatcher.imeOptions = info?.imeOptions ?: 0
         dispatcher.inputType = inputType
-        dispatcher.doubleSpacePeriod =
-            profile == Profile.COMPACT &&
-                settings.doubleSpacePeriod &&
-                !isPasswordInput(inputType) &&
-                inputType and InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS == 0
+        dispatcher.doubleSpacePeriod = flags.doubleSpacePeriod
+        autoCapitalizeField = flags.autoCapitalize
         keyboardView?.previewEnabled = previewAllowed(info)
         updateAutoShift()
     }
@@ -226,10 +227,7 @@ class BuckyImeService : InputMethodService() {
         val view = keyboardView ?: return
         val inputType = currentInputEditorInfo?.inputType ?: 0
         val on =
-            profile == Profile.COMPACT &&
-                settings.autoCapitalize &&
-                inputType != 0 &&
-                (currentInputConnection?.getCursorCapsMode(inputType) ?: 0) != 0
+            autoCapitalizeField && (currentInputConnection?.getCursorCapsMode(inputType) ?: 0) != 0
         view.setAutoShift(on)
     }
 
@@ -311,13 +309,10 @@ class BuckyImeService : InputMethodService() {
             isLandscape(),
         )
 
-    private fun compactRowHeightPx(): Int =
-        cappedRowHeightPx(
-            chosenRowHeightPx() * FULL_MAIN_ROWS / COMPACT_ROWS,
-            COMPACT_ROWS,
-            resources.displayMetrics.heightPixels,
-            isLandscape(),
-        )
+    private fun fullRowCount(): Int =
+        FULL_MAIN_ROWS +
+            (if (settings.fKeyRow) 1 else 0) +
+            (if (settings.extraRow.isNotEmpty()) 1 else 0)
 
     private fun isLandscape(): Boolean =
         resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -328,6 +323,5 @@ class BuckyImeService : InputMethodService() {
     private companion object {
         const val PERCENT = 100f
         const val FULL_MAIN_ROWS = 5
-        const val COMPACT_ROWS = 4
     }
 }

@@ -89,4 +89,11 @@ class TypingRulesTest {
         assertFalse(shouldInsertPeriod("", 300))
         assertFalse(shouldInsertPeriod(" ", 300))
     }
+
+    @Test
+    fun `the period window is open only within a second`() {
+        assertTrue(periodWindowOpen(300))
+        assertFalse(periodWindowOpen(1500))
+        assertFalse(periodWindowOpen(Long.MAX_VALUE))
+    }
 }
