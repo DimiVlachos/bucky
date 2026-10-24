@@ -1077,6 +1077,69 @@ class KeyboardEngineTest {
         assertEquals(KeyboardEngine.NO_DEADLINE, engine.nextDeadline)
     }
 
+    @Test
+    fun `holding the keyboard key requests the full layout`() {
+        useRow(keyboardKey, char("c"))
+        down("⌨", pointer = 0)
+        tick(LONG_PRESS_MS)
+        up("⌨", pointer = 0)
+        assertEquals(BuiltInLayouts.FULL_LAYOUT, engine.takeSwitchRequest())
+        assertEquals(null, engine.takeSwitchRequest())
+    }
+
+    @Test
+    fun `tapping the keyboard key requests the other keyboard`() {
+        useRow(keyboardKey, char("c"))
+        tap("⌨")
+        assertEquals(BuiltInLayouts.OTHER_KEYBOARD, engine.takeSwitchRequest())
+    }
+
+    @Test
+    fun `a key with then types and then requests the switch`() {
+        useRow(
+            KeySpec(KeyDef.Char(" ", " "), "space", then = BuiltInLayouts.PAGE_LETTERS),
+            char("c"),
+        )
+        tap("space")
+        assertEquals(listOf(Text(" ")), sink.emitted)
+        assertEquals(BuiltInLayouts.PAGE_LETTERS, engine.takeSwitchRequest())
+    }
+
+    @Test
+    fun `auto shift capitalises the next letter and clears`() {
+        engine.setAutoShift(true)
+        tap("c")
+        assertEquals(listOf(Text("C")), sink.emitted)
+        assertFalse(engine.autoShift)
+    }
+
+    @Test
+    fun `tapping shift while auto shift is on turns it off`() {
+        engine.setAutoShift(true)
+        tap("Shift")
+        tap("c")
+        assertEquals(listOf(Text("c")), sink.emitted)
+        assertEquals(0, engine.lockedMask)
+    }
+
+    @Test
+    fun `auto shift does not survive reset`() {
+        engine.setAutoShift(true)
+        engine.reset()
+        assertFalse(engine.autoShift)
+        tap("c")
+        assertEquals(listOf(Text("c")), sink.emitted)
+    }
+
+    @Test
+    fun `auto shift shows as an active shift`() {
+        engine.setAutoShift(true)
+        assertTrue(engine.modifierMask and (1 shl ModifierKind.SHIFT.ordinal) != 0)
+    }
+
+    private val keyboardKey =
+        KeySpec(KeyDef.LayoutSwitch(BuiltInLayouts.OTHER_KEYBOARD, BuiltInLayouts.FULL_LAYOUT), "⌨")
+
     private fun swipeSpace(by: Float) {
         val (x, y) = centre("")
         engine.onPointer(0, x, y, PointerAction.DOWN, now, sink)
