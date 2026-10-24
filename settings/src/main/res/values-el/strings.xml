@@ -25,4 +25,7 @@
     <string name="onboarding_status_enabled">✓ Το Bucky είναι ενεργό. Επιλέξτε το τώρα ως πληκτρολόγιο.</string>
     <string name="settings_version">Έκδοση %1$s</string>
     <string name="settings_source">Ο κώδικας στο GitHub</string>
+    <string name="settings_extra_row_preview">Πλήκτρα: %1$s</string>
+    <string name="settings_extra_row_unknown">Δεν είναι πλήκτρο: %1$s</string>
+    <string name="settings_extra_row_limit">Χρησιμοποιούνται μόνο τα πρώτα %1$d πλήκτρα.</string>
 </resources>

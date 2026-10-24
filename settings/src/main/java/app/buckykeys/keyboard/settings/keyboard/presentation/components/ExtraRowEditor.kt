@@ -25,53 +25,88 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import app.buckykeys.keyboard.settings.R
 import app.buckykeys.keyboard.settings.core.presentation.components.keepVisibleWhenFocused
 import app.buckykeys.keyboard.settings.core.presentation.theme.BuckyTheme
+import app.buckykeys.keyboard.settings.keyboard.domain.model.ExtraRowPreview
 import app.buckykeys.keyboard.settings.keyboard.presentation.state.ExtraRowDraftState
 
 @Composable
-internal fun ExtraRowEditor(saved: List<String>, draft: ExtraRowDraftState, onSave: () -> Unit) {
+internal fun ExtraRowEditor(
+    saved: List<String>,
+    draft: ExtraRowDraftState,
+    preview: ExtraRowPreview,
+    onSave: () -> Unit,
+) {
     val text = draft.display(saved)
-    Column(verticalArrangement = Arrangement.spacedBy(BuckyTheme.spacing.small)) {
-        OutlinedTextField(
-            value = text,
-            onValueChange = draft::edit,
-            label = { Text(stringResource(R.string.settings_extra_row)) },
-            singleLine = true,
-            trailingIcon = {
-                AnimatedVisibility(
-                    visible = text.isNotBlank(),
-                    enter =
-                        fadeIn(tween(ENTER_MS)) +
-                            scaleIn(tween(ENTER_MS), initialScale = HIDDEN_SCALE),
-                    exit =
-                        fadeOut(tween(EXIT_MS)) +
-                            scaleOut(tween(EXIT_MS), targetScale = HIDDEN_SCALE),
-                ) {
-                    IconButton(onClick = onSave) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_check),
-                            contentDescription = stringResource(R.string.settings_save),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
+    val invalid = text.isNotBlank() && !preview.valid
+    OutlinedTextField(
+        value = text,
+        onValueChange = draft::edit,
+        label = { Text(stringResource(R.string.settings_extra_row)) },
+        singleLine = true,
+        isError = invalid,
+        trailingIcon = {
+            AnimatedVisibility(
+                visible = text.isNotBlank() && preview.valid,
+                enter =
+                    fadeIn(tween(ENTER_MS)) + scaleIn(tween(ENTER_MS), initialScale = HIDDEN_SCALE),
+                exit =
+                    fadeOut(tween(EXIT_MS)) + scaleOut(tween(EXIT_MS), targetScale = HIDDEN_SCALE),
+            ) {
+                IconButton(onClick = onSave) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_check),
+                        contentDescription = stringResource(R.string.settings_save),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
                 }
-            },
-            keyboardOptions =
-                KeyboardOptions(
-                    capitalization = KeyboardCapitalization.None,
-                    autoCorrectEnabled = false,
-                    imeAction = ImeAction.Done,
-                ),
-            keyboardActions = KeyboardActions(onDone = { onSave() }),
-            modifier = Modifier.fillMaxWidth().keepVisibleWhenFocused(),
-        )
-        Text(
-            text = stringResource(R.string.settings_extra_row_hint),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+            }
+        },
+        supportingText = { ExtraRowSupportingText(text = text, preview = preview) },
+        keyboardOptions =
+            KeyboardOptions(
+                capitalization = KeyboardCapitalization.None,
+                autoCorrectEnabled = false,
+                imeAction = ImeAction.Done,
+            ),
+        keyboardActions = KeyboardActions(onDone = { onSave() }),
+        modifier = Modifier.fillMaxWidth().keepVisibleWhenFocused(),
+    )
+}
+
+@Composable
+private fun ExtraRowSupportingText(text: String, preview: ExtraRowPreview) {
+    Column(verticalArrangement = Arrangement.spacedBy(BuckyTheme.spacing.extraSmall)) {
+        when {
+            text.isBlank() -> Text(stringResource(R.string.settings_extra_row_hint))
+            preview.labels.isNotEmpty() ->
+                Text(
+                    text =
+                        stringResource(
+                            R.string.settings_extra_row_preview,
+                            preview.labels.joinToString(" · "),
+                        ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+        }
+        if (preview.unknown.isNotEmpty()) {
+            Text(
+                text =
+                    stringResource(
+                        R.string.settings_extra_row_unknown,
+                        preview.unknown.joinToString(", "),
+                    ),
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+        if (preview.overLimit) {
+            Text(
+                text = stringResource(R.string.settings_extra_row_limit, MAX_KEYS),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
 private const val ENTER_MS = 150
 private const val EXIT_MS = 120
 private const val HIDDEN_SCALE = 0.6f
+private const val MAX_KEYS = 15
