@@ -18,6 +18,9 @@ public class KeyboardEngine(
     private var timerRepeats = false
     private var popupPointer = NO_POINTER
     private var previewPointer = NO_POINTER
+    private var deadMark: String? = null
+    private var deadKey = NO_DEAD_KEY
+    private var switchRequest: String? = null
 
     private var oneShotMask = 0
     private var heldMask = 0
@@ -36,6 +39,15 @@ public class KeyboardEngine(
 
     public val previewKey: Int
         get() = if (previewPointer == NO_POINTER) NO_PREVIEW else pointerKeys[previewPointer]
+
+    public val pendingDeadKey: Int
+        get() = deadKey
+
+    public fun takeSwitchRequest(): String? {
+        val request = switchRequest
+        switchRequest = null
+        return request
+    }
 
     public fun onPointer(
         pointerId: Int,
@@ -77,6 +89,8 @@ public class KeyboardEngine(
         timerPointer = NO_POINTER
         previewPointer = NO_POINTER
         closePopup()
+        clearDead()
+        switchRequest = null
         oneShotMask = 0
         lockedMask = 0
         heldMask = 0
@@ -195,6 +209,7 @@ public class KeyboardEngine(
                     else -> false
                 }
             is KeyDef.Char -> def.primary == " "
+            is KeyDef.Dead,
             is KeyDef.Modifier,
             is KeyDef.LayoutSwitch -> false
         }
@@ -215,7 +230,11 @@ public class KeyboardEngine(
     private fun release(key: Int, chorded: Boolean, sink: InputSink) {
         when (val def = geometry.spec(key).def) {
             is KeyDef.Modifier -> if (!chorded) tapModifier(bit(def.kind))
-            is KeyDef.LayoutSwitch -> Unit
+            is KeyDef.LayoutSwitch -> switchRequest = def.targetId
+            is KeyDef.Dead -> {
+                pressDead(key, def, sink)
+                afterKey()
+            }
             is KeyDef.Char,
             is KeyDef.Special -> {
                 emit(def, sink)
@@ -242,22 +261,64 @@ public class KeyboardEngine(
 
     private fun emit(def: KeyDef, sink: InputSink) {
         when (def) {
-            is KeyDef.Special ->
-                sink.sendKey(KeyCodes.forSpecial(def.code), metaState(forceShift = false))
+            is KeyDef.Special -> emitSpecial(def, sink)
             is KeyDef.Char -> emitChar(def, sink, forceShift = false)
+            is KeyDef.Dead,
             is KeyDef.Modifier,
             is KeyDef.LayoutSwitch -> Unit
         }
     }
 
+    private fun emitSpecial(def: KeyDef.Special, sink: InputSink) {
+        if (deadMark != null) {
+            clearDead()
+            if (def.code == KeyCode.BACKSPACE) return
+        }
+        sink.sendKey(KeyCodes.forSpecial(def.code), metaState(forceShift = false))
+    }
+
+    private fun pressDead(key: Int, def: KeyDef.Dead, sink: InputSink) {
+        val latin = def.latin
+        if (latin != null && (isActive(ModifierKind.CTRL) || isActive(ModifierKind.ALT))) {
+            sink.sendKey(KeyCodes.forChar(latin[0]), metaState(forceShift = false))
+            return
+        }
+        val mark = if (isActive(ModifierKind.SHIFT)) def.shifted else def.primary
+        val pending = deadMark
+        if (pending != null) {
+            sink.commitText(pending)
+            clearDead()
+            if (pending == mark) return
+        }
+        deadMark = mark
+        deadKey = key
+    }
+
+    private fun clearDead() {
+        deadMark = null
+        deadKey = NO_DEAD_KEY
+    }
+
     private fun emitChar(def: KeyDef.Char, sink: InputSink, forceShift: Boolean) {
         val shifted = forceShift || isActive(ModifierKind.SHIFT)
         if (isActive(ModifierKind.CTRL) || isActive(ModifierKind.ALT)) {
-            val keyCode = KeyCodes.forChar(def.primary[0])
+            val keyCode = KeyCodes.forChar((def.latin ?: def.primary)[0])
             if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
+                clearDead()
                 sink.sendKey(keyCode, metaState(forceShift))
                 return
             }
+        }
+        val pending = deadMark
+        if (pending != null) {
+            clearDead()
+            val composed = (if (shifted) def.composedShifted else def.composed)[pending]
+            if (composed != null) {
+                sink.commitText(composed)
+                return
+            }
+            sink.commitText(pending)
+            if (def.primary == " ") return
         }
         sink.commitText(if (shifted) def.shifted else def.primary)
     }
@@ -280,6 +341,7 @@ public class KeyboardEngine(
     public companion object {
         public const val NO_DEADLINE: Long = -1L
         public const val NO_PREVIEW: Int = -1
+        public const val NO_DEAD_KEY: Int = -1
         private const val MAX_POINTERS = 10
         private const val NO_KEY = -1
         private const val NO_POINTER = -1

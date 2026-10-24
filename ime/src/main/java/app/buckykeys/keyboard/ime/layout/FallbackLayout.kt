@@ -82,7 +82,8 @@ public object FallbackLayout {
                     Row(
                         listOf(
                             modifier(ModifierKind.ALT, "Alt", 1.5f),
-                            KeySpec(KeyDef.Char(" ", " "), "", 6.75f),
+                            KeySpec(KeyDef.LayoutSwitch(BuiltInLayouts.NEXT_LANGUAGE), "🌐", 1.25f),
+                            KeySpec(KeyDef.Char(" ", " "), "", 5.5f),
                             special(KeyCode.HOME, "Home", 1.5f),
                             special(KeyCode.END, "End", 1.5f),
                             special(KeyCode.LEFT, "←", 1.25f),

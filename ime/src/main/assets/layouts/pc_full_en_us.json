@@ -76,7 +76,8 @@
     {
       "keys": [
         { "key": "ALT", "width": 1.5 },
-        { "chars": [" ", " "], "width": 6.75 },
+        { "switchTo": "@language", "label": "🌐", "width": 1.25 },
+        { "chars": [" ", " "], "width": 5.5 },
         { "key": "HOME", "width": 1.5 },
         { "key": "END", "width": 1.5 },
         { "key": "LEFT", "width": 1.25 },
