@@ -5,6 +5,7 @@ internal object DefaultLabels {
     fun of(def: KeyDef): String =
         when (def) {
             is KeyDef.Char -> if (def.primary.isBlank()) "" else def.primary
+            is KeyDef.Dead -> def.primary
             is KeyDef.Special -> special(def.code)
             is KeyDef.Modifier -> modifier(def.kind)
             is KeyDef.LayoutSwitch -> def.targetId
