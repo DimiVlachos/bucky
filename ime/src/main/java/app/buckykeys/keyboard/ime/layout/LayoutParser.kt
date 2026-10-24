@@ -12,8 +12,9 @@ public object LayoutParser {
 
     private val layoutFields = setOf("id", "name", "rows")
     private val rowFields = setOf("keys")
-    private val keyFields = setOf("chars", "key", "switchTo", "label", "width", "longPress")
-    private val keyKinds = listOf("chars", "key", "switchTo")
+    private val keyFields =
+        setOf("chars", "dead", "key", "switchTo", "label", "width", "longPress", "latin")
+    private val keyKinds = listOf("chars", "dead", "key", "switchTo")
 
     public fun parse(json: String): Result<Layout> =
         try {
@@ -30,9 +31,11 @@ public object LayoutParser {
             id = obj.string("id", path),
             name = obj.string("name", path),
             rows =
-                obj.nonEmptyArray("rows", path).mapIndexed { index, row ->
-                    row(row, "$path.rows[$index]")
-                },
+                withCompositions(
+                    obj.nonEmptyArray("rows", path).mapIndexed { index, row ->
+                        row(row, "$path.rows[$index]")
+                    },
+                ),
         )
     }
 
@@ -51,11 +54,15 @@ public object LayoutParser {
         val def =
             when (kind) {
                 "chars" -> chars(obj, path)
+                "dead" -> dead(obj, path)
                 "key" -> named(obj.string("key", path), "$path.key")
                 "switchTo" -> KeyDef.LayoutSwitch(obj.string("switchTo", path))
-                else -> fail(path, "needs exactly one of chars, key or switchTo")
+                else -> fail(path, "needs exactly one of chars, dead, key or switchTo")
             }
         if (def !is KeyDef.Char && "longPress" in obj) fail("$path.longPress", "needs chars")
+        if (def !is KeyDef.Char && def !is KeyDef.Dead && "latin" in obj) {
+            fail("$path.latin", "needs chars or dead")
+        }
         val label = if ("label" in obj) obj.string("label", path) else DefaultLabels.of(def)
         val width = obj["width"]?.let { width(it, "$path.width") } ?: 1f
         return KeySpec(def, label, width)
@@ -66,8 +73,53 @@ public object LayoutParser {
         if (chars.size !in 1..2) fail("$path.chars", "needs one or two strings")
         val alternates =
             if ("longPress" in obj) obj.strings("longPress", path).map(::alternate) else emptyList()
-        return KeyDef.Char(chars[0], chars.getOrElse(1) { chars[0].uppercase() }, alternates)
+        return KeyDef.Char(
+            chars[0],
+            chars.getOrElse(1) { chars[0].uppercase() },
+            alternates,
+            latin(obj, path),
+        )
     }
+
+    private fun dead(obj: JsonObject, path: String): KeyDef.Dead {
+        val marks = obj.strings("dead", path)
+        if (marks.size !in 1..2) fail("$path.dead", "needs one or two strings")
+        return KeyDef.Dead(marks[0], marks.getOrElse(1) { marks[0] }, latin(obj, path))
+    }
+
+    private fun latin(obj: JsonObject, path: String): String? {
+        if ("latin" !in obj) return null
+        val latin = obj.string("latin", path)
+        if (latin.length != 1) fail("$path.latin", "needs exactly one character")
+        return latin
+    }
+
+    private fun withCompositions(rows: List<Row>): List<Row> {
+        val marks =
+            rows
+                .flatMap { row -> row.keys.map { it.def } }
+                .filterIsInstance<KeyDef.Dead>()
+                .flatMap { listOf(it.primary, it.shifted) }
+                .distinct()
+        if (marks.isEmpty()) return rows
+        return rows.map { row ->
+            Row(
+                row.keys.map { spec ->
+                    val def = spec.def as? KeyDef.Char ?: return@map spec
+                    spec.copy(
+                        def =
+                            def.copy(
+                                composed = compositions(def.primary, marks),
+                                composedShifted = compositions(def.shifted, marks),
+                            ),
+                    )
+                },
+            )
+        }
+    }
+
+    private fun compositions(base: String, marks: List<String>): Map<String, String> =
+        marks.mapNotNull { mark -> DeadKeys.compose(base, mark)?.let { mark to it } }.toMap()
 
     private fun alternate(name: String): KeyDef =
         KeyCode.entries.firstOrNull { it.name == name }?.let { KeyDef.Special(it) }

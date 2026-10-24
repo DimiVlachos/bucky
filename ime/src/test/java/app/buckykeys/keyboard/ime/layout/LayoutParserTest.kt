@@ -103,6 +103,61 @@ class LayoutParserTest {
     }
 
     @Test
+    fun `latin gives a character key the letter that ctrl uses`() {
+        assertEquals(
+            KeyDef.Char("ψ", "Ψ", latin = "c"),
+            parseKeys("""{ "chars": ["ψ"], "latin": "c" }""").single().def,
+        )
+    }
+
+    @Test
+    fun `latin is a single character`() {
+        assertEquals(
+            "$.rows[0].keys[0].latin",
+            failureOf(layoutWithKeys("""{ "chars": ["ψ"], "latin": "cc" }""")).path,
+        )
+    }
+
+    @Test
+    fun `a dead key holds its two marks and its latin key`() {
+        assertEquals(
+            KeySpec(KeyDef.Dead("΄", "¨", latin = ";"), "΄"),
+            parseKeys("""{ "dead": ["΄", "¨"], "latin": ";" }""").single(),
+        )
+    }
+
+    @Test
+    fun `a dead key needs one or two marks`() {
+        assertEquals("$.rows[0].keys[0].dead", failureOf(layoutWithKeys("""{ "dead": [] }""")).path)
+    }
+
+    @Test
+    fun `a layout with dead keys precomputes what each letter composes into`() {
+        val keys =
+            parseKeys(
+                """{ "dead": ["΄", "¨"] }""",
+                """{ "chars": ["α", "Α"] }""",
+                """{ "chars": ["ι", "Ι"] }""",
+                """{ "chars": ["ψ", "Ψ"] }""",
+            )
+        val alpha = keys[1].def as KeyDef.Char
+        val iota = keys[2].def as KeyDef.Char
+        val psi = keys[3].def as KeyDef.Char
+        assertEquals(mapOf("΄" to "ά"), alpha.composed)
+        assertEquals(mapOf("΄" to "Ά"), alpha.composedShifted)
+        assertEquals(mapOf("΄" to "ί", "¨" to "ϊ"), iota.composed)
+        assertEquals(emptyMap<String, String>(), psi.composed)
+    }
+
+    @Test
+    fun `a layout without dead keys composes nothing`() {
+        assertEquals(
+            emptyMap<String, String>(),
+            (parseKeys("""{ "chars": ["e"] }""").single().def as KeyDef.Char).composed,
+        )
+    }
+
+    @Test
     fun `malformed json fails at the root`() {
         assertEquals("$", failureOf("""{ "id": """).path)
     }

@@ -6,6 +6,7 @@ import app.buckykeys.keyboard.ime.engine.fake.FakeInputSink.Emitted.Key
 import app.buckykeys.keyboard.ime.engine.fake.FakeInputSink.Emitted.Text
 import app.buckykeys.keyboard.ime.geometry.KeyboardGeometry
 import app.buckykeys.keyboard.ime.layout.FallbackLayout
+import app.buckykeys.keyboard.ime.layout.KeyCode
 import app.buckykeys.keyboard.ime.layout.KeyDef
 import app.buckykeys.keyboard.ime.layout.KeySpec
 import app.buckykeys.keyboard.ime.layout.Layout
@@ -606,6 +607,150 @@ class KeyboardEngineTest {
         down("a", pointer = 0)
         engine.reset()
         assertEquals(KeyboardEngine.NO_PREVIEW, engine.previewKey)
+    }
+
+    @Test
+    fun `tonos then alpha types the accented alpha`() {
+        useGreek()
+        tap("΄")
+        tap("α")
+        assertEquals(listOf(Text("ά")), sink.emitted)
+    }
+
+    @Test
+    fun `shift then the tonos key gives dialytika for the next letter only`() {
+        useGreek()
+        tap("Shift")
+        tap("΄")
+        tap("ι")
+        assertEquals(listOf(Text("ϊ")), sink.emitted)
+    }
+
+    @Test
+    fun `shift after the tonos gives the accented capital`() {
+        useGreek()
+        tap("΄")
+        tap("Shift")
+        tap("α")
+        assertEquals(listOf(Text("Ά")), sink.emitted)
+    }
+
+    @Test
+    fun `a letter with no accented form types the mark and then the letter`() {
+        useGreek()
+        tap("΄")
+        tap("ψ")
+        assertEquals(listOf(Text("΄"), Text("ψ")), sink.emitted)
+    }
+
+    @Test
+    fun `the tonos key twice types the tonos once`() {
+        useGreek()
+        tap("΄")
+        tap("΄")
+        assertEquals(listOf(Text("΄")), sink.emitted)
+        assertEquals(KeyboardEngine.NO_DEAD_KEY, engine.pendingDeadKey)
+    }
+
+    @Test
+    fun `tonos then space types the tonos alone`() {
+        useGreek()
+        tap("΄")
+        tap("")
+        assertEquals(listOf(Text("΄")), sink.emitted)
+    }
+
+    @Test
+    fun `backspace cancels a pending tonos and sends nothing`() {
+        useGreek()
+        tap("΄")
+        tap("⌫")
+        tap("α")
+        assertEquals(listOf(Text("α")), sink.emitted)
+    }
+
+    @Test
+    fun `enter after a pending tonos clears it and still sends enter`() {
+        useGreek()
+        tap("΄")
+        tap("Enter")
+        tap("α")
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_ENTER, 0), Text("α")), sink.emitted)
+    }
+
+    @Test
+    fun `a pending dead key is reported for highlighting`() {
+        useGreek()
+        tap("΄")
+        assertEquals(indexOf("΄"), engine.pendingDeadKey)
+        tap("α")
+        assertEquals(KeyboardEngine.NO_DEAD_KEY, engine.pendingDeadKey)
+    }
+
+    @Test
+    fun `ctrl on a greek letter sends the latin letter at that position`() {
+        useGreek()
+        tap("Ctrl")
+        tap("ψ")
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_C, ctrl)), sink.emitted)
+    }
+
+    @Test
+    fun `ctrl on the tonos key sends its latin key and leaves nothing pending`() {
+        useGreek()
+        tap("Ctrl")
+        tap("΄")
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_SEMICOLON, ctrl)), sink.emitted)
+        assertEquals(KeyboardEngine.NO_DEAD_KEY, engine.pendingDeadKey)
+    }
+
+    @Test
+    fun `the language key requests a switch once`() {
+        useGreek()
+        tap("🌐")
+        assertEquals("@language", engine.takeSwitchRequest())
+        assertEquals(null, engine.takeSwitchRequest())
+        assertTrue(sink.emitted.isEmpty())
+    }
+
+    @Test
+    fun `reset clears a pending dead key`() {
+        useGreek()
+        tap("΄")
+        engine.reset()
+        tap("α")
+        assertEquals(listOf(Text("α")), sink.emitted)
+    }
+
+    private fun useGreek() {
+        useRow(
+            KeySpec(KeyDef.Dead("΄", "¨", latin = ";"), "΄"),
+            KeySpec(
+                KeyDef.Char(
+                    "α",
+                    "Α",
+                    composed = mapOf("΄" to "ά"),
+                    composedShifted = mapOf("΄" to "Ά"),
+                ),
+                "α",
+            ),
+            KeySpec(
+                KeyDef.Char(
+                    "ι",
+                    "Ι",
+                    composed = mapOf("΄" to "ί", "¨" to "ϊ"),
+                    composedShifted = mapOf("΄" to "Ί", "¨" to "Ϊ"),
+                ),
+                "ι",
+            ),
+            KeySpec(KeyDef.Char("ψ", "Ψ", latin = "c"), "ψ"),
+            KeySpec(KeyDef.Char(" ", " "), ""),
+            KeySpec(KeyDef.Special(KeyCode.BACKSPACE), "⌫"),
+            KeySpec(KeyDef.Special(KeyCode.ENTER), "Enter"),
+            KeySpec(KeyDef.Modifier(ModifierKind.SHIFT), "Shift"),
+            KeySpec(KeyDef.Modifier(ModifierKind.CTRL), "Ctrl"),
+            KeySpec(KeyDef.LayoutSwitch("@language"), "🌐"),
+        )
     }
 
     private val accented =

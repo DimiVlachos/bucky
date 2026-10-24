@@ -1,0 +1,89 @@
+{
+  "id": "pc_full_el",
+  "name": "PC Full (Ελληνικά)",
+  "rows": [
+    {
+      "keys": [
+        { "key": "ESC", "width": 1.25 },
+        { "chars": ["1", "!"], "longPress": ["F1"] },
+        { "chars": ["2", "@"], "longPress": ["F2"] },
+        { "chars": ["3", "#"], "longPress": ["F3"] },
+        { "chars": ["4", "$"], "longPress": ["F4"] },
+        { "chars": ["5", "%"], "longPress": ["F5"] },
+        { "chars": ["6", "^"], "longPress": ["F6"] },
+        { "chars": ["7", "&"], "longPress": ["F7"] },
+        { "chars": ["8", "*"], "longPress": ["F8"] },
+        { "chars": ["9", "("], "longPress": ["F9"] },
+        { "chars": ["0", ")"], "longPress": ["F10"] },
+        { "chars": ["-", "_"], "longPress": ["F11"] },
+        { "chars": ["=", "+"], "longPress": ["F12"] },
+        { "key": "BACKSPACE", "width": 1.75 }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "TAB", "width": 1.5 },
+        { "chars": [";", ":"], "latin": "q" },
+        { "chars": ["ς", "Σ"], "latin": "w" },
+        { "chars": ["ε"], "latin": "e", "longPress": ["έ"] },
+        { "chars": ["ρ"], "latin": "r" },
+        { "chars": ["τ"], "latin": "t" },
+        { "chars": ["υ"], "latin": "y", "longPress": ["ύ", "ϋ", "ΰ"] },
+        { "chars": ["θ"], "latin": "u" },
+        { "chars": ["ι"], "latin": "i", "longPress": ["ί", "ϊ", "ΐ"] },
+        { "chars": ["ο"], "latin": "o", "longPress": ["ό"] },
+        { "chars": ["π"], "latin": "p" },
+        { "chars": ["[", "{"] },
+        { "chars": ["]", "}"] },
+        { "chars": ["\\", "|"], "width": 1.5 }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "CTRL", "width": 1.75 },
+        { "chars": ["α"], "latin": "a", "longPress": ["ά"] },
+        { "chars": ["σ"], "latin": "s" },
+        { "chars": ["δ"], "latin": "d" },
+        { "chars": ["φ"], "latin": "f" },
+        { "chars": ["γ"], "latin": "g" },
+        { "chars": ["η"], "latin": "h", "longPress": ["ή"] },
+        { "chars": ["ξ"], "latin": "j" },
+        { "chars": ["κ"], "latin": "k" },
+        { "chars": ["λ"], "latin": "l" },
+        { "dead": ["΄", "¨"], "latin": ";" },
+        { "chars": ["'", "\""] },
+        { "key": "ENTER", "width": 2.25 }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "SHIFT", "width": 1.5 },
+        { "chars": ["ζ"], "latin": "z" },
+        { "chars": ["χ"], "latin": "x" },
+        { "chars": ["ψ"], "latin": "c" },
+        { "chars": ["ω"], "latin": "v", "longPress": ["ώ"] },
+        { "chars": ["β"], "latin": "b" },
+        { "chars": ["ν"], "latin": "n" },
+        { "chars": ["μ"], "latin": "m" },
+        { "chars": [",", "<"] },
+        { "chars": [".", ">"] },
+        { "chars": ["/", "?"] },
+        { "chars": ["`", "~"] },
+        { "key": "UP", "width": 1.25 },
+        { "key": "FORWARD_DEL", "width": 1.25 }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "ALT", "width": 1.5 },
+        { "switchTo": "@language", "label": "🌐", "width": 1.25 },
+        { "chars": [" ", " "], "width": 5.5 },
+        { "key": "HOME", "width": 1.5 },
+        { "key": "END", "width": 1.5 },
+        { "key": "LEFT", "width": 1.25 },
+        { "key": "DOWN", "width": 1.25 },
+        { "key": "RIGHT", "width": 1.25 }
+      ]
+    }
+  ]
+}
