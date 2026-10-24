@@ -1,6 +1,11 @@
 package app.buckykeys.keyboard.ime.layout
 
-public data class KeySpec(val def: KeyDef, val label: String, val width: Float = 1f)
+public data class KeySpec(
+    val def: KeyDef,
+    val label: String,
+    val width: Float = 1f,
+    val fn: KeyDef? = null,
+)
 
 public data class Row(val keys: List<KeySpec>)
 

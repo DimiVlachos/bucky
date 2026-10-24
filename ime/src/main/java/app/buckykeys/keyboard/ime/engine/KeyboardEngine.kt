@@ -18,6 +18,7 @@ public class KeyboardEngine(
     private val pointerKeys = IntArray(MAX_POINTERS) { NO_KEY }
     private val pointerConsumed = BooleanArray(MAX_POINTERS)
     private val pointerDownX = FloatArray(MAX_POINTERS)
+    private val pointerFn = BooleanArray(MAX_POINTERS)
     private var timerPointer = NO_POINTER
     private var timerAt = NO_DEADLINE
     private var timerRepeats = false
@@ -90,7 +91,7 @@ public class KeyboardEngine(
     public fun onTick(timeMs: Long, sink: InputSink) {
         if (timerPointer == NO_POINTER || timeMs < timerAt) return
         val pointerId = timerPointer
-        val def = geometry.spec(pointerKeys[pointerId]).def
+        val def = acting(pointerKeys[pointerId], pointerFn[pointerId])
         if (timerRepeats) {
             emit(def, sink)
             pointerConsumed[pointerId] = true
@@ -115,6 +116,7 @@ public class KeyboardEngine(
     private fun releaseAllPointers() {
         pointerKeys.fill(NO_KEY)
         pointerConsumed.fill(false)
+        pointerFn.fill(false)
         timerPointer = NO_POINTER
         previewPointer = NO_POINTER
         closePopup()
@@ -142,16 +144,19 @@ public class KeyboardEngine(
         pointerKeys[pointerId] = key
         pointerConsumed[pointerId] = false
         pointerDownX[pointerId] = x
+        pointerFn[pointerId] =
+            key != NO_KEY && geometry.spec(key).fn != null && isActive(ModifierKind.FN)
         if (def is KeyDef.Modifier) startHold(def.kind)
-        when (def) {
+        val acting = if (key == NO_KEY) null else acting(key, pointerFn[pointerId])
+        when (acting) {
             is KeyDef.Char -> previewPointer = pointerId
             is KeyDef.Modifier -> Unit
             else -> previewPointer = NO_POINTER
         }
         when {
-            def == null -> Unit
-            repeats(def) -> startTimer(pointerId, timeMs + REPEAT_DELAY_MS, repeats = true)
-            longPresses(def) -> startTimer(pointerId, timeMs + longPressMs, repeats = false)
+            acting == null -> Unit
+            repeats(acting) -> startTimer(pointerId, timeMs + REPEAT_DELAY_MS, repeats = true)
+            longPresses(acting) -> startTimer(pointerId, timeMs + longPressMs, repeats = false)
         }
     }
 
@@ -193,6 +198,7 @@ public class KeyboardEngine(
         endHold(pointerKeys[pointerId])
         pointerKeys[pointerId] = NO_KEY
         pointerConsumed[pointerId] = false
+        pointerFn[pointerId] = false
     }
 
     private fun lift(pointerId: Int, x: Float, y: Float, sink: InputSink) {
@@ -200,8 +206,10 @@ public class KeyboardEngine(
         if (pointerId == timerPointer) stopTimer()
         val key = pointerKeys[pointerId]
         val consumed = pointerConsumed[pointerId]
+        val usesFn = pointerFn[pointerId]
         pointerKeys[pointerId] = NO_KEY
         pointerConsumed[pointerId] = false
+        pointerFn[pointerId] = false
         if (pointerId == popupPointer) {
             popup.select(x, y)
             commitPopup(key, sink)
@@ -209,7 +217,7 @@ public class KeyboardEngine(
         }
         if (key == NO_KEY) return
         val chorded = endHold(key)
-        if (!consumed && geometry.keyAt(x, y) == key) release(key, chorded, sink)
+        if (!consumed && geometry.keyAt(x, y) == key) release(key, chorded, usesFn, sink)
     }
 
     private fun startTimer(pointerId: Int, at: Long, repeats: Boolean) {
@@ -265,7 +273,9 @@ public class KeyboardEngine(
                     KeyCode.UP,
                     KeyCode.DOWN,
                     KeyCode.LEFT,
-                    KeyCode.RIGHT -> true
+                    KeyCode.RIGHT,
+                    KeyCode.PAGE_UP,
+                    KeyCode.PAGE_DOWN -> true
                     else -> false
                 }
             is KeyDef.Char -> isSpace(def)
@@ -298,8 +308,13 @@ public class KeyboardEngine(
         return chorded
     }
 
-    private fun release(key: Int, chorded: Boolean, sink: InputSink) {
-        when (val def = geometry.spec(key).def) {
+    private fun acting(key: Int, usesFn: Boolean): KeyDef {
+        val spec = geometry.spec(key)
+        return if (usesFn) spec.fn ?: spec.def else spec.def
+    }
+
+    private fun release(key: Int, chorded: Boolean, usesFn: Boolean, sink: InputSink) {
+        when (val def = acting(key, usesFn)) {
             is KeyDef.Modifier -> if (!chorded) tapModifier(bit(def.kind))
             is KeyDef.LayoutSwitch -> switchRequest = def.targetId
             is KeyDef.Dead -> {
