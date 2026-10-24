@@ -489,6 +489,37 @@ class KeyboardEngineTest {
     }
 
     @Test
+    fun `near the right edge the first alternate still sits above the key`() {
+        useRow(char("x"), char("y"), char("z"), accented)
+        down("e", pointer = 0)
+        tick(300)
+        assertTrue(engine.popup.reversed)
+        up("e", pointer = 0)
+        assertEquals(listOf(Text("é")), sink.emitted)
+    }
+
+    @Test
+    fun `near the right edge sliding left walks through the alternates`() {
+        useRow(char("x"), char("y"), char("z"), accented)
+        down("e", pointer = 0)
+        tick(300)
+        engine.onPointer(0, 250f, 60f, PointerAction.MOVE, now, sink)
+        assertEquals(1, engine.popup.selected)
+        engine.onPointer(0, 150f, 60f, PointerAction.UP, now, sink)
+        assertEquals(listOf(Text("ê")), sink.emitted)
+    }
+
+    @Test
+    fun `holding a letter with accents types its capital`() {
+        geometry = KeyboardGeometry(FallbackLayout.pcFullEnUs, 1080, 120)
+        engine = KeyboardEngine(geometry, LONG_PRESS_MS)
+        down("o", pointer = 0)
+        tick(LONG_PRESS_MS)
+        up("o", pointer = 0)
+        assertEquals(listOf(Text("O")), sink.emitted)
+    }
+
+    @Test
     fun `a popup wider than the keyboard shrinks its cells`() {
         useRow(char("x"), accented)
         down("e", pointer = 0)

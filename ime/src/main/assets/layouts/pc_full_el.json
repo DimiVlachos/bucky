@@ -34,8 +34,8 @@
         { "chars": ["ι"], "latin": "i", "longPress": ["ί", "ϊ", "ΐ"] },
         { "chars": ["ο"], "latin": "o", "longPress": ["ό"] },
         { "chars": ["π"], "latin": "p" },
-        { "chars": ["[", "{"] },
-        { "chars": ["]", "}"] },
+        { "chars": ["[", "{"], "longPress": ["«", "‹"] },
+        { "chars": ["]", "}"], "longPress": ["»", "›"] },
         { "chars": ["\\", "|"], "width": 1.5 }
       ]
     },
@@ -52,7 +52,7 @@
         { "chars": ["κ"], "latin": "k" },
         { "chars": ["λ"], "latin": "l" },
         { "dead": ["΄", "¨"], "latin": ";" },
-        { "chars": ["'", "\""] },
+        { "chars": ["'", "\""], "longPress": ["’", "‘", "´"] },
         { "key": "ENTER", "width": 2.25 }
       ]
     },
@@ -66,9 +66,9 @@
         { "chars": ["β"], "latin": "b" },
         { "chars": ["ν"], "latin": "n" },
         { "chars": ["μ"], "latin": "m" },
-        { "chars": [",", "<"] },
-        { "chars": [".", ">"] },
-        { "chars": ["/", "?"] },
+        { "chars": [",", "<"], "longPress": ["„", "‚"] },
+        { "chars": [".", ">"], "longPress": ["…", "·"] },
+        { "chars": ["/", "?"], "longPress": ["÷", "¿"] },
         { "chars": ["`", "~"] },
         { "key": "UP", "width": 1.25 },
         { "key": "FORWARD_DEL", "width": 1.25 }
