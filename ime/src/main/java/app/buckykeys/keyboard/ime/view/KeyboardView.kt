@@ -8,6 +8,7 @@ import android.os.SystemClock
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -40,7 +41,19 @@ public class KeyboardView(
 
     public val keysTop: Int = rowHeightPx
 
+    private val longPressMs = ViewConfiguration.getLongPressTimeout().toLong()
+
     private val backgroundPaint = fillPaint(R.color.keyboard_background)
+    private val previewLabelPaint =
+        labelPaint(R.dimen.key_label_size).apply {
+            textSize = resources.getDimension(R.dimen.key_preview_label_size)
+        }
+
+    public var previewEnabled: Boolean = true
+        set(value) {
+            field = value
+            invalidate()
+        }
 
     private val keyPaint = fillPaint(R.color.key_background)
     private val pressedPaint = fillPaint(R.color.key_pressed)
@@ -50,7 +63,7 @@ public class KeyboardView(
     private val smallLabelPaint = labelPaint(R.dimen.key_label_small_size)
 
     private var geometry = KeyboardGeometry(layout, 0, rowHeightPx)
-    private var engine = KeyboardEngine(geometry)
+    private var engine = KeyboardEngine(geometry, longPressMs)
     private var labelX = FloatArray(0)
     private var labelY = FloatArray(0)
     private var labelSize = FloatArray(0)
@@ -61,14 +74,15 @@ public class KeyboardView(
 
     init {
         ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
-            val bottom =
-                insets
-                    .getInsets(
-                        WindowInsetsCompat.Type.navigationBars() or
-                            WindowInsetsCompat.Type.tappableElement(),
-                    )
-                    .bottom
-            view.setPadding(0, 0, 0, bottom)
+            val bars =
+                insets.getInsets(
+                    WindowInsetsCompat.Type.navigationBars() or
+                        WindowInsetsCompat.Type.tappableElement() or
+                        WindowInsetsCompat.Type.displayCutout(),
+                )
+            val sidesChanged = bars.left != view.paddingLeft || bars.right != view.paddingRight
+            view.setPadding(bars.left, 0, bars.right, bars.bottom)
+            if (sidesChanged && width > 0) rebuildGeometry()
             insets
         }
     }
@@ -81,8 +95,12 @@ public class KeyboardView(
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        geometry = KeyboardGeometry(layout, w, rowHeightPx)
-        engine = KeyboardEngine(geometry)
+        rebuildGeometry()
+    }
+
+    private fun rebuildGeometry() {
+        geometry = KeyboardGeometry(layout, width - paddingLeft - paddingRight, rowHeightPx)
+        engine = KeyboardEngine(geometry, longPressMs)
         scheduleTimer()
         val count = geometry.keyCount
         labelX = FloatArray(count)
@@ -113,7 +131,7 @@ public class KeyboardView(
     override fun onDraw(canvas: Canvas) {
         canvas.drawRect(0f, keysTop.toFloat(), width.toFloat(), height.toFloat(), backgroundPaint)
         canvas.save()
-        canvas.translate(0f, keysTop.toFloat())
+        canvas.translate(paddingLeft.toFloat(), keysTop.toFloat())
         val rects = geometry.rects
         val mask = engine.modifierMask
         val locked = engine.lockedMask
@@ -142,6 +160,7 @@ public class KeyboardView(
             paint.textSize = labelSize[i]
             canvas.drawText(label, labelX[i], labelY[i], paint)
         }
+        drawPreview(canvas, shifted)
         drawPopup(canvas, shifted)
         canvas.restore()
         if (pendingDownTime != NO_PENDING) {
@@ -216,6 +235,40 @@ public class KeyboardView(
         }
     }
 
+    private fun drawPreview(canvas: Canvas, shifted: Boolean) {
+        val key = engine.previewKey
+        if (!previewEnabled || key == KeyboardEngine.NO_PREVIEW) return
+        val spec = geometry.spec(key)
+        val def = spec.def as? KeyDef.Char ?: return
+        val label = if (shifted) def.shifted else spec.label
+        if (label.isBlank()) return
+        val rects = geometry.rects
+        val keyLeft = rects[key * 4]
+        val keyRight = rects[key * 4 + 2]
+        val previewWidth = maxOf(keyRight - keyLeft, rowHeightPx.toFloat())
+        val left =
+            ((keyLeft + keyRight - previewWidth) / 2f)
+                .coerceAtMost(geometry.widthPx - previewWidth)
+                .coerceAtLeast(0f)
+        val bottom = rects[key * 4 + 1]
+        val top = bottom - rowHeightPx
+        canvas.drawRoundRect(
+            left + gapPx,
+            top + gapPx,
+            left + previewWidth - gapPx,
+            bottom - gapPx,
+            cornerPx,
+            cornerPx,
+            pressedPaint,
+        )
+        canvas.drawText(
+            label,
+            left + previewWidth / 2f,
+            (top + bottom) / 2f - (previewLabelPaint.ascent() + previewLabelPaint.descent()) / 2f,
+            previewLabelPaint,
+        )
+    }
+
     private fun drawPopup(canvas: Canvas, shifted: Boolean) {
         val popup = engine.popup
         if (!popup.isOpen) return
@@ -261,7 +314,7 @@ public class KeyboardView(
     private fun dispatch(event: MotionEvent, index: Int, action: PointerAction) {
         engine.onPointer(
             event.getPointerId(index),
-            event.getX(index),
+            event.getX(index) - paddingLeft,
             event.getY(index) - keysTop,
             action,
             event.eventTime,

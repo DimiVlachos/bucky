@@ -23,7 +23,7 @@ class KeyboardEngineTest {
     private val ctrlBit = 1 shl ModifierKind.CTRL.ordinal
 
     private var geometry = KeyboardGeometry(FallbackLayout.pcFullEnUs, 1080, 120)
-    private var engine = KeyboardEngine(geometry)
+    private var engine = KeyboardEngine(geometry, LONG_PRESS_MS)
     private val sink = FakeInputSink()
     private var now = 0L
     private val del = Key(KeyEvent.KEYCODE_DEL, 0)
@@ -207,7 +207,7 @@ class KeyboardEngineTest {
                 200,
                 100,
             )
-        engine = KeyboardEngine(geometry)
+        engine = KeyboardEngine(geometry, LONG_PRESS_MS)
         tap("Ctrl")
         tap("§")
         assertEquals(listOf(Text("§")), sink.emitted)
@@ -551,6 +551,63 @@ class KeyboardEngineTest {
         assertFalse(engine.popup.isOpen)
     }
 
+    @Test
+    fun `pressing a letter previews it until it is lifted`() {
+        down("a", pointer = 0)
+        assertEquals(indexOf("a"), engine.previewKey)
+        up("a", pointer = 0)
+        assertEquals(KeyboardEngine.NO_PREVIEW, engine.previewKey)
+    }
+
+    @Test
+    fun `modifiers and special keys are not previewed`() {
+        down("Ctrl", pointer = 0)
+        assertEquals(KeyboardEngine.NO_PREVIEW, engine.previewKey)
+        up("Ctrl", pointer = 0)
+        down("⌫", pointer = 0)
+        assertEquals(KeyboardEngine.NO_PREVIEW, engine.previewKey)
+    }
+
+    @Test
+    fun `the latest finger owns the preview`() {
+        down("a", pointer = 0)
+        down("s", pointer = 1)
+        assertEquals(indexOf("s"), engine.previewKey)
+        up("s", pointer = 1)
+        assertEquals(KeyboardEngine.NO_PREVIEW, engine.previewKey)
+    }
+
+    @Test
+    fun `sliding off the previewed key hides the preview`() {
+        down("a", pointer = 0)
+        move("s", pointer = 0)
+        assertEquals(KeyboardEngine.NO_PREVIEW, engine.previewKey)
+    }
+
+    @Test
+    fun `an open popup hides the preview`() {
+        down("1", pointer = 0)
+        tick(300)
+        assertEquals(KeyboardEngine.NO_PREVIEW, engine.previewKey)
+    }
+
+    @Test
+    fun `a long press that types the shifted letter hides the preview`() {
+        down("a", pointer = 0)
+        tick(300)
+        assertEquals(KeyboardEngine.NO_PREVIEW, engine.previewKey)
+    }
+
+    @Test
+    fun `cancel and reset hide the preview`() {
+        down("a", pointer = 0)
+        cancel(pointer = 0)
+        assertEquals(KeyboardEngine.NO_PREVIEW, engine.previewKey)
+        down("a", pointer = 0)
+        engine.reset()
+        assertEquals(KeyboardEngine.NO_PREVIEW, engine.previewKey)
+    }
+
     private val accented =
         KeySpec(
             KeyDef.Char(
@@ -565,7 +622,7 @@ class KeyboardEngineTest {
 
     private fun useRow(vararg keys: KeySpec) {
         geometry = KeyboardGeometry(Layout("test", "test", listOf(Row(keys.toList()))), 400, 120)
-        engine = KeyboardEngine(geometry)
+        engine = KeyboardEngine(geometry, LONG_PRESS_MS)
     }
 
     private fun tap(label: String, pointer: Int = 0) {
@@ -604,5 +661,9 @@ class KeyboardEngineTest {
         val i = indexOf(label) * 4
         val r = geometry.rects
         return (r[i] + r[i + 2]) / 2f to (r[i + 1] + r[i + 3]) / 2f
+    }
+
+    private companion object {
+        const val LONG_PRESS_MS = 300L
     }
 }
