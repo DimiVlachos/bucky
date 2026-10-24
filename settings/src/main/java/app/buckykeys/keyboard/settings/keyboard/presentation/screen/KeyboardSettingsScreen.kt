@@ -2,6 +2,7 @@ package app.buckykeys.keyboard.settings.keyboard.presentation.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -110,7 +111,7 @@ private fun KeyboardSettingsScreenPreview() {
             {},
             {},
             {},
-            ExtraRowDraftState(null),
+            ExtraRowDraftState(TextFieldState()),
             ExtraRowPreview(emptyList(), emptyList(), overLimit = false),
             {},
         )

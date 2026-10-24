@@ -18,7 +18,7 @@ internal fun KeyboardSettingsEntry(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
     state.settings?.let {
-        val extraRowText = extraRowDraft.display(it.extraRow)
+        val extraRowText = extraRowDraft.text
         val extraRowPreview = remember(extraRowText) { viewModel.previewExtraRow(extraRowText) }
         KeyboardSettingsScreen(
             settings = it,
@@ -42,7 +42,6 @@ private fun saveExtraRow(
     draft: ExtraRowDraftState,
     focusManager: FocusManager,
 ) {
-    draft.text?.let(viewModel::onExtraRowSave)
-    draft.reset()
+    viewModel.onExtraRowSave(draft.text)
     focusManager.clearFocus()
 }

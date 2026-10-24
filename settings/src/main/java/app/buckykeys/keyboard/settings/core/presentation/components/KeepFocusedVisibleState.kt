@@ -16,6 +16,17 @@ import androidx.compose.ui.unit.Dp
 @Stable
 internal class KeepFocusedVisibleState {
     var target: LayoutCoordinates? = null
+    internal var viewport: LayoutCoordinates? = null
+    internal var scrollState: ScrollState? = null
+    internal var marginPx: Float = 0f
+
+    internal fun revealTarget() {
+        val target = target?.takeIf { it.isAttached } ?: return
+        val viewport = viewport?.takeIf { it.isAttached } ?: return
+        val bottom = viewport.localBoundingBoxOf(target, clipBounds = false).bottom
+        val overflow = bottom + marginPx - viewport.size.height
+        if (overflow > 0f) scrollState?.dispatchRawDelta(overflow)
+    }
 }
 
 private val LocalKeepFocusedVisible = staticCompositionLocalOf<KeepFocusedVisibleState?> { null }
@@ -32,7 +43,14 @@ internal fun ProvideKeepFocusedVisible(
 internal fun Modifier.keepVisibleWhenFocused(): Modifier {
     val state = LocalKeepFocusedVisible.current ?: return this
     val holder = remember { arrayOfNulls<LayoutCoordinates>(1) }
-    return onGloballyPositioned { holder[0] = it }
+    val lastHeight = remember { intArrayOf(UNMEASURED) }
+    return onGloballyPositioned { coordinates ->
+        holder[0] = coordinates
+        val height = coordinates.size.height
+        val grew = lastHeight[0] != UNMEASURED && height > lastHeight[0]
+        lastHeight[0] = height
+        if (grew && state.target === coordinates) state.revealTarget()
+    }
         .onFocusChanged { focus ->
             if (focus.isFocused) state.target = holder[0]
             else if (state.target === holder[0]) state.target = null
@@ -45,17 +63,15 @@ internal fun Modifier.scrollFocusedIntoView(
     scrollState: ScrollState,
     margin: Dp,
 ): Modifier {
-    val marginPx = with(LocalDensity.current) { margin.toPx() }
+    state.scrollState = scrollState
+    state.marginPx = with(LocalDensity.current) { margin.toPx() }
     val lastHeight = remember { intArrayOf(UNMEASURED) }
     return onGloballyPositioned { viewport ->
+        state.viewport = viewport
         val height = viewport.size.height
         val shrank = lastHeight[0] != UNMEASURED && height < lastHeight[0]
         lastHeight[0] = height
-        if (!shrank) return@onGloballyPositioned
-        val target = state.target?.takeIf { it.isAttached } ?: return@onGloballyPositioned
-        val bottom = viewport.localBoundingBoxOf(target, clipBounds = false).bottom
-        val overflow = bottom + marginPx - viewport.size.height
-        if (overflow > 0f) scrollState.dispatchRawDelta(overflow)
+        if (shrank) state.revealTarget()
     }
 }
 
