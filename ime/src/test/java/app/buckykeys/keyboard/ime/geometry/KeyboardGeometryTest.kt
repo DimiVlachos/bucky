@@ -1,14 +1,14 @@
 package app.buckykeys.keyboard.ime.geometry
 
+import app.buckykeys.keyboard.ime.layout.FallbackLayout
 import app.buckykeys.keyboard.ime.layout.KeyCode
 import app.buckykeys.keyboard.ime.layout.KeyDef
-import app.buckykeys.keyboard.ime.layout.SpikeLayout
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class KeyboardGeometryTest {
 
-    private val layout = SpikeLayout.pcFullEnUs
+    private val layout = FallbackLayout.pcFullEnUs
     private val geometry = KeyboardGeometry(layout, widthPx = 1080, rowHeightPx = 120)
 
     @Test

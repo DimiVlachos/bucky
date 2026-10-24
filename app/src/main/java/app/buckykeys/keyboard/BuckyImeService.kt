@@ -4,7 +4,8 @@ import android.inputmethodservice.InputMethodService
 import android.view.View
 import app.buckykeys.keyboard.billing.domain.repository.BillingRepository
 import app.buckykeys.keyboard.ime.dispatch.InputDispatcher
-import app.buckykeys.keyboard.ime.layout.SpikeLayout
+import app.buckykeys.keyboard.ime.layout.BuiltInLayouts
+import app.buckykeys.keyboard.ime.layout.Layout
 import app.buckykeys.keyboard.ime.view.KeyboardView
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -24,6 +25,8 @@ class BuckyImeService : InputMethodService() {
 
     private var keyboardView: KeyboardView? = null
 
+    private val layout: Layout by lazy { BuiltInLayouts.load(assets, BuiltInLayouts.PC_FULL_EN_US) }
+
     override fun onCreate() {
         super.onCreate()
         serviceScope.launch {
@@ -34,7 +37,7 @@ class BuckyImeService : InputMethodService() {
     override fun onCreateInputView(): View =
         KeyboardView(
                 context = this,
-                layout = SpikeLayout.pcFullEnUs,
+                layout = layout,
                 sink = InputDispatcher { currentInputConnection },
                 latencyLogging = BuildConfig.DEBUG,
             )
