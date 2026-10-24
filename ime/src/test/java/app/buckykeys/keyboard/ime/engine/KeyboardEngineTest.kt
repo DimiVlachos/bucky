@@ -5,6 +5,7 @@ import app.buckykeys.keyboard.ime.engine.fake.FakeInputSink
 import app.buckykeys.keyboard.ime.engine.fake.FakeInputSink.Emitted.Key
 import app.buckykeys.keyboard.ime.engine.fake.FakeInputSink.Emitted.Text
 import app.buckykeys.keyboard.ime.geometry.KeyboardGeometry
+import app.buckykeys.keyboard.ime.layout.BuiltInLayouts
 import app.buckykeys.keyboard.ime.layout.FallbackLayout
 import app.buckykeys.keyboard.ime.layout.KeyCode
 import app.buckykeys.keyboard.ime.layout.KeyDef
@@ -908,6 +909,77 @@ class KeyboardEngineTest {
         tick(400)
         tick(450)
         assertEquals(0, engine.longPressCount)
+    }
+
+    @Test
+    fun `swiping right on the space bar requests the next language and types nothing`() {
+        engine.languageSwipe = true
+        swipeSpace(by = 100f)
+        assertEquals(BuiltInLayouts.NEXT_LANGUAGE, engine.takeSwitchRequest())
+        assertTrue(sink.emitted.isEmpty())
+    }
+
+    @Test
+    fun `swiping left on the space bar requests the previous language`() {
+        engine.languageSwipe = true
+        swipeSpace(by = -100f)
+        assertEquals(BuiltInLayouts.PREVIOUS_LANGUAGE, engine.takeSwitchRequest())
+        assertTrue(sink.emitted.isEmpty())
+    }
+
+    @Test
+    fun `a short slide on the space bar still types a space`() {
+        engine.languageSwipe = true
+        swipeSpace(by = 40f)
+        assertEquals(null, engine.takeSwitchRequest())
+        assertEquals(listOf(Text(" ")), sink.emitted)
+    }
+
+    @Test
+    fun `with one language a swipe on the space bar types a space`() {
+        swipeSpace(by = 100f)
+        assertEquals(null, engine.takeSwitchRequest())
+        assertEquals(listOf(Text(" ")), sink.emitted)
+    }
+
+    @Test
+    fun `one swipe switches the language once`() {
+        engine.languageSwipe = true
+        val (x, y) = centre("")
+        engine.onPointer(0, x, y, PointerAction.DOWN, now, sink)
+        engine.onPointer(0, x + 100f, y, PointerAction.MOVE, now, sink)
+        assertEquals(BuiltInLayouts.NEXT_LANGUAGE, engine.takeSwitchRequest())
+        engine.onPointer(0, x + 200f, y, PointerAction.MOVE, now, sink)
+        engine.onPointer(0, x + 200f, y, PointerAction.UP, now, sink)
+        assertEquals(null, engine.takeSwitchRequest())
+        assertTrue(sink.emitted.isEmpty())
+    }
+
+    @Test
+    fun `a swipe after the space bar started repeating does not switch`() {
+        engine.languageSwipe = true
+        val (x, y) = centre("")
+        engine.onPointer(0, x, y, PointerAction.DOWN, now, sink)
+        tick(400L)
+        engine.onPointer(0, x + 100f, y, PointerAction.MOVE, now, sink)
+        assertEquals(null, engine.takeSwitchRequest())
+        assertEquals(listOf(Text(" ")), sink.emitted)
+    }
+
+    @Test
+    fun `a swipe keeps a one-shot shift for the next key`() {
+        engine.languageSwipe = true
+        tap("Shift")
+        swipeSpace(by = 100f)
+        tap("c")
+        assertEquals(listOf(Text("C")), sink.emitted)
+    }
+
+    private fun swipeSpace(by: Float) {
+        val (x, y) = centre("")
+        engine.onPointer(0, x, y, PointerAction.DOWN, now, sink)
+        engine.onPointer(0, x + by, y, PointerAction.MOVE, now, sink)
+        engine.onPointer(0, x + by, y, PointerAction.UP, now, sink)
     }
 
     private fun swapGeometry(next: KeyboardGeometry) {

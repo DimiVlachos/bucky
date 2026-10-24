@@ -10,7 +10,7 @@ import kotlinx.serialization.json.floatOrNull
 
 public object LayoutParser {
 
-    private val layoutFields = setOf("id", "name", "rows")
+    private val layoutFields = setOf("id", "name", "language", "rows")
     private val rowFields = setOf("keys")
     private val keyFields =
         setOf("chars", "dead", "key", "switchTo", "label", "width", "longPress", "latin")
@@ -33,6 +33,8 @@ public object LayoutParser {
         return Layout(
             id = obj.string("id", path),
             name = obj.string("name", path),
+            language =
+                if ("language" in obj) obj.string("language", path) else obj.string("name", path),
             rows =
                 withCompositions(
                     obj.nonEmptyArray("rows", path).mapIndexed { index, row ->

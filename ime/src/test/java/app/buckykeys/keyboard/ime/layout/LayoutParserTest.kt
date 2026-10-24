@@ -322,4 +322,19 @@ class LayoutParserTest {
         assertEquals("$.rows[0].keys[0].key", error.path)
         assertEquals("FN is not supported yet", error.reason)
     }
+
+    @Test
+    fun `the language name defaults to the layout name`() {
+        assertEquals(
+            "Test",
+            LayoutParser.parse(layoutWithKeys("""{ "chars": ["a"] }""")).getOrThrow().language,
+        )
+    }
+
+    @Test
+    fun `a layout can name its language`() {
+        val json =
+            """{ "id": "t", "name": "PC Full (US)", "language": "English (US)", "rows": [ { "keys": [ { "chars": ["a"] } ] } ] }"""
+        assertEquals("English (US)", LayoutParser.parse(json).getOrThrow().language)
+    }
 }

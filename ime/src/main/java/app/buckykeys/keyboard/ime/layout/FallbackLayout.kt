@@ -6,6 +6,7 @@ public object FallbackLayout {
         Layout(
             id = "pc_full_en_us",
             name = "PC Full (US)",
+            language = "English (US)",
             rows =
                 listOf(
                     Row(
@@ -81,11 +82,10 @@ public object FallbackLayout {
                     ),
                     Row(
                         listOf(
-                            modifier(ModifierKind.ALT, "Alt", 1.5f),
-                            KeySpec(KeyDef.LayoutSwitch(BuiltInLayouts.NEXT_LANGUAGE), "🌐", 1.25f),
-                            KeySpec(KeyDef.Char(" ", " "), "", 5.5f),
+                            modifier(ModifierKind.ALT, "Alt", 1.25f),
                             special(KeyCode.HOME, "Home", 1.5f),
                             special(KeyCode.END, "End", 1.5f),
+                            KeySpec(KeyDef.Char(" ", " "), "", 7f),
                             special(KeyCode.LEFT, "←", 1.25f),
                             special(KeyCode.DOWN, "↓", 1.25f),
                             special(KeyCode.RIGHT, "→", 1.25f),
