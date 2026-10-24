@@ -5,6 +5,7 @@ plugins {
 }
 
 val architectureTestPattern = "**/architecture/**"
+val fossStoreFile = providers.gradleProperty("bucky.foss.storeFile").orNull
 
 android {
     namespace = "app.buckykeys.keyboard"
@@ -15,13 +16,27 @@ android {
         minSdk = 26
         targetSdk = 37
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = "0.1.0-alpha1"
+    }
+
+    signingConfigs {
+        if (fossStoreFile != null) {
+            create("fossRelease") {
+                storeFile = file(fossStoreFile)
+                storePassword = providers.gradleProperty("bucky.foss.storePassword").get()
+                keyAlias = providers.gradleProperty("bucky.foss.keyAlias").get()
+                keyPassword = providers.gradleProperty("bucky.foss.keyPassword").get()
+            }
+        }
     }
 
     flavorDimensions += "distribution"
     productFlavors {
         create("play") { dimension = "distribution" }
-        create("foss") { dimension = "distribution" }
+        create("foss") {
+            dimension = "distribution"
+            signingConfigs.findByName("fossRelease")?.let { signingConfig = it }
+        }
     }
 
     buildTypes {
