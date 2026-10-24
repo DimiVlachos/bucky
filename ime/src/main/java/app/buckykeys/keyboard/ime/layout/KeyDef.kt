@@ -17,7 +17,7 @@ public sealed interface KeyDef {
 
     public data class Modifier(val kind: ModifierKind) : KeyDef
 
-    public data class LayoutSwitch(val targetId: String) : KeyDef
+    public data class LayoutSwitch(val targetId: String, val holdTargetId: String? = null) : KeyDef
 }
 
 public enum class KeyCode {

@@ -20,9 +20,9 @@ public class KeyboardGeometry(
         var index = 0
         layout.rows.forEachIndexed { rowIndex, row ->
             rowStarts[rowIndex] = index
-            val unit = widthPx / row.keys.sumOf { it.width.toDouble() }.toFloat()
+            val unit = widthPx / (row.keys.sumOf { it.width.toDouble() }.toFloat() + 2 * row.inset)
             val top = rowIndex * rowHeightPx.toFloat()
-            var left = 0f
+            var left = row.inset * unit
             row.keys.forEach { key ->
                 val right = left + key.width * unit
                 rects[index * 4] = left
@@ -42,9 +42,13 @@ public class KeyboardGeometry(
         if (!hittable || x < 0f || y < 0f) return -1
         val row = (y / rowHeightPx).toInt()
         if (row >= rowStarts.size - 1) return -1
-        for (index in rowStarts[row] until rowStarts[row + 1]) {
+        val first = rowStarts[row]
+        val last = rowStarts[row + 1] - 1
+        if (last < first) return -1
+        if (x < rects[first * 4]) return first
+        for (index in first..last) {
             if (x >= rects[index * 4] && x < rects[index * 4 + 2]) return index
         }
-        return -1
+        return last
     }
 }

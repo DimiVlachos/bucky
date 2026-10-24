@@ -351,4 +351,70 @@ class LayoutParserTest {
             """{ "id": "t", "name": "PC Full (US)", "language": "English (US)", "rows": [ { "keys": [ { "chars": ["a"] } ] } ] }"""
         assertEquals("English (US)", LayoutParser.parse(json).getOrThrow().language)
     }
+
+    @Test
+    fun `a row can have an inset`() {
+        val json =
+            """{ "id": "t", "name": "T", "rows": [ { "inset": 0.5, "keys": [ { "chars": ["a"] } ] } ] }"""
+        assertEquals(0.5f, LayoutParser.parse(json).getOrThrow().rows.single().inset, 0.001f)
+    }
+
+    @Test
+    fun `a negative inset is rejected`() {
+        val error =
+            failureOf(
+                """{ "id": "t", "name": "T", "rows": [ { "inset": -1, "keys": [ { "chars": ["a"] } ] } ] }""",
+            )
+        assertEquals("$.rows[0].inset", error.path)
+    }
+
+    @Test
+    fun `a key can name a switch to follow it`() {
+        val key = parseKeys("""{ "chars": [" "], "then": "@page:letters" }""").single()
+        assertEquals(BuiltInLayouts.PAGE_LETTERS, key.then)
+    }
+
+    @Test
+    fun `a switch key can name a hold target`() {
+        val key =
+            parseKeys("""{ "switchTo": "@keyboard", "holdTo": "@full", "label": "⌨" }""").single()
+        assertEquals(
+            KeyDef.LayoutSwitch(BuiltInLayouts.OTHER_KEYBOARD, BuiltInLayouts.FULL_LAYOUT),
+            key.def,
+        )
+    }
+
+    @Test
+    fun `page targets parse`() {
+        listOf(
+                BuiltInLayouts.PAGE_LETTERS,
+                BuiltInLayouts.PAGE_SYMBOLS,
+                BuiltInLayouts.PAGE_SYMBOLS_MORE,
+            )
+            .forEach { target ->
+                val key = parseKeys("""{ "switchTo": "$target" }""").single()
+                assertEquals(KeyDef.LayoutSwitch(target), key.def)
+            }
+    }
+
+    @Test
+    fun `page switches get their phone keyboard labels`() {
+        assertEquals("?123", parseKeys("""{ "switchTo": "@page:symbols" }""").single().label)
+        assertEquals("ABC", parseKeys("""{ "switchTo": "@page:letters" }""").single().label)
+        assertEquals("=\\<", parseKeys("""{ "switchTo": "@page:symbols-more" }""").single().label)
+        assertEquals("⌨", parseKeys("""{ "switchTo": "@keyboard" }""").single().label)
+    }
+
+    @Test
+    fun `an unknown page target is rejected`() {
+        val error = failureOf(layoutWithKeys("""{ "switchTo": "@page:emoji" }"""))
+        assertEquals("$.rows[0].keys[0].switchTo", error.path)
+    }
+
+    @Test
+    fun `holdTo only accepts the full layout`() {
+        val error =
+            failureOf(layoutWithKeys("""{ "switchTo": "@keyboard", "holdTo": "@language" }"""))
+        assertEquals("$.rows[0].keys[0].holdTo", error.path)
+    }
 }
