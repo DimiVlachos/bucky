@@ -6,7 +6,10 @@ import app.buckykeys.keyboard.ime.layout.KeyCode
 import app.buckykeys.keyboard.ime.layout.KeyDef
 import app.buckykeys.keyboard.ime.layout.ModifierKind
 
-public class KeyboardEngine(private val geometry: KeyboardGeometry) {
+public class KeyboardEngine(
+    private val geometry: KeyboardGeometry,
+    private val longPressMs: Long,
+) {
 
     private val pointerKeys = IntArray(MAX_POINTERS) { NO_KEY }
     private val pointerConsumed = BooleanArray(MAX_POINTERS)
@@ -14,6 +17,7 @@ public class KeyboardEngine(private val geometry: KeyboardGeometry) {
     private var timerAt = NO_DEADLINE
     private var timerRepeats = false
     private var popupPointer = NO_POINTER
+    private var previewPointer = NO_POINTER
 
     private var oneShotMask = 0
     private var heldMask = 0
@@ -29,6 +33,9 @@ public class KeyboardEngine(private val geometry: KeyboardGeometry) {
 
     public val nextDeadline: Long
         get() = if (timerPointer == NO_POINTER) NO_DEADLINE else timerAt
+
+    public val previewKey: Int
+        get() = if (previewPointer == NO_POINTER) NO_PREVIEW else pointerKeys[previewPointer]
 
     public fun onPointer(
         pointerId: Int,
@@ -68,6 +75,7 @@ public class KeyboardEngine(private val geometry: KeyboardGeometry) {
         pointerKeys.fill(NO_KEY)
         pointerConsumed.fill(false)
         timerPointer = NO_POINTER
+        previewPointer = NO_POINTER
         closePopup()
         oneShotMask = 0
         lockedMask = 0
@@ -84,14 +92,22 @@ public class KeyboardEngine(private val geometry: KeyboardGeometry) {
         pointerKeys[pointerId] = key
         pointerConsumed[pointerId] = false
         if (def is KeyDef.Modifier) heldMask = heldMask or bit(def.kind)
+        when (def) {
+            is KeyDef.Char -> previewPointer = pointerId
+            is KeyDef.Modifier -> Unit
+            else -> previewPointer = NO_POINTER
+        }
         when {
             def == null -> Unit
             repeats(def) -> startTimer(pointerId, timeMs + REPEAT_DELAY_MS, repeats = true)
-            longPresses(def) -> startTimer(pointerId, timeMs + LONG_PRESS_MS, repeats = false)
+            longPresses(def) -> startTimer(pointerId, timeMs + longPressMs, repeats = false)
         }
     }
 
     private fun move(pointerId: Int, x: Float, y: Float) {
+        if (pointerId == previewPointer && geometry.keyAt(x, y) != pointerKeys[pointerId]) {
+            previewPointer = NO_POINTER
+        }
         when (pointerId) {
             popupPointer -> popup.select(x, y)
             timerPointer -> if (geometry.keyAt(x, y) != pointerKeys[pointerId]) stopTimer()
@@ -99,6 +115,7 @@ public class KeyboardEngine(private val geometry: KeyboardGeometry) {
     }
 
     private fun cancel(pointerId: Int) {
+        if (pointerId == previewPointer) previewPointer = NO_POINTER
         if (pointerId == timerPointer) stopTimer()
         if (pointerId == popupPointer) closePopup()
         endHold(pointerKeys[pointerId])
@@ -107,6 +124,7 @@ public class KeyboardEngine(private val geometry: KeyboardGeometry) {
     }
 
     private fun lift(pointerId: Int, x: Float, y: Float, sink: InputSink) {
+        if (pointerId == previewPointer) previewPointer = NO_POINTER
         if (pointerId == timerPointer) stopTimer()
         val key = pointerKeys[pointerId]
         val consumed = pointerConsumed[pointerId]
@@ -135,6 +153,7 @@ public class KeyboardEngine(private val geometry: KeyboardGeometry) {
 
     private fun longPress(pointerId: Int, def: KeyDef.Char, sink: InputSink) {
         pointerConsumed[pointerId] = true
+        if (pointerId == previewPointer) previewPointer = NO_POINTER
         if (def.alternates.isEmpty()) {
             emitChar(def, sink, forceShift = true)
             afterKey()
@@ -260,10 +279,10 @@ public class KeyboardEngine(private val geometry: KeyboardGeometry) {
 
     public companion object {
         public const val NO_DEADLINE: Long = -1L
+        public const val NO_PREVIEW: Int = -1
         private const val MAX_POINTERS = 10
         private const val NO_KEY = -1
         private const val NO_POINTER = -1
-        private const val LONG_PRESS_MS = 300L
         private const val REPEAT_DELAY_MS = 400L
         private const val REPEAT_INTERVAL_MS = 50L
     }
