@@ -311,10 +311,11 @@ class KeyboardEngineTest {
     @Test
     fun `letters do not repeat`() {
         down("a", pointer = 0)
-        assertEquals(KeyboardEngine.NO_DEADLINE, engine.nextDeadline)
+        tick(300)
+        tick(350)
         tick(1000)
         up("a", pointer = 0)
-        assertEquals(listOf(Text("a")), sink.emitted)
+        assertEquals(listOf(Text("A")), sink.emitted)
     }
 
     @Test
@@ -408,6 +409,163 @@ class KeyboardEngineTest {
         tick(400)
         assertTrue(sink.emitted.isEmpty())
         assertEquals(KeyboardEngine.NO_DEADLINE, engine.nextDeadline)
+    }
+
+    @Test
+    fun `holding a letter for 300 ms types its shifted form`() {
+        down("a", pointer = 0)
+        assertEquals(300L, engine.nextDeadline)
+        tick(300)
+        up("a", pointer = 0)
+        assertEquals(listOf(Text("A")), sink.emitted)
+        assertEquals(KeyboardEngine.NO_DEADLINE, engine.nextDeadline)
+    }
+
+    @Test
+    fun `a letter released before 300 ms types normally`() {
+        down("a", pointer = 0)
+        tick(299)
+        up("a", pointer = 0)
+        assertEquals(listOf(Text("a")), sink.emitted)
+    }
+
+    @Test
+    fun `holding 1 opens its alternates and lifting picks f1`() {
+        down("1", pointer = 0)
+        tick(300)
+        assertTrue(sink.emitted.isEmpty())
+        assertEquals(indexOf("1"), engine.popup.keyIndex)
+        assertEquals(1, engine.popup.count)
+        assertEquals(0, engine.popup.selected)
+        up("1", pointer = 0)
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_F1, 0)), sink.emitted)
+        assertFalse(engine.popup.isOpen)
+    }
+
+    @Test
+    fun `the popup sits one row above its key`() {
+        down("1", pointer = 0)
+        tick(300)
+        val i = indexOf("1") * 4
+        val r = geometry.rects
+        assertEquals(r[i], engine.popup.left, 0.01f)
+        assertEquals(r[i + 1] - 120f, engine.popup.top, 0.01f)
+        assertEquals(r[i + 2] - r[i], engine.popup.cellWidth, 0.01f)
+        assertEquals(120f, engine.popup.cellHeight, 0.01f)
+    }
+
+    @Test
+    fun `sliding below the key dismisses the popup without typing`() {
+        down("1", pointer = 0)
+        tick(300)
+        val (x, y) = centre("1")
+        engine.onPointer(0, x, y + 120f, PointerAction.MOVE, now, sink)
+        assertEquals(AlternatesPopup.NONE, engine.popup.selected)
+        engine.onPointer(0, x, y + 120f, PointerAction.UP, now, sink)
+        assertTrue(sink.emitted.isEmpty())
+        assertFalse(engine.popup.isOpen)
+    }
+
+    @Test
+    fun `sliding along the popup selects an alternate`() {
+        useRow(accented, char("x"), char("y"), char("z"))
+        down("e", pointer = 0)
+        tick(300)
+        engine.onPointer(0, 150f, 60f, PointerAction.MOVE, now, sink)
+        assertEquals(1, engine.popup.selected)
+        engine.onPointer(0, 150f, 60f, PointerAction.UP, now, sink)
+        assertEquals(listOf(Text("è")), sink.emitted)
+    }
+
+    @Test
+    fun `a popup near the right edge stays inside the keyboard`() {
+        useRow(char("x"), char("y"), char("z"), accented)
+        down("e", pointer = 0)
+        tick(300)
+        assertEquals(100f, engine.popup.left, 0.01f)
+        assertEquals(400f, engine.popup.left + 3 * engine.popup.cellWidth, 0.01f)
+    }
+
+    @Test
+    fun `a popup wider than the keyboard shrinks its cells`() {
+        useRow(char("x"), accented)
+        down("e", pointer = 0)
+        tick(300)
+        assertEquals(0f, engine.popup.left, 0.01f)
+        assertEquals(400f / 3, engine.popup.cellWidth, 0.01f)
+    }
+
+    @Test
+    fun `a key with no alternates and no shifted form does not long press`() {
+        useRow(KeySpec(KeyDef.Char("-", "-"), "-"))
+        down("-", pointer = 0)
+        assertEquals(KeyboardEngine.NO_DEADLINE, engine.nextDeadline)
+    }
+
+    @Test
+    fun `pressing the next key before 300 ms cancels the long press`() {
+        down("a", pointer = 0)
+        now = 100
+        down("s", pointer = 1)
+        tick(300)
+        up("a", pointer = 0)
+        assertEquals(400L, engine.nextDeadline)
+        up("s", pointer = 1)
+        assertEquals(listOf(Text("a"), Text("s")), sink.emitted)
+    }
+
+    @Test
+    fun `a one-shot ctrl applies to the chosen alternate and then clears`() {
+        tap("Ctrl")
+        down("1", pointer = 0)
+        tick(300)
+        up("1", pointer = 0)
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_F1, ctrl)), sink.emitted)
+        assertEquals(0, engine.modifierMask)
+    }
+
+    @Test
+    fun `a cancel closes the popup without typing`() {
+        down("1", pointer = 0)
+        tick(300)
+        cancel(pointer = 0)
+        assertFalse(engine.popup.isOpen)
+        assertTrue(sink.emitted.isEmpty())
+    }
+
+    @Test
+    fun `a second finger closes the popup and the first finger types nothing`() {
+        down("1", pointer = 0)
+        tick(300)
+        tap("a", pointer = 1)
+        up("1", pointer = 0)
+        assertFalse(engine.popup.isOpen)
+        assertEquals(listOf(Text("a")), sink.emitted)
+    }
+
+    @Test
+    fun `reset closes the popup`() {
+        down("1", pointer = 0)
+        tick(300)
+        engine.reset()
+        assertFalse(engine.popup.isOpen)
+    }
+
+    private val accented =
+        KeySpec(
+            KeyDef.Char(
+                "e",
+                "E",
+                listOf(KeyDef.Char("é", "É"), KeyDef.Char("è", "È"), KeyDef.Char("ê", "Ê")),
+            ),
+            "e",
+        )
+
+    private fun char(c: String): KeySpec = KeySpec(KeyDef.Char(c, c.uppercase()), c)
+
+    private fun useRow(vararg keys: KeySpec) {
+        geometry = KeyboardGeometry(Layout("test", "test", listOf(Row(keys.toList()))), 400, 120)
+        engine = KeyboardEngine(geometry)
     }
 
     private fun tap(label: String, pointer: Int = 0) {

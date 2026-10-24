@@ -1,6 +1,7 @@
 package app.buckykeys.keyboard
 
 import android.inputmethodservice.InputMethodService
+import android.inputmethodservice.InputMethodService.Insets
 import android.view.View
 import app.buckykeys.keyboard.billing.domain.repository.BillingRepository
 import app.buckykeys.keyboard.ime.dispatch.InputDispatcher
@@ -42,6 +43,15 @@ class BuckyImeService : InputMethodService() {
                 latencyLogging = BuildConfig.DEBUG,
             )
             .also { keyboardView = it }
+
+    override fun onComputeInsets(outInsets: Insets) {
+        super.onComputeInsets(outInsets)
+        val view = keyboardView ?: return
+        if (!isInputViewShown) return
+        outInsets.contentTopInsets += view.keysTop
+        outInsets.visibleTopInsets += view.keysTop
+        outInsets.touchableInsets = Insets.TOUCHABLE_INSETS_CONTENT
+    }
 
     override fun onFinishInputView(finishingInput: Boolean) {
         keyboardView?.resetState()
