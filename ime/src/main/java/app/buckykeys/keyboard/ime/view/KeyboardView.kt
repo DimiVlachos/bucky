@@ -204,7 +204,7 @@ public class KeyboardView(
         modifierBits = IntArray(count)
         spaceKey = NO_SPACE_KEY
         val rects = geometry.rects
-        hintLabels = Array(count) { hintOf(geometry.spec(it).def) }
+        hintLabels = Array(count) { hintFor(geometry.spec(it).def) }
         fnLabels = Array(count) { geometry.spec(it).fn?.let(DefaultLabels::of).orEmpty() }
         fnSmall = BooleanArray(count) { isSmall(fnLabels[it]) }
         fnSize = FloatArray(count)
@@ -284,12 +284,6 @@ public class KeyboardView(
         paint.textSize = fnSize[i]
         fnY[i] =
             (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f - (paint.ascent() + paint.descent()) / 2f
-    }
-
-    private fun hintOf(def: KeyDef): String {
-        if (def !is KeyDef.Char || def.alternates.isEmpty()) return ""
-        if (def.primary.uppercase() != def.primary) return ""
-        return DefaultLabels.of(def.alternates.first())
     }
 
     private fun showsLanguage(): Boolean =
