@@ -1,40 +1,38 @@
 package app.buckykeys.keyboard.settings.keyboard.presentation.state
 
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 
 @Stable
-internal class ExtraRowDraftState(text: String?) {
+internal class ExtraRowDraftState(
+    val textField: TextFieldState,
+    private val synced: MutableState<String?> = mutableStateOf(null),
+) {
 
-    var text: String? by mutableStateOf(text)
-        private set
+    val text: String
+        get() = textField.text.toString()
 
-    fun display(saved: List<String>): String = text ?: saved.joinToString(" ")
-
-    fun edit(value: String) {
-        text = value
+    fun syncTo(saved: String) {
+        if (saved == synced.value) return
+        synced.value = saved
+        textField.setTextAndPlaceCursorAtEnd(saved)
     }
 
-    fun reset() {
-        text = null
-    }
-
-    companion object {
-        val Saver: Saver<ExtraRowDraftState, String> =
-            Saver(
-                save = { it.text ?: NOT_EDITED },
-                restore = { ExtraRowDraftState(it.takeIf { it != NOT_EDITED }) },
-            )
-
-        private const val NOT_EDITED = "\u0000"
+    fun fill(text: String) {
+        textField.setTextAndPlaceCursorAtEnd(text)
     }
 }
 
 @Composable
-internal fun rememberExtraRowDraftState(): ExtraRowDraftState =
-    rememberSaveable(saver = ExtraRowDraftState.Saver) { ExtraRowDraftState(null) }
+internal fun rememberExtraRowDraftState(): ExtraRowDraftState {
+    val field = rememberTextFieldState()
+    val synced = rememberSaveable { mutableStateOf<String?>(null) }
+    return remember(field, synced) { ExtraRowDraftState(field, synced) }
+}
