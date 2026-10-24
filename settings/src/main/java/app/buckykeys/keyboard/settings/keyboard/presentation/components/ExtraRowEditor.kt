@@ -31,10 +31,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.unit.dp
 import app.buckykeys.keyboard.settings.R
 import app.buckykeys.keyboard.settings.core.presentation.components.keepVisibleWhenFocused
@@ -103,13 +105,15 @@ internal fun ExtraRowEditor(
             },
             isError = invalid,
         )
-    val fadeWidth = BuckyTheme.spacing.large
+    val edge = TEXT_EDGE
+    val indent = with(LocalDensity.current) { edge.toSp() }
     BasicTextField(
         state = draft.textField,
         modifier = Modifier.fillMaxWidth().keepVisibleWhenFocused(),
         textStyle =
             MaterialTheme.typography.bodyLarge.copy(
                 color = colors.onSurface.copy(alpha = textAlpha.value),
+                textIndent = TextIndent(firstLine = indent),
             ),
         keyboardOptions =
             KeyboardOptions(
@@ -124,7 +128,11 @@ internal fun ExtraRowEditor(
         scrollState = scroll,
         decorator = { innerTextField ->
             decorator.Decoration {
-                Box(modifier = Modifier.horizontalFadingEdges(scroll, fadeWidth)) {
+                Box(
+                    modifier =
+                        Modifier.extendIntoPadding(start = edge, end = edge)
+                            .horizontalFadingEdges(scroll, start = edge, end = edge),
+                ) {
                     innerTextField()
                 }
             }
@@ -190,6 +198,7 @@ private fun ExtraRowSupportingText(
 
 private const val ENTER_MS = 150
 private const val FILL_MS = 200
+private val TEXT_EDGE = 16.dp
 private const val SWAP_OUT_MS = 100
 private const val SWAP_IN_MS = 150
 private const val EXIT_MS = 120
