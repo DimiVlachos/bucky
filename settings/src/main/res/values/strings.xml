@@ -21,4 +21,8 @@
     <string name="settings_extra_row">Your own row</string>
     <string name="settings_extra_row_hint">Key names or single characters, separated by spaces, as in Termux extra keys: ESC TAB CTRL ALT ~ | / - HOME END PGUP PGDN</string>
     <string name="settings_save">Save</string>
+    <string name="onboarding_status_ready">✓ Bucky is on and selected as your keyboard.</string>
+    <string name="onboarding_status_enabled">✓ Bucky is on. Now choose it as your keyboard.</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_source">Source code on GitHub</string>
 </resources>

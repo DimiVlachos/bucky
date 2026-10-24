@@ -1,6 +1,10 @@
 package app.buckykeys.keyboard.settings
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.inputmethod.InputMethodManager
@@ -8,22 +12,32 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import app.buckykeys.keyboard.settings.core.presentation.theme.BuckyTheme
+import app.buckykeys.keyboard.settings.home.presentation.components.AboutFooter
 import app.buckykeys.keyboard.settings.home.presentation.screen.HomeScreen
 import app.buckykeys.keyboard.settings.keyboard.presentation.entry.KeyboardSettingsEntry
 import app.buckykeys.keyboard.settings.keyboard.presentation.view_model.KeyboardSettingsViewModel
+import app.buckykeys.keyboard.settings.onboarding.data.source.SetupStateReader
 import app.buckykeys.keyboard.settings.onboarding.presentation.screen.OnboardingSection
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 
 @AndroidEntryPoint
 public class SettingsActivity : ComponentActivity() {
 
     private val keyboardSettings: KeyboardSettingsViewModel by viewModels()
+
+    private val setupReader by lazy { SetupStateReader(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,9 +45,20 @@ public class SettingsActivity : ComponentActivity() {
         setContent {
             BuckyTheme {
                 var tryText by rememberSaveable { mutableStateOf("") }
+                var setup by remember { mutableStateOf(setupReader.read()) }
+                val lifecycleOwner = LocalLifecycleOwner.current
+                LaunchedEffect(lifecycleOwner) {
+                    lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                        while (true) {
+                            setup = setupReader.read()
+                            delay(SETUP_POLL_MS)
+                        }
+                    }
+                }
                 HomeScreen(
                     setup = {
                         OnboardingSection(
+                            setup = setup,
                             tryText = tryText,
                             onTryTextChange = { tryText = it },
                             onEnableClick = {
@@ -45,8 +70,32 @@ public class SettingsActivity : ComponentActivity() {
                         )
                     },
                     settings = { KeyboardSettingsEntry(keyboardSettings) },
+                    footer = { AboutFooter(versionName(), ::openSource) },
                 )
             }
         }
+    }
+
+    private fun versionName(): String {
+        val info =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageManager.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0))
+            } else {
+                @Suppress("DEPRECATION") packageManager.getPackageInfo(packageName, 0)
+            }
+        return info.versionName.orEmpty()
+    }
+
+    private fun openSource() {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(SOURCE_URL)))
+        } catch (e: ActivityNotFoundException) {
+            return
+        }
+    }
+
+    private companion object {
+        const val SETUP_POLL_MS = 1_000L
+        const val SOURCE_URL = "https://github.com/DimiVlachos/bucky"
     }
 }

@@ -21,4 +21,8 @@
     <string name="settings_extra_row">Δική σας σειρά</string>
     <string name="settings_extra_row_hint">Ονόματα πλήκτρων ή μεμονωμένοι χαρακτήρες, χωρισμένα με κενά, όπως στα extra keys του Termux: ESC TAB CTRL ALT ~ | / - HOME END PGUP PGDN</string>
     <string name="settings_save">Αποθήκευση</string>
+    <string name="onboarding_status_ready">✓ Το Bucky είναι ενεργό και επιλεγμένο ως πληκτρολόγιο.</string>
+    <string name="onboarding_status_enabled">✓ Το Bucky είναι ενεργό. Επιλέξτε το τώρα ως πληκτρολόγιο.</string>
+    <string name="settings_version">Έκδοση %1$s</string>
+    <string name="settings_source">Ο κώδικας στο GitHub</string>
 </resources>
