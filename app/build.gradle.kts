@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.ksp)
@@ -5,7 +7,15 @@ plugins {
 }
 
 val architectureTestPattern = "**/architecture/**"
-val fossStoreFile = providers.gradleProperty("bucky.foss.storeFile").orNull
+val localProperties =
+    Properties().apply {
+        rootProject.file("local.properties").takeIf { it.isFile }?.inputStream()?.use { load(it) }
+    }
+
+fun signingProperty(name: String): String? =
+    providers.gradleProperty(name).orNull ?: localProperties.getProperty(name)
+
+val fossStoreFile = signingProperty("bucky.foss.storeFile")
 
 android {
     namespace = "app.buckykeys.keyboard"
@@ -23,9 +33,18 @@ android {
         if (fossStoreFile != null) {
             create("fossRelease") {
                 storeFile = file(fossStoreFile)
-                storePassword = providers.gradleProperty("bucky.foss.storePassword").get()
-                keyAlias = providers.gradleProperty("bucky.foss.keyAlias").get()
-                keyPassword = providers.gradleProperty("bucky.foss.keyPassword").get()
+                storePassword =
+                    checkNotNull(signingProperty("bucky.foss.storePassword")) {
+                        "bucky.foss.storePassword is missing"
+                    }
+                keyAlias =
+                    checkNotNull(signingProperty("bucky.foss.keyAlias")) {
+                        "bucky.foss.keyAlias is missing"
+                    }
+                keyPassword =
+                    checkNotNull(signingProperty("bucky.foss.keyPassword")) {
+                        "bucky.foss.keyPassword is missing"
+                    }
             }
         }
     }
