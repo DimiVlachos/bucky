@@ -19,15 +19,22 @@ import app.buckykeys.keyboard.ime.engine.PointerAction
 import app.buckykeys.keyboard.ime.geometry.KeyboardGeometry
 import app.buckykeys.keyboard.ime.layout.BuiltInLayouts
 import app.buckykeys.keyboard.ime.layout.DefaultLabels
+import app.buckykeys.keyboard.ime.layout.FallbackLayout
 import app.buckykeys.keyboard.ime.layout.KeyDef
 import app.buckykeys.keyboard.ime.layout.Layout
 import app.buckykeys.keyboard.ime.layout.ModifierKind
 import timber.log.Timber
 
+public fun interface LanguageChangeListener {
+    public fun onLanguageChanged(index: Int)
+}
+
 @SuppressLint("ViewConstructor")
 public class KeyboardView(
     context: Context,
-    private val languages: List<Layout>,
+    languages: List<Layout>,
+    initialLanguageIndex: Int,
+    private val languageChangeListener: LanguageChangeListener,
     private val sink: InputSink,
     private val latencyLogging: Boolean,
     private val rowHeightPx: Int,
@@ -40,6 +47,9 @@ public class KeyboardView(
     private val labelMinSizePx = resources.getDimension(R.dimen.key_label_min_size)
     private val labelSizePx = resources.getDimension(R.dimen.key_label_size)
     private val smallLabelSizePx = resources.getDimension(R.dimen.key_label_small_size)
+    private val lockBarHeightPx = resources.getDimension(R.dimen.key_lock_bar_height)
+    private val lockBarInsetPx = resources.getDimension(R.dimen.key_lock_bar_inset)
+    private val labelMaxSizePx = rowHeightPx * LABEL_HEIGHT_FRACTION
 
     public val keysTop: Int = rowHeightPx
 
@@ -47,9 +57,12 @@ public class KeyboardView(
 
     private val backgroundPaint = fillPaint(R.color.keyboard_background)
     private val previewLabelPaint =
-        labelPaint(R.dimen.key_label_size).apply {
-            textSize = resources.getDimension(R.dimen.key_preview_label_size)
-        }
+        labelPaint(
+            minOf(
+                resources.getDimension(R.dimen.key_preview_label_size),
+                rowHeightPx * PREVIEW_LABEL_HEIGHT_FRACTION,
+            ),
+        )
 
     public var previewEnabled: Boolean = true
         set(value) {
@@ -61,25 +74,38 @@ public class KeyboardView(
     private val pressedPaint = fillPaint(R.color.key_pressed)
     private val activePaint = fillPaint(R.color.key_modifier_active)
     private val lockedPaint = fillPaint(R.color.key_modifier_locked)
-    private val labelPaint = labelPaint(R.dimen.key_label_size)
-    private val smallLabelPaint = labelPaint(R.dimen.key_label_small_size)
+    private val lockBarPaint = fillPaint(R.color.key_label)
+    private val labelPaint = labelPaint(labelSizePx)
+    private val smallLabelPaint = labelPaint(smallLabelSizePx)
 
-    private var languageIndex = 0
+    private val languages: List<Layout> = languages.ifEmpty { listOf(FallbackLayout.pcFullEnUs) }
+    private var languageIndex = initialLanguageIndex.coerceIn(0, this.languages.lastIndex)
     private val layout: Layout
         get() = languages[languageIndex]
 
     private var geometry = KeyboardGeometry(layout, 0, rowHeightPx)
-    private var engine = KeyboardEngine(geometry, longPressMs)
+    private var geometryLanguage = languageIndex
+    private val engine = KeyboardEngine(geometry, longPressMs)
     private var labelX = FloatArray(0)
     private var labelY = FloatArray(0)
     private var labelSize = FloatArray(0)
+    private var labelSmall = BooleanArray(0)
     private var modifierBits = IntArray(0)
+    private var popupLabels = emptyArray<String>()
+    private var popupShiftedLabels = emptyArray<String>()
+    private var popupSmall = BooleanArray(0)
+    private var popupSize = FloatArray(0)
     private var pendingDownTime = NO_PENDING
+    private var lastLatencyMs = 0L
     private var scheduledDeadline = KeyboardEngine.NO_DEADLINE
     private val timerTick = Runnable { onTimer() }
     private val nextLanguage = Runnable { switchToNextLanguage() }
+    private val logLatency = Runnable {
+        Timber.tag(LATENCY_TAG).d("touch-to-draw %d ms", lastLatencyMs)
+    }
 
     init {
+        buildLabels()
         ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
             val bars =
                 insets.getInsets(
@@ -89,7 +115,7 @@ public class KeyboardView(
                 )
             val sidesChanged = bars.left != view.paddingLeft || bars.right != view.paddingRight
             view.setPadding(bars.left, 0, bars.right, bars.bottom)
-            if (sidesChanged && width > 0) rebuildGeometry()
+            if (sidesChanged && width > 0) rebuildGeometryIfNeeded()
             insets
         }
     }
@@ -102,37 +128,102 @@ public class KeyboardView(
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        rebuildGeometry()
+        rebuildGeometryIfNeeded()
     }
 
-    private fun rebuildGeometry() {
-        geometry = KeyboardGeometry(layout, width - paddingLeft - paddingRight, rowHeightPx)
-        engine = KeyboardEngine(geometry, longPressMs)
+    private fun rebuildGeometryIfNeeded() {
+        val contentWidth = (width - paddingLeft - paddingRight).coerceAtLeast(0)
+        if (contentWidth == geometry.widthPx && geometryLanguage == languageIndex) return
+        geometry = KeyboardGeometry(layout, contentWidth, rowHeightPx)
+        geometryLanguage = languageIndex
+        try {
+            engine.setGeometry(geometry)
+        } catch (e: RuntimeException) {
+            Timber.e(e, "setGeometry: engine failed, resetting")
+            engine.reset()
+        }
+        buildLabels()
         scheduleTimer()
+    }
+
+    private fun buildLabels() {
         val count = geometry.keyCount
         labelX = FloatArray(count)
         labelY = FloatArray(count)
         labelSize = FloatArray(count)
+        labelSmall = BooleanArray(count)
         modifierBits = IntArray(count)
         val rects = geometry.rects
         for (i in 0 until count) {
-            val label = geometry.spec(i).label
-            val paint = paintFor(label)
-            paint.textSize = baseSizeFor(label)
+            val spec = geometry.spec(i)
+            val def = spec.def
+            val shiftedLabel =
+                when (def) {
+                    is KeyDef.Char -> def.shifted
+                    is KeyDef.Dead -> def.shifted
+                    else -> spec.label
+                }
+            labelSmall[i] = isSmall(spec.label)
+            val paint = if (labelSmall[i]) smallLabelPaint else labelPaint
             labelSize[i] =
-                fittedTextSize(
-                    paint.textSize,
-                    paint.measureText(label),
-                    rects[i * 4 + 2] - rects[i * 4] - 2 * (gapPx + labelPaddingPx),
-                    labelMinSizePx,
+                fitLabel(
+                    paint,
+                    if (labelSmall[i]) smallLabelSizePx else labelSizePx,
+                    spec.label,
+                    shiftedLabel,
+                    rects[i * 4 + 2] - rects[i * 4],
+                    labelMaxSizePx,
                 )
             paint.textSize = labelSize[i]
             labelX[i] = (rects[i * 4] + rects[i * 4 + 2]) / 2f
             labelY[i] =
                 (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f - (paint.ascent() + paint.descent()) / 2f
-            val def = geometry.spec(i).def
             modifierBits[i] = if (def is KeyDef.Modifier) 1 shl def.kind.ordinal else 0
         }
+    }
+
+    private fun fitLabel(
+        paint: Paint,
+        baseSize: Float,
+        label: String,
+        shiftedLabel: String,
+        cellWidth: Float,
+        maxSize: Float,
+    ): Float {
+        paint.textSize = baseSize
+        return fittedTextSize(
+            baseSize,
+            maxOf(paint.measureText(label), paint.measureText(shiftedLabel)),
+            cellWidth - 2 * (gapPx + labelPaddingPx),
+            labelMinSizePx,
+            maxSize,
+        )
+    }
+
+    private fun buildPopupLabels() {
+        val popup = engine.popup
+        val def = geometry.spec(popup.keyIndex).def as? KeyDef.Char ?: return
+        val count = popup.count
+        popupLabels = Array(count) { DefaultLabels.of(def.alternates[it]) }
+        popupShiftedLabels =
+            Array(count) {
+                when (val alternate = def.alternates[it]) {
+                    is KeyDef.Char -> alternate.shifted
+                    else -> popupLabels[it]
+                }
+            }
+        popupSmall = BooleanArray(count) { isSmall(popupLabels[it]) }
+        popupSize =
+            FloatArray(count) {
+                fitLabel(
+                    if (popupSmall[it]) smallLabelPaint else labelPaint,
+                    if (popupSmall[it]) smallLabelSizePx else labelSizePx,
+                    popupLabels[it],
+                    popupShiftedLabels[it],
+                    popup.cellWidth,
+                    popup.cellHeight * LABEL_HEIGHT_FRACTION,
+                )
+            }
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -143,6 +234,7 @@ public class KeyboardView(
         val mask = engine.modifierMask
         val locked = engine.lockedMask
         val shifted = mask and (1 shl ModifierKind.SHIFT.ordinal) != 0
+        val deadShifted = engine.deadKeyShifted
         for (i in 0 until geometry.keyCount) {
             val fill =
                 when {
@@ -162,20 +254,38 @@ public class KeyboardView(
                 fill,
             )
             val spec = geometry.spec(i)
-            val def = spec.def
-            val label = if (shifted && def is KeyDef.Char) def.shifted else spec.label
-            val paint = paintFor(spec.label)
+            val label =
+                when (val def = spec.def) {
+                    is KeyDef.Char -> if (shifted) def.shifted else spec.label
+                    is KeyDef.Dead -> if (deadShifted) def.shifted else spec.label
+                    else -> spec.label
+                }
+            val paint = if (labelSmall[i]) smallLabelPaint else labelPaint
             paint.textSize = labelSize[i]
             canvas.drawText(label, labelX[i], labelY[i], paint)
+            if (modifierBits[i] and locked != 0) drawLockBar(canvas, i)
         }
         drawPreview(canvas, shifted)
         drawPopup(canvas, shifted)
         canvas.restore()
         if (pendingDownTime != NO_PENDING) {
-            Timber.tag(LATENCY_TAG)
-                .d("touch-to-draw %d ms", SystemClock.uptimeMillis() - pendingDownTime)
+            lastLatencyMs = SystemClock.uptimeMillis() - pendingDownTime
             pendingDownTime = NO_PENDING
+            post(logLatency)
         }
+    }
+
+    private fun drawLockBar(canvas: Canvas, key: Int) {
+        val rects = geometry.rects
+        val halfWidth = (rects[key * 4 + 2] - rects[key * 4]) * LOCK_BAR_WIDTH_FRACTION / 2f
+        val bottom = rects[key * 4 + 3] - gapPx - lockBarInsetPx
+        canvas.drawRect(
+            labelX[key] - halfWidth,
+            bottom - lockBarHeightPx,
+            labelX[key] + halfWidth,
+            bottom,
+            lockBarPaint,
+        )
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -220,6 +330,7 @@ public class KeyboardView(
     override fun onDetachedFromWindow() {
         removeCallbacks(timerTick)
         removeCallbacks(nextLanguage)
+        removeCallbacks(logLatency)
         scheduledDeadline = KeyboardEngine.NO_DEADLINE
         super.onDetachedFromWindow()
     }
@@ -235,22 +346,24 @@ public class KeyboardView(
 
     private fun switchToNextLanguage() {
         languageIndex = (languageIndex + 1) % languages.size
-        rebuildGeometry()
+        rebuildGeometryIfNeeded()
+        languageChangeListener.onLanguageChanged(languageIndex)
         requestLayout()
         invalidate()
     }
 
     private fun onTimer() {
         scheduledDeadline = KeyboardEngine.NO_DEADLINE
-        val popupWasOpen = engine.popup.isOpen
+        val longPresses = engine.longPressCount
         try {
             engine.onTick(SystemClock.uptimeMillis(), sink)
+            if (engine.longPressCount != longPresses) {
+                if (engine.popup.isOpen) buildPopupLabels()
+                if (haptics) performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            }
         } catch (e: RuntimeException) {
             Timber.e(e, "onTimer: engine failed, resetting")
             engine.reset()
-        }
-        if (!popupWasOpen && engine.popup.isOpen) {
-            if (haptics) performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
         }
         scheduleTimer()
         invalidate()
@@ -303,7 +416,7 @@ public class KeyboardView(
     private fun drawPopup(canvas: Canvas, shifted: Boolean) {
         val popup = engine.popup
         if (!popup.isOpen) return
-        val def = geometry.spec(popup.keyIndex).def as? KeyDef.Char ?: return
+        if (popupLabels.size != popup.count) return
         val top = popup.top
         val bottom = top + popup.cellHeight
         canvas.drawRoundRect(
@@ -327,12 +440,9 @@ public class KeyboardView(
                 cornerPx,
                 if (i == popup.selected) activePaint else keyPaint,
             )
-            val alternate = def.alternates[i]
-            val label =
-                if (shifted && alternate is KeyDef.Char) alternate.shifted
-                else DefaultLabels.of(alternate)
-            val paint = paintFor(label)
-            paint.textSize = baseSizeFor(label)
+            val label = if (shifted) popupShiftedLabels[i] else popupLabels[i]
+            val paint = if (popupSmall[i]) smallLabelPaint else labelPaint
+            paint.textSize = popupSize[i]
             canvas.drawText(
                 label,
                 (left + right) / 2f,
@@ -353,24 +463,21 @@ public class KeyboardView(
         )
     }
 
-    private fun paintFor(label: String): Paint =
-        if (label.length > 1) smallLabelPaint else labelPaint
-
-    private fun baseSizeFor(label: String): Float =
-        if (label.length > 1) smallLabelSizePx else labelSizePx
+    private fun isSmall(label: String): Boolean = visibleCharCount(label) > 1
 
     private fun fillPaint(colorRes: Int): Paint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply { color = ContextCompat.getColor(context, colorRes) }
 
-    private fun labelPaint(sizeRes: Int): Paint =
+    private fun labelPaint(sizePx: Float): Paint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = ContextCompat.getColor(context, R.color.key_label)
             textAlign = Paint.Align.CENTER
-            textSize = resources.getDimension(sizeRes)
+            textSize = sizePx
         }
 
     private companion object {
         const val NO_PENDING = -1L
         const val LATENCY_TAG = "PCK-LAT"
+        const val LOCK_BAR_WIDTH_FRACTION = 0.3f
     }
 }
