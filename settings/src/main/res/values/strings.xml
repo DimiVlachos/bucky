@@ -8,7 +8,7 @@
     <string name="settings_language_en_us">English (US)</string>
     <string name="settings_language_el">Greek</string>
     <string name="settings_language_required">Required: at least one language</string>
-    <string name="settings_languages_hint">Switch between them with the 🌐 key. At least one stays on.</string>
+    <string name="settings_languages_hint">Swipe the space bar left or right to switch between them. At least one stays on.</string>
     <string name="settings_size">Size</string>
     <string name="settings_row_height">Key height</string>
     <string name="settings_landscape_row_height">Key height in landscape</string>

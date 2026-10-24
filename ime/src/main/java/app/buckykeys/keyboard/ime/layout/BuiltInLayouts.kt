@@ -9,6 +9,7 @@ public object BuiltInLayouts {
     public const val PC_FULL_EN_US: String = "pc_full_en_us"
     public const val PC_FULL_EL: String = "pc_full_el"
     public const val NEXT_LANGUAGE: String = "@language"
+    public const val PREVIOUS_LANGUAGE: String = "@language-previous"
 
     public fun load(assets: AssetManager, id: String): Layout = loadOrFallback {
         assets.open("layouts/$id.json").bufferedReader().use { it.readText() }
