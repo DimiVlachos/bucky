@@ -7,9 +7,11 @@ import app.buckykeys.keyboard.ime.layout.KeyDef
 import app.buckykeys.keyboard.ime.layout.ModifierKind
 
 public class KeyboardEngine(
-    private val geometry: KeyboardGeometry,
+    geometry: KeyboardGeometry,
     private val longPressMs: Long,
 ) {
+
+    private var geometry = geometry
 
     private val pointerKeys = IntArray(MAX_POINTERS) { NO_KEY }
     private val pointerConsumed = BooleanArray(MAX_POINTERS)
@@ -25,6 +27,7 @@ public class KeyboardEngine(
     private var oneShotMask = 0
     private var heldMask = 0
     private var chordedMask = 0
+    private val heldCounts = IntArray(MODIFIER_KINDS)
 
     public val popup: AlternatesPopup = AlternatesPopup()
 
@@ -42,6 +45,19 @@ public class KeyboardEngine(
 
     public val pendingDeadKey: Int
         get() = deadKey
+
+    public val deadKeyShifted: Boolean
+        get() = (oneShotMask or heldMask) and bit(ModifierKind.SHIFT) != 0
+
+    public var longPressCount: Int = 0
+        private set
+
+    public fun setGeometry(geometry: KeyboardGeometry) {
+        this.geometry = geometry
+        releaseAllPointers()
+        deadKey = findDeadKey(deadMark)
+        if (deadKey == NO_DEAD_KEY) deadMark = null
+    }
 
     public fun takeSwitchRequest(): String? {
         val request = switchRequest
@@ -84,17 +100,31 @@ public class KeyboardEngine(
     public fun isPressed(keyIndex: Int): Boolean = pointerKeys.any { it == keyIndex }
 
     public fun reset() {
+        releaseAllPointers()
+        clearDead()
+        switchRequest = null
+        oneShotMask = 0
+        lockedMask = 0
+    }
+
+    private fun releaseAllPointers() {
         pointerKeys.fill(NO_KEY)
         pointerConsumed.fill(false)
         timerPointer = NO_POINTER
         previewPointer = NO_POINTER
         closePopup()
-        clearDead()
-        switchRequest = null
-        oneShotMask = 0
-        lockedMask = 0
+        heldCounts.fill(0)
         heldMask = 0
         chordedMask = 0
+    }
+
+    private fun findDeadKey(mark: String?): Int {
+        if (mark == null) return NO_DEAD_KEY
+        for (i in 0 until geometry.keyCount) {
+            val def = geometry.spec(i).def
+            if (def is KeyDef.Dead && (def.primary == mark || def.shifted == mark)) return i
+        }
+        return NO_DEAD_KEY
     }
 
     private fun press(pointerId: Int, key: Int, timeMs: Long) {
@@ -103,9 +133,10 @@ public class KeyboardEngine(
             stopTimer()
             closePopup()
         }
+        endHold(pointerKeys[pointerId])
         pointerKeys[pointerId] = key
         pointerConsumed[pointerId] = false
-        if (def is KeyDef.Modifier) heldMask = heldMask or bit(def.kind)
+        if (def is KeyDef.Modifier) startHold(def.kind)
         when (def) {
             is KeyDef.Char -> previewPointer = pointerId
             is KeyDef.Modifier -> Unit
@@ -145,6 +176,7 @@ public class KeyboardEngine(
         pointerKeys[pointerId] = NO_KEY
         pointerConsumed[pointerId] = false
         if (pointerId == popupPointer) {
+            popup.select(x, y)
             commitPopup(key, sink)
             return
         }
@@ -167,6 +199,7 @@ public class KeyboardEngine(
 
     private fun longPress(pointerId: Int, def: KeyDef.Char, sink: InputSink) {
         pointerConsumed[pointerId] = true
+        longPressCount++
         if (pointerId == previewPointer) previewPointer = NO_POINTER
         if (def.alternates.isEmpty()) {
             emitChar(def, sink, forceShift = true)
@@ -217,9 +250,20 @@ public class KeyboardEngine(
     private fun longPresses(def: KeyDef): Boolean =
         def is KeyDef.Char && (def.alternates.isNotEmpty() || def.shifted != def.primary)
 
+    private fun startHold(kind: ModifierKind) {
+        val bit = bit(kind)
+        if (heldCounts[kind.ordinal] > 0) chordedMask = chordedMask or bit
+        heldCounts[kind.ordinal]++
+        heldMask = heldMask or bit
+    }
+
     private fun endHold(key: Int): Boolean {
         val def = if (key == NO_KEY) null else geometry.spec(key).def
         if (def !is KeyDef.Modifier) return false
+        val kind = def.kind.ordinal
+        if (heldCounts[kind] == 0) return false
+        heldCounts[kind]--
+        if (heldCounts[kind] > 0) return true
         val bit = bit(def.kind)
         val chorded = chordedMask and bit != 0
         heldMask = heldMask and bit.inv()
@@ -279,11 +323,15 @@ public class KeyboardEngine(
 
     private fun pressDead(key: Int, def: KeyDef.Dead, sink: InputSink) {
         val latin = def.latin
-        if (latin != null && (isActive(ModifierKind.CTRL) || isActive(ModifierKind.ALT))) {
-            sink.sendKey(KeyCodes.forChar(latin[0]), metaState(forceShift = false))
-            return
+        if (!latin.isNullOrEmpty() && (isActive(ModifierKind.CTRL) || isActive(ModifierKind.ALT))) {
+            val keyCode = KeyCodes.forChar(latin[0])
+            if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
+                clearDead()
+                sink.sendKey(keyCode, metaState(forceShift = false))
+                return
+            }
         }
-        val mark = if (isActive(ModifierKind.SHIFT)) def.shifted else def.primary
+        val mark = if (deadKeyShifted) def.shifted else def.primary
         val pending = deadMark
         if (pending != null) {
             sink.commitText(pending)
@@ -343,6 +391,7 @@ public class KeyboardEngine(
         public const val NO_PREVIEW: Int = -1
         public const val NO_DEAD_KEY: Int = -1
         private const val MAX_POINTERS = 10
+        private val MODIFIER_KINDS = ModifierKind.entries.size
         private const val NO_KEY = -1
         private const val NO_POINTER = -1
         private const val REPEAT_DELAY_MS = 400L
