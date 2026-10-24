@@ -12,16 +12,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.repeatOnLifecycle
 import app.buckykeys.keyboard.settings.core.presentation.theme.BuckyTheme
 import app.buckykeys.keyboard.settings.home.presentation.components.AboutFooter
 import app.buckykeys.keyboard.settings.home.presentation.screen.HomeScreen
@@ -29,9 +24,9 @@ import app.buckykeys.keyboard.settings.keyboard.presentation.entry.KeyboardSetti
 import app.buckykeys.keyboard.settings.keyboard.presentation.state.rememberExtraRowDraftState
 import app.buckykeys.keyboard.settings.keyboard.presentation.view_model.KeyboardSettingsViewModel
 import app.buckykeys.keyboard.settings.onboarding.data.source.SetupStateReader
+import app.buckykeys.keyboard.settings.onboarding.domain.model.SetupState
 import app.buckykeys.keyboard.settings.onboarding.presentation.screen.OnboardingSection
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 
 @AndroidEntryPoint
 public class SettingsActivity : ComponentActivity() {
@@ -40,6 +35,8 @@ public class SettingsActivity : ComponentActivity() {
 
     private val setupReader by lazy { SetupStateReader(this) }
 
+    private var setup by mutableStateOf(SetupState(enabled = false, selected = false))
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -47,16 +44,6 @@ public class SettingsActivity : ComponentActivity() {
             BuckyTheme {
                 var tryText by rememberSaveable { mutableStateOf("") }
                 val extraRowDraft = rememberExtraRowDraftState()
-                var setup by remember { mutableStateOf(setupReader.read()) }
-                val lifecycleOwner = LocalLifecycleOwner.current
-                LaunchedEffect(lifecycleOwner) {
-                    lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                        while (true) {
-                            setup = setupReader.read()
-                            delay(SETUP_POLL_MS)
-                        }
-                    }
-                }
                 HomeScreen(
                     setup = {
                         OnboardingSection(
@@ -78,6 +65,16 @@ public class SettingsActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        setup = setupReader.read()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) setup = setupReader.read()
+    }
+
     private fun versionName(): String {
         val info =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -97,7 +94,6 @@ public class SettingsActivity : ComponentActivity() {
     }
 
     private companion object {
-        const val SETUP_POLL_MS = 1_000L
         const val SOURCE_URL = "https://github.com/DimiVlachos/bucky"
     }
 }
