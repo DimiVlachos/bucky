@@ -1,5 +1,6 @@
 package app.buckykeys.keyboard.ime.layout
 
+import kotlin.math.abs
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -51,5 +52,19 @@ class FallbackLayoutTest {
                 keys.first { it.def == KeyDef.Special(code) }.width
             }
         assertEquals(listOf(1.25f, 1.25f, 1.25f, 1.25f), widths)
+    }
+
+    @Test
+    fun `the space bar is within a quarter key of the centre`() {
+        val bottom = layout.rows.last().keys
+        val spaceIndex = bottom.indexOfFirst { it.def == KeyDef.Char(" ", " ") }
+        val left = bottom.take(spaceIndex).sumOf { it.width.toDouble() }
+        val right = bottom.drop(spaceIndex + 1).sumOf { it.width.toDouble() }
+        assertTrue("left $left, right $right", abs(left - right) <= 0.5)
+    }
+
+    @Test
+    fun `the built-in layout has no language key`() {
+        assertTrue(layout.rows.flatMap { it.keys }.none { it.def is KeyDef.LayoutSwitch })
     }
 }
