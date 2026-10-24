@@ -25,6 +25,7 @@ internal fun KeyboardSettingsEntry(
             onLanguageChange = viewModel::onLanguageChange,
             onRowHeightChange = viewModel::onRowHeightChange,
             onLandscapeRowHeightChange = viewModel::onLandscapeRowHeightChange,
+            onLabelScaleChange = viewModel::onLabelScaleChange,
             onKeyPreviewChange = viewModel::onKeyPreviewChange,
             onHapticsChange = viewModel::onHapticsChange,
             onFKeyRowChange = viewModel::onFKeyRowChange,

@@ -1,5 +1,6 @@
 package app.buckykeys.keyboard.settings.keyboard.domain.model
 
+import kotlin.math.roundToInt
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -8,6 +9,7 @@ public data class KeyboardSettings(
     val languages: List<KeyboardLanguage> = listOf(KeyboardLanguage.EN_US),
     val rowHeightDp: Int = DEFAULT_ROW_HEIGHT_DP,
     val landscapeRowHeightDp: Int = DEFAULT_LANDSCAPE_ROW_HEIGHT_DP,
+    val labelScalePercent: Int = DEFAULT_LABEL_SCALE_PERCENT,
     val keyPreview: Boolean = true,
     val haptics: Boolean = true,
     val fKeyRow: Boolean = false,
@@ -28,6 +30,9 @@ public data class KeyboardSettings(
     public fun withLandscapeRowHeight(dp: Int): KeyboardSettings =
         copy(landscapeRowHeightDp = dp.coerceIn(LANDSCAPE_ROW_HEIGHT_RANGE))
 
+    public fun withLabelScale(percent: Int): KeyboardSettings =
+        copy(labelScalePercent = snapLabelScale(percent))
+
     public fun sanitized(
         fallbackLanguages: List<KeyboardLanguage> = listOf(KeyboardLanguage.EN_US),
     ): KeyboardSettings =
@@ -38,6 +43,7 @@ public data class KeyboardSettings(
                 },
             rowHeightDp = rowHeightDp.coerceIn(ROW_HEIGHT_RANGE),
             landscapeRowHeightDp = landscapeRowHeightDp.coerceIn(LANDSCAPE_ROW_HEIGHT_RANGE),
+            labelScalePercent = snapLabelScale(labelScalePercent),
             extraRow = extraRow.filter { it.isNotBlank() }.take(MAX_EXTRA_ROW_WORDS),
         )
 
@@ -46,10 +52,18 @@ public data class KeyboardSettings(
         public const val DEFAULT_LANDSCAPE_ROW_HEIGHT_DP: Int = 34
         public val ROW_HEIGHT_RANGE: IntRange = 36..64
         public val LANDSCAPE_ROW_HEIGHT_RANGE: IntRange = 26..56
+        public const val DEFAULT_LABEL_SCALE_PERCENT: Int = 100
+        public val LABEL_SCALE_RANGE: IntRange = 80..140
+        public const val LABEL_SCALE_STEP: Int = 10
         public const val MAX_EXTRA_ROW_WORDS: Int = 64
         public const val TERMUX_DEFAULT_EXTRA_ROW: String =
             "ESC / - HOME UP END PGUP TAB CTRL ALT LEFT DOWN RIGHT PGDN"
         private val WHITESPACE = Regex("\\s+")
+
+        private fun snapLabelScale(percent: Int): Int =
+            ((percent / LABEL_SCALE_STEP.toFloat()).roundToInt() * LABEL_SCALE_STEP).coerceIn(
+                LABEL_SCALE_RANGE,
+            )
 
         public fun defaults(systemLanguage: String): KeyboardSettings =
             KeyboardSettings(

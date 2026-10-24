@@ -13,6 +13,8 @@
     <string name="settings_row_height">Ύψος πλήκτρων</string>
     <string name="settings_landscape_row_height">Ύψος πλήκτρων σε οριζόντιο προσανατολισμό</string>
     <string name="settings_dp">%1$d dp</string>
+    <string name="settings_label_size">Μέγεθος ετικετών</string>
+    <string name="settings_percent">%1$d%%</string>
     <string name="settings_feedback">Ανάδραση</string>
     <string name="settings_key_preview">Εμφάνιση του πλήκτρου πάνω από το δάχτυλο</string>
     <string name="settings_haptics">Δόνηση κατά το πάτημα πλήκτρων</string>
