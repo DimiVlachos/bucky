@@ -2,9 +2,11 @@ package app.buckykeys.keyboard.ime.engine
 
 import android.view.KeyEvent
 import app.buckykeys.keyboard.ime.geometry.KeyboardGeometry
+import app.buckykeys.keyboard.ime.layout.BuiltInLayouts
 import app.buckykeys.keyboard.ime.layout.KeyCode
 import app.buckykeys.keyboard.ime.layout.KeyDef
 import app.buckykeys.keyboard.ime.layout.ModifierKind
+import kotlin.math.abs
 
 public class KeyboardEngine(
     geometry: KeyboardGeometry,
@@ -15,6 +17,7 @@ public class KeyboardEngine(
 
     private val pointerKeys = IntArray(MAX_POINTERS) { NO_KEY }
     private val pointerConsumed = BooleanArray(MAX_POINTERS)
+    private val pointerDownX = FloatArray(MAX_POINTERS)
     private var timerPointer = NO_POINTER
     private var timerAt = NO_DEADLINE
     private var timerRepeats = false
@@ -30,6 +33,8 @@ public class KeyboardEngine(
     private val heldCounts = IntArray(MODIFIER_KINDS)
 
     public val popup: AlternatesPopup = AlternatesPopup()
+
+    public var languageSwipe: Boolean = false
 
     public var lockedMask: Int = 0
         private set
@@ -75,7 +80,7 @@ public class KeyboardEngine(
     ) {
         if (pointerId !in 0 until MAX_POINTERS) return
         when (action) {
-            PointerAction.DOWN -> press(pointerId, geometry.keyAt(x, y), timeMs)
+            PointerAction.DOWN -> press(pointerId, geometry.keyAt(x, y), x, timeMs)
             PointerAction.MOVE -> move(pointerId, x, y)
             PointerAction.CANCEL -> cancel(pointerId)
             PointerAction.UP -> lift(pointerId, x, y, sink)
@@ -127,7 +132,7 @@ public class KeyboardEngine(
         return NO_DEAD_KEY
     }
 
-    private fun press(pointerId: Int, key: Int, timeMs: Long) {
+    private fun press(pointerId: Int, key: Int, x: Float, timeMs: Long) {
         val def = if (key == NO_KEY) null else geometry.spec(key).def
         if (def !is KeyDef.Modifier) {
             stopTimer()
@@ -136,6 +141,7 @@ public class KeyboardEngine(
         endHold(pointerKeys[pointerId])
         pointerKeys[pointerId] = key
         pointerConsumed[pointerId] = false
+        pointerDownX[pointerId] = x
         if (def is KeyDef.Modifier) startHold(def.kind)
         when (def) {
             is KeyDef.Char -> previewPointer = pointerId
@@ -150,6 +156,10 @@ public class KeyboardEngine(
     }
 
     private fun move(pointerId: Int, x: Float, y: Float) {
+        if (isLanguageSwipe(pointerId, x)) {
+            swipeLanguage(pointerId, forward = x > pointerDownX[pointerId])
+            return
+        }
         if (pointerId == previewPointer && geometry.keyAt(x, y) != pointerKeys[pointerId]) {
             previewPointer = NO_POINTER
         }
@@ -158,6 +168,23 @@ public class KeyboardEngine(
             timerPointer -> if (geometry.keyAt(x, y) != pointerKeys[pointerId]) stopTimer()
         }
     }
+
+    private fun isLanguageSwipe(pointerId: Int, x: Float): Boolean {
+        if (!languageSwipe || pointerConsumed[pointerId]) return false
+        val key = pointerKeys[pointerId]
+        if (key == NO_KEY || !isSpace(geometry.spec(key).def)) return false
+        return abs(x - pointerDownX[pointerId]) >= geometry.widthPx * LANGUAGE_SWIPE_FRACTION
+    }
+
+    private fun swipeLanguage(pointerId: Int, forward: Boolean) {
+        if (pointerId == timerPointer) stopTimer()
+        if (pointerId == previewPointer) previewPointer = NO_POINTER
+        pointerConsumed[pointerId] = true
+        switchRequest =
+            if (forward) BuiltInLayouts.NEXT_LANGUAGE else BuiltInLayouts.PREVIOUS_LANGUAGE
+    }
+
+    private fun isSpace(def: KeyDef): Boolean = def is KeyDef.Char && def.primary == " "
 
     private fun cancel(pointerId: Int) {
         if (pointerId == previewPointer) previewPointer = NO_POINTER
@@ -241,7 +268,7 @@ public class KeyboardEngine(
                     KeyCode.RIGHT -> true
                     else -> false
                 }
-            is KeyDef.Char -> def.primary == " "
+            is KeyDef.Char -> isSpace(def)
             is KeyDef.Dead,
             is KeyDef.Modifier,
             is KeyDef.LayoutSwitch -> false
@@ -396,5 +423,6 @@ public class KeyboardEngine(
         private const val NO_POINTER = -1
         private const val REPEAT_DELAY_MS = 400L
         private const val REPEAT_INTERVAL_MS = 50L
+        private const val LANGUAGE_SWIPE_FRACTION = 0.08f
     }
 }

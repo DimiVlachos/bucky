@@ -5,4 +5,5 @@
     <color name="key_modifier_active">#FF3D5A80</color>
     <color name="key_modifier_locked">#FF3062AE</color>
     <color name="key_label">#FFE8EAED</color>
+    <color name="key_label_secondary">#FF9AA0A6</color>
 </resources>

@@ -80,6 +80,10 @@ public class KeyboardView(
     private val lockBarPaint = fillPaint(R.color.key_label)
     private val labelPaint = labelPaint(labelSizePx)
     private val smallLabelPaint = labelPaint(smallLabelSizePx)
+    private val spaceLabelPaint =
+        labelPaint(smallLabelSizePx).apply {
+            color = ContextCompat.getColor(context, R.color.key_label_secondary)
+        }
 
     private val languages: List<Layout> = languages.ifEmpty { listOf(FallbackLayout.pcFullEnUs) }
     private var languageIndex = initialLanguageIndex.coerceIn(0, this.languages.lastIndex)
@@ -94,6 +98,9 @@ public class KeyboardView(
     private var labelSize = FloatArray(0)
     private var labelSmall = BooleanArray(0)
     private var modifierBits = IntArray(0)
+    private var spaceKey = NO_SPACE_KEY
+    private var spaceLabelSize = 0f
+    private var spaceLabelY = 0f
     private var popupLabels = emptyArray<String>()
     private var popupShiftedLabels = emptyArray<String>()
     private var popupSmall = BooleanArray(0)
@@ -102,12 +109,14 @@ public class KeyboardView(
     private var lastLatencyMs = 0L
     private var scheduledDeadline = KeyboardEngine.NO_DEADLINE
     private val timerTick = Runnable { onTimer() }
-    private val nextLanguage = Runnable { switchToNextLanguage() }
+    private val nextLanguage = Runnable { switchLanguage(1) }
+    private val previousLanguage = Runnable { switchLanguage(-1) }
     private val logLatency = Runnable {
         Timber.tag(LATENCY_TAG).d("touch-to-draw %d ms", lastLatencyMs)
     }
 
     init {
+        engine.languageSwipe = this.languages.size > 1
         buildLabels()
         ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
             val bars =
@@ -160,6 +169,7 @@ public class KeyboardView(
         labelSize = FloatArray(count)
         labelSmall = BooleanArray(count)
         modifierBits = IntArray(count)
+        spaceKey = NO_SPACE_KEY
         val rects = geometry.rects
         for (i in 0 until count) {
             val spec = geometry.spec(i)
@@ -186,7 +196,26 @@ public class KeyboardView(
             labelY[i] =
                 (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f - (paint.ascent() + paint.descent()) / 2f
             modifierBits[i] = if (def is KeyDef.Modifier) 1 shl def.kind.ordinal else 0
+            if (engine.languageSwipe && def is KeyDef.Char && def.primary == " ") spaceKey = i
         }
+        if (spaceKey != NO_SPACE_KEY) buildSpaceLabel(rects)
+    }
+
+    private fun buildSpaceLabel(rects: FloatArray) {
+        val i = spaceKey
+        spaceLabelSize =
+            fitLabel(
+                spaceLabelPaint,
+                smallLabelSizePx,
+                layout.language,
+                layout.language,
+                rects[i * 4 + 2] - rects[i * 4],
+                labelMaxSizePx,
+            )
+        spaceLabelPaint.textSize = spaceLabelSize
+        spaceLabelY =
+            (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f -
+                (spaceLabelPaint.ascent() + spaceLabelPaint.descent()) / 2f
     }
 
     private fun fitLabel(
@@ -263,6 +292,11 @@ public class KeyboardView(
                 cornerPx,
                 fill,
             )
+            if (i == spaceKey) {
+                spaceLabelPaint.textSize = spaceLabelSize
+                canvas.drawText(layout.language, labelX[i], spaceLabelY, spaceLabelPaint)
+                continue
+            }
             val spec = geometry.spec(i)
             val label =
                 when (val def = spec.def) {
@@ -340,6 +374,7 @@ public class KeyboardView(
     override fun onDetachedFromWindow() {
         removeCallbacks(timerTick)
         removeCallbacks(nextLanguage)
+        removeCallbacks(previousLanguage)
         removeCallbacks(logLatency)
         scheduledDeadline = KeyboardEngine.NO_DEADLINE
         super.onDetachedFromWindow()
@@ -347,15 +382,16 @@ public class KeyboardView(
 
     private fun handleSwitchRequest() {
         val target = engine.takeSwitchRequest() ?: return
-        if (target == BuiltInLayouts.NEXT_LANGUAGE && languages.size > 1) {
-            post(nextLanguage)
-        } else {
-            Timber.w("no layout for switch target %s", target)
+        when {
+            languages.size < 2 -> Timber.w("no other language for switch target %s", target)
+            target == BuiltInLayouts.NEXT_LANGUAGE -> post(nextLanguage)
+            target == BuiltInLayouts.PREVIOUS_LANGUAGE -> post(previousLanguage)
+            else -> Timber.w("no layout for switch target %s", target)
         }
     }
 
-    private fun switchToNextLanguage() {
-        languageIndex = (languageIndex + 1) % languages.size
+    private fun switchLanguage(step: Int) {
+        languageIndex = (languageIndex + step).mod(languages.size)
         rebuildGeometryIfNeeded()
         languageChangeListener.onLanguageChanged(languageIndex)
         requestLayout()
@@ -487,6 +523,7 @@ public class KeyboardView(
 
     private companion object {
         const val NO_PENDING = -1L
+        const val NO_SPACE_KEY = -1
         const val LATENCY_TAG = "PCK-LAT"
         const val LOCK_BAR_WIDTH_FRACTION = 0.3f
     }
