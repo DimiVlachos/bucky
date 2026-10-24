@@ -54,6 +54,15 @@ class KeyboardSettingsViewModelTest {
         }
 
     @Test
+    fun `a label size change is saved`() =
+        runTest(dispatcher) {
+            val viewModel = KeyboardSettingsViewModel(repository, FakeExtraRowInterpreter())
+            backgroundScope.launch { viewModel.state.collect {} }
+            viewModel.onLabelScaleChange(120)
+            assertEquals(120, repository.stored.value.labelScalePercent)
+        }
+
+    @Test
     fun `a failed save sets the error flag instead of crashing`() =
         runTest(dispatcher) {
             val viewModel = KeyboardSettingsViewModel(repository, FakeExtraRowInterpreter())

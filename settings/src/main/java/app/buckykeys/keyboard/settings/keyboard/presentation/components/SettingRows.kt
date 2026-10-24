@@ -1,5 +1,6 @@
 package app.buckykeys.keyboard.settings.keyboard.presentation.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,7 +28,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
-import app.buckykeys.keyboard.settings.R
 import app.buckykeys.keyboard.settings.core.presentation.theme.BuckyTheme
 import kotlin.math.roundToInt
 
@@ -95,14 +95,16 @@ internal fun SwitchRow(text: String, checked: Boolean, onCheckedChange: (Boolean
 }
 
 @Composable
-internal fun HeightSlider(
+internal fun SettingSlider(
     text: String,
-    valueDp: Int,
+    value: Int,
     range: IntRange,
+    @StringRes valueFormat: Int,
     onValueChangeFinished: (Int) -> Unit,
+    step: Int = 1,
 ) {
-    var dragValue by remember(valueDp) { mutableFloatStateOf(valueDp.toFloat()) }
-    val valueText = stringResource(R.string.settings_dp, dragValue.roundToInt())
+    var dragValue by remember(value) { mutableFloatStateOf(value.toFloat()) }
+    val valueText = stringResource(valueFormat, dragValue.roundToInt())
     Column {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
@@ -117,6 +119,7 @@ internal fun HeightSlider(
             onValueChange = { dragValue = it },
             onValueChangeFinished = { onValueChangeFinished(dragValue.roundToInt()) },
             valueRange = range.first.toFloat()..range.last.toFloat(),
+            steps = if (step > 1) (range.last - range.first) / step - 1 else 0,
             modifier =
                 Modifier.semantics {
                     contentDescription = text

@@ -50,6 +50,10 @@ constructor(
         update { it.withLandscapeRowHeight(dp) }
     }
 
+    fun onLabelScaleChange(percent: Int) {
+        update { it.withLabelScale(percent) }
+    }
+
     fun onKeyPreviewChange(enabled: Boolean) {
         update { it.copy(keyPreview = enabled) }
     }

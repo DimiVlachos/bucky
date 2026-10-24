@@ -40,14 +40,15 @@ public class KeyboardView(
     private val latencyLogging: Boolean,
     private val rowHeightPx: Int,
     private val haptics: Boolean,
+    labelScale: Float = 1f,
 ) : View(context) {
 
     private val gapPx = resources.getDimension(R.dimen.key_gap)
     private val cornerPx = resources.getDimension(R.dimen.key_corner_radius)
     private val labelPaddingPx = resources.getDimension(R.dimen.key_label_padding)
     private val labelMinSizePx = resources.getDimension(R.dimen.key_label_min_size)
-    private val labelSizePx = resources.getDimension(R.dimen.key_label_size)
-    private val smallLabelSizePx = resources.getDimension(R.dimen.key_label_small_size)
+    private val labelSizePx = resources.getDimension(R.dimen.key_label_size) * labelScale
+    private val smallLabelSizePx = resources.getDimension(R.dimen.key_label_small_size) * labelScale
     private val lockBarHeightPx = resources.getDimension(R.dimen.key_lock_bar_height)
     private val lockBarInsetPx = resources.getDimension(R.dimen.key_lock_bar_inset)
     private val labelMaxSizePx = rowHeightPx * LABEL_HEIGHT_FRACTION
@@ -225,7 +226,34 @@ public class KeyboardView(
             if (engine.languageSwipe && def is KeyDef.Char && def.primary == " ") spaceKey = i
             if (fnLabels[i].isNotEmpty()) buildFnLabel(i, rects)
         }
+        evenOut(labelSize, labelSmall, labelY, rects) { true }
+        evenOut(fnSize, fnSmall, fnY, rects) { fnLabels[it].isNotEmpty() }
         if (spaceKey != NO_SPACE_KEY) buildSpaceLabel(rects)
+    }
+
+    // One size per label class, so a key whose shifted form is wider (5 and %) doesn't shrink
+    // alone.
+    private inline fun evenOut(
+        sizes: FloatArray,
+        small: BooleanArray,
+        ys: FloatArray,
+        rects: FloatArray,
+        included: (Int) -> Boolean,
+    ) {
+        var bigMin = Float.MAX_VALUE
+        var smallMin = Float.MAX_VALUE
+        for (i in sizes.indices) {
+            if (!included(i)) continue
+            if (small[i]) smallMin = minOf(smallMin, sizes[i]) else bigMin = minOf(bigMin, sizes[i])
+        }
+        for (i in sizes.indices) {
+            if (!included(i)) continue
+            sizes[i] = if (small[i]) smallMin else bigMin
+            val paint = if (small[i]) smallLabelPaint else labelPaint
+            paint.textSize = sizes[i]
+            ys[i] =
+                (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f - (paint.ascent() + paint.descent()) / 2f
+        }
     }
 
     private fun buildFnLabel(i: Int, rects: FloatArray) {
