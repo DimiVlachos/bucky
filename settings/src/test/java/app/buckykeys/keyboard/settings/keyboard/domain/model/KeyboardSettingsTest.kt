@@ -73,8 +73,60 @@ class KeyboardSettingsTest {
     }
 
     @Test
-    fun `the extra row keeps at most fifteen words`() {
-        assertEquals(15, english.withExtraRow(List(20) { "/" }.joinToString(" ")).extraRow.size)
+    fun `the extra row keeps more than fifteen words so invalid ones do not use up key slots`() {
+        assertEquals(20, english.withExtraRow(List(20) { "/" }.joinToString(" ")).extraRow.size)
+    }
+
+    @Test
+    fun `the extra row is capped to bound storage`() {
+        assertEquals(
+            KeyboardSettings.MAX_EXTRA_ROW_WORDS,
+            english.withExtraRow(List(100) { "/" }.joinToString(" ")).extraRow.size,
+        )
+    }
+
+    @Test
+    fun `sanitized removes duplicate languages`() {
+        val settings = english.copy(languages = listOf(KeyboardLanguage.EL, KeyboardLanguage.EL))
+        assertEquals(listOf(KeyboardLanguage.EL), settings.sanitized().languages)
+    }
+
+    @Test
+    fun `sanitized replaces an empty language list with the fallback`() {
+        val settings = english.copy(languages = emptyList())
+        assertEquals(listOf(KeyboardLanguage.EN_US), settings.sanitized().languages)
+        assertEquals(
+            listOf(KeyboardLanguage.EL),
+            settings.sanitized(fallbackLanguages = listOf(KeyboardLanguage.EL)).languages,
+        )
+        assertEquals(
+            listOf(KeyboardLanguage.EN_US),
+            settings.sanitized(fallbackLanguages = emptyList()).languages,
+        )
+    }
+
+    @Test
+    fun `sanitized clamps both heights`() {
+        val settings = english.copy(rowHeightDp = 0, landscapeRowHeightDp = 1_000).sanitized()
+        assertEquals(KeyboardSettings.ROW_HEIGHT_RANGE.first, settings.rowHeightDp)
+        assertEquals(
+            KeyboardSettings.LANDSCAPE_ROW_HEIGHT_RANGE.last,
+            settings.landscapeRowHeightDp,
+        )
+    }
+
+    @Test
+    fun `sanitized drops blank extra keys and caps the extra row`() {
+        val settings = english.copy(extraRow = listOf("ESC", " ", "") + List(100) { "/" })
+        val extraRow = settings.sanitized().extraRow
+        assertEquals("ESC", extraRow.first())
+        assertEquals(KeyboardSettings.MAX_EXTRA_ROW_WORDS, extraRow.size)
+    }
+
+    @Test
+    fun `sanitized keeps valid settings unchanged`() {
+        val settings = KeyboardSettings.defaults(systemLanguage = "el").withExtraRow("ESC TAB")
+        assertEquals(settings, settings.sanitized())
     }
 
     @Test

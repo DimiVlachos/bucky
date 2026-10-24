@@ -3,6 +3,7 @@ package app.buckykeys.keyboard.settings.keyboard.presentation.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -15,14 +16,25 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import app.buckykeys.keyboard.settings.R
 import app.buckykeys.keyboard.settings.core.presentation.theme.BuckyTheme
+
+private val Whitespace = Regex("\\s+")
+
+private fun String.normalized(): String =
+    split(Whitespace).filter { it.isNotEmpty() }.joinToString(" ")
 
 @Composable
 internal fun ExtraRowEditor(saved: List<String>, onSave: (String) -> Unit) {
     val savedText = saved.joinToString(" ")
     var text by rememberSaveable(savedText) { mutableStateOf(savedText) }
+    val changed = text.normalized() != savedText
+    val save = {
+        if (changed) onSave(text)
+        text = text.normalized()
+    }
     Column(verticalArrangement = Arrangement.spacedBy(BuckyTheme.spacing.small)) {
         OutlinedTextField(
             value = text,
@@ -33,7 +45,9 @@ internal fun ExtraRowEditor(saved: List<String>, onSave: (String) -> Unit) {
                 KeyboardOptions(
                     capitalization = KeyboardCapitalization.None,
                     autoCorrectEnabled = false,
+                    imeAction = ImeAction.Done,
                 ),
+            keyboardActions = KeyboardActions(onDone = { save() }),
             modifier = Modifier.fillMaxWidth(),
         )
         Text(
@@ -41,11 +55,7 @@ internal fun ExtraRowEditor(saved: List<String>, onSave: (String) -> Unit) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Button(
-            onClick = { onSave(text) },
-            enabled = text != savedText,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
+        Button(onClick = save, enabled = changed, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.settings_save))
         }
     }
