@@ -68,4 +68,23 @@ class LayoutTransformsTest {
             )
         assertEquals(layout.rows.take(1), layout.withoutLanguageKey().rows)
     }
+
+    @Test
+    fun `removing the keyboard key gives its width to the widest key`() {
+        val layout =
+            Layout(
+                "t",
+                "T",
+                listOf(
+                    Row(
+                        listOf(
+                            KeySpec(KeyDef.Char(" ", " "), "", 4f),
+                            KeySpec(KeyDef.LayoutSwitch(BuiltInLayouts.OTHER_KEYBOARD), "⌨"),
+                        ),
+                    ),
+                ),
+            )
+        val row = layout.withoutSwitchKey(BuiltInLayouts.OTHER_KEYBOARD).rows.single()
+        assertEquals(listOf(5f), row.keys.map { it.width })
+    }
 }

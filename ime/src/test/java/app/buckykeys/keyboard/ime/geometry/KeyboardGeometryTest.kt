@@ -3,6 +3,9 @@ package app.buckykeys.keyboard.ime.geometry
 import app.buckykeys.keyboard.ime.layout.FallbackLayout
 import app.buckykeys.keyboard.ime.layout.KeyCode
 import app.buckykeys.keyboard.ime.layout.KeyDef
+import app.buckykeys.keyboard.ime.layout.KeySpec
+import app.buckykeys.keyboard.ime.layout.Layout
+import app.buckykeys.keyboard.ime.layout.Row
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -76,5 +79,28 @@ class KeyboardGeometryTest {
     private fun centerX(code: KeyCode): Float {
         val index = indexOf(code)
         return (geometry.rects[index * 4] + geometry.rects[index * 4 + 2]) / 2f
+    }
+
+    private val inset =
+        KeyboardGeometry(
+            Layout(
+                "t",
+                "T",
+                listOf(Row(List(9) { KeySpec(KeyDef.Char("$it", "$it"), "$it") }, inset = 0.5f)),
+            ),
+            widthPx = 1000,
+            rowHeightPx = 100,
+        )
+
+    @Test
+    fun `an inset row starts half a key in`() {
+        assertEquals(50f, inset.rects[0], 0.01f)
+        assertEquals(100f, inset.rects[2] - inset.rects[0], 0.01f)
+    }
+
+    @Test
+    fun `a tap in the inset goes to the edge key`() {
+        assertEquals(0, inset.keyAt(10f, 50f))
+        assertEquals(8, inset.keyAt(995f, 50f))
     }
 }

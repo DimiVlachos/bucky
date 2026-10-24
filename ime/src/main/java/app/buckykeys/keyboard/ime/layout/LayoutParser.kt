@@ -11,13 +11,33 @@ import kotlinx.serialization.json.floatOrNull
 public object LayoutParser {
 
     private val layoutFields = setOf("id", "name", "language", "rows")
-    private val rowFields = setOf("keys")
+    private val rowFields = setOf("keys", "inset")
     private val keyFields =
-        setOf("chars", "dead", "key", "switchTo", "label", "width", "longPress", "latin", "fn")
+        setOf(
+            "chars",
+            "dead",
+            "key",
+            "switchTo",
+            "holdTo",
+            "label",
+            "width",
+            "longPress",
+            "latin",
+            "fn",
+            "then",
+        )
     private val keyKinds = listOf("chars", "dead", "key", "switchTo")
     private const val LATIN_KEYS =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-=[];',./\\`"
     private val keyNameLike = Regex("[A-Z][A-Z0-9_]+")
+    private val switchTargets =
+        setOf(
+            BuiltInLayouts.NEXT_LANGUAGE,
+            BuiltInLayouts.PAGE_LETTERS,
+            BuiltInLayouts.PAGE_SYMBOLS,
+            BuiltInLayouts.PAGE_SYMBOLS_MORE,
+            BuiltInLayouts.OTHER_KEYBOARD,
+        )
 
     public fun parse(json: String): Result<Layout> =
         try {
@@ -50,6 +70,7 @@ public object LayoutParser {
             obj.nonEmptyArray("keys", path).mapIndexed { index, key ->
                 key(key, "$path.keys[$index]")
             },
+            obj["inset"]?.let { inset(it, "$path.inset") } ?: 0f,
         )
     }
 
@@ -61,17 +82,19 @@ public object LayoutParser {
                 "chars" -> chars(obj, path)
                 "dead" -> dead(obj, path)
                 "key" -> named(obj.string("key", path), "$path.key")
-                "switchTo" -> switchTo(obj.string("switchTo", path), "$path.switchTo")
+                "switchTo" -> switchTo(obj, path)
                 else -> fail(path, "needs exactly one of chars, dead, key or switchTo")
             }
         if (def !is KeyDef.Char && "longPress" in obj) fail("$path.longPress", "needs chars")
+        if (def !is KeyDef.LayoutSwitch && "holdTo" in obj) fail("$path.holdTo", "needs switchTo")
         if (def !is KeyDef.Char && def !is KeyDef.Dead && "latin" in obj) {
             fail("$path.latin", "needs chars or dead")
         }
         val label = if ("label" in obj) obj.string("label", path) else DefaultLabels.of(def)
         val width = obj["width"]?.let { width(it, "$path.width") } ?: 1f
         val fn = if ("fn" in obj) alternate(obj.string("fn", path), "$path.fn") else null
-        return KeySpec(def, label, width, fn)
+        val then = if ("then" in obj) target(obj.string("then", path), "$path.then") else null
+        return KeySpec(def, label, width, fn, then)
     }
 
     private fun chars(obj: JsonObject, path: String): KeyDef.Char {
@@ -140,11 +163,26 @@ public object LayoutParser {
     private fun compositions(base: String, marks: List<String>): Map<String, String> =
         marks.mapNotNull { mark -> DeadKeys.compose(base, mark)?.let { mark to it } }.toMap()
 
-    private fun switchTo(target: String, path: String): KeyDef.LayoutSwitch {
-        if (target != BuiltInLayouts.NEXT_LANGUAGE) {
-            fail(path, "unsupported switch target \"$target\"")
+    private fun switchTo(obj: JsonObject, path: String): KeyDef.LayoutSwitch {
+        val target = target(obj.string("switchTo", path), "$path.switchTo")
+        val hold = if ("holdTo" in obj) obj.string("holdTo", path) else null
+        if (hold != null && hold != BuiltInLayouts.FULL_LAYOUT) {
+            fail("$path.holdTo", "unsupported hold target \"$hold\"")
         }
-        return KeyDef.LayoutSwitch(target)
+        return KeyDef.LayoutSwitch(target, hold)
+    }
+
+    private fun target(target: String, path: String): String {
+        if (target !in switchTargets) fail(path, "unsupported switch target \"$target\"")
+        return target
+    }
+
+    private fun inset(element: JsonElement, path: String): Float {
+        val value =
+            (element as? JsonPrimitive)?.takeUnless { it.isString }?.floatOrNull
+                ?: fail(path, "expected a number")
+        if (!value.isFinite() || value < 0f) fail(path, "must be zero or more")
+        return value
     }
 
     private fun alternate(name: String, path: String): KeyDef {

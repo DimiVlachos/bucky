@@ -5,9 +5,10 @@ public data class KeySpec(
     val label: String,
     val width: Float = 1f,
     val fn: KeyDef? = null,
+    val then: String? = null,
 )
 
-public data class Row(val keys: List<KeySpec>)
+public data class Row(val keys: List<KeySpec>, val inset: Float = 0f)
 
 public data class Layout(
     val id: String,

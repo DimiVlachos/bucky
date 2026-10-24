@@ -10,6 +10,11 @@ public object BuiltInLayouts {
     public const val PC_FULL_EL: String = "pc_full_el"
     public const val NEXT_LANGUAGE: String = "@language"
     public const val PREVIOUS_LANGUAGE: String = "@language-previous"
+    public const val PAGE_LETTERS: String = "@page:letters"
+    public const val PAGE_SYMBOLS: String = "@page:symbols"
+    public const val PAGE_SYMBOLS_MORE: String = "@page:symbols-more"
+    public const val OTHER_KEYBOARD: String = "@keyboard"
+    public const val FULL_LAYOUT: String = "@full"
 
     public fun load(assets: AssetManager, id: String): Layout = loadOrFallback {
         assets.open("layouts/$id.json").bufferedReader().use { it.readText() }
