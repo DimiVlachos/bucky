@@ -474,6 +474,8 @@ public class KeyboardView(
 
     public fun resetState() {
         engine.reset()
+        removeCallbacks(pageSwitch)
+        removeCallbacks(actionRequest)
         if (page != BuiltInLayouts.PAGE_LETTERS) {
             page = BuiltInLayouts.PAGE_LETTERS
             rebuildGeometryIfNeeded()
@@ -550,6 +552,7 @@ public class KeyboardView(
                 if (engine.popup.isOpen) buildPopupLabels()
                 if (haptics) performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             }
+            handleSwitchRequest()
         } catch (e: RuntimeException) {
             Timber.e(e, "onTimer: engine failed, resetting")
             engine.reset()

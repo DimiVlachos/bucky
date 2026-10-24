@@ -19,6 +19,8 @@ public fun enterAction(imeOptions: Int, inputType: Int, rawEnter: Boolean): Int 
 }
 
 public fun shouldInsertPeriod(before: CharSequence?, sinceLastSpaceMs: Long): Boolean {
-    if (before == null || before.length < 2 || sinceLastSpaceMs > PERIOD_WINDOW_MS) return false
+    if (before == null || before.length < 2 || !periodWindowOpen(sinceLastSpaceMs)) return false
     return before[before.lastIndex] == ' ' && before[before.lastIndex - 1].isLetterOrDigit()
 }
+
+public fun periodWindowOpen(sinceLastSpaceMs: Long): Boolean = sinceLastSpaceMs <= PERIOD_WINDOW_MS

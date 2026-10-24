@@ -1137,6 +1137,37 @@ class KeyboardEngineTest {
         assertTrue(engine.modifierMask and (1 shl ModifierKind.SHIFT.ordinal) != 0)
     }
 
+    @Test
+    fun `auto shift does not reach enter`() {
+        engine.setAutoShift(true)
+        tap("Enter")
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_ENTER, 0)), sink.emitted)
+    }
+
+    @Test
+    fun `auto shift does not reach backspace`() {
+        engine.setAutoShift(true)
+        tap("⌫")
+        assertEquals(listOf(del), sink.emitted)
+    }
+
+    @Test
+    fun `a greek sentence can start with an accented capital`() {
+        useGreek()
+        engine.setAutoShift(true)
+        tap("΄")
+        tap("α")
+        assertEquals(listOf(Text("Ά")), sink.emitted)
+    }
+
+    @Test
+    fun `holding the keyboard key counts as a long press`() {
+        useRow(keyboardKey, char("c"))
+        down("⌨", pointer = 0)
+        tick(LONG_PRESS_MS)
+        assertEquals(1, engine.longPressCount)
+    }
+
     private val keyboardKey =
         KeySpec(KeyDef.LayoutSwitch(BuiltInLayouts.OTHER_KEYBOARD, BuiltInLayouts.FULL_LAYOUT), "⌨")
 

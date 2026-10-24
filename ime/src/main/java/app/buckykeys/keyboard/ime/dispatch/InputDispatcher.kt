@@ -23,7 +23,11 @@ public class InputDispatcher(private val connection: () -> InputConnection?) : I
         }
         val now = SystemClock.uptimeMillis()
         val since = if (lastSpaceAt == NO_SPACE) Long.MAX_VALUE else now - lastSpaceAt
-        if (doubleSpacePeriod && shouldInsertPeriod(target.getTextBeforeCursor(2, 0), since)) {
+        if (
+            doubleSpacePeriod &&
+                periodWindowOpen(since) &&
+                shouldInsertPeriod(target.getTextBeforeCursor(2, 0), since)
+        ) {
             target.deleteSurroundingText(1, 0)
             target.commitText(". ", 1)
             lastSpaceAt = NO_SPACE
