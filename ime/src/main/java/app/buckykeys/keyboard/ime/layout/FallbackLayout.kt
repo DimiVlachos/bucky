@@ -1,6 +1,6 @@
 package app.buckykeys.keyboard.ime.layout
 
-public object SpikeLayout {
+public object FallbackLayout {
 
     public val pcFullEnUs: Layout =
         Layout(
