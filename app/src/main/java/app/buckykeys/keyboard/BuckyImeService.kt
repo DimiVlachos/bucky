@@ -96,6 +96,7 @@ class BuckyImeService : InputMethodService() {
                 latencyLogging = BuildConfig.DEBUG,
                 rowHeightPx = rowHeightPx(languages.maxOf { it.rows.size }),
                 haptics = settings.haptics,
+                labelScale = settings.labelScalePercent / PERCENT,
             )
             .also {
                 it.previewEnabled = previewAllowed(currentInputEditorInfo)
@@ -171,4 +172,8 @@ class BuckyImeService : InputMethodService() {
 
     private fun previewAllowed(info: EditorInfo?): Boolean =
         settings.keyPreview && !isPasswordInput(info?.inputType ?: 0)
+
+    private companion object {
+        const val PERCENT = 100f
+    }
 }

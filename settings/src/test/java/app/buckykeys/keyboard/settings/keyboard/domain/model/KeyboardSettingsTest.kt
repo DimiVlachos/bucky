@@ -65,6 +65,23 @@ class KeyboardSettingsTest {
     }
 
     @Test
+    fun `the label size defaults to one hundred percent`() {
+        assertEquals(100, KeyboardSettings.defaults(systemLanguage = "en").labelScalePercent)
+    }
+
+    @Test
+    fun `the label size snaps to ten percent steps within its range`() {
+        assertEquals(110, english.withLabelScale(113).labelScalePercent)
+        assertEquals(140, english.withLabelScale(500).labelScalePercent)
+        assertEquals(80, english.withLabelScale(0).labelScalePercent)
+    }
+
+    @Test
+    fun `sanitized clamps the label size`() {
+        assertEquals(140, english.copy(labelScalePercent = 999).sanitized().labelScalePercent)
+    }
+
+    @Test
     fun `the extra row is split into words`() {
         assertEquals(
             listOf("ESC", "TAB", "~", "|"),

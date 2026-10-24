@@ -15,8 +15,8 @@ import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardLanguage
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
 import app.buckykeys.keyboard.settings.keyboard.presentation.components.CheckboxRow
 import app.buckykeys.keyboard.settings.keyboard.presentation.components.ExtraRowEditor
-import app.buckykeys.keyboard.settings.keyboard.presentation.components.HeightSlider
 import app.buckykeys.keyboard.settings.keyboard.presentation.components.SectionTitle
+import app.buckykeys.keyboard.settings.keyboard.presentation.components.SettingSlider
 import app.buckykeys.keyboard.settings.keyboard.presentation.components.SwitchRow
 import app.buckykeys.keyboard.settings.keyboard.presentation.state.ExtraRowDraftState
 
@@ -26,6 +26,7 @@ internal fun KeyboardSettingsScreen(
     onLanguageChange: (KeyboardLanguage, Boolean) -> Unit,
     onRowHeightChange: (Int) -> Unit,
     onLandscapeRowHeightChange: (Int) -> Unit,
+    onLabelScaleChange: (Int) -> Unit,
     onKeyPreviewChange: (Boolean) -> Unit,
     onHapticsChange: (Boolean) -> Unit,
     onFKeyRowChange: (Boolean) -> Unit,
@@ -55,17 +56,27 @@ internal fun KeyboardSettingsScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         SectionTitle(stringResource(R.string.settings_size))
-        HeightSlider(
+        SettingSlider(
             text = stringResource(R.string.settings_row_height),
-            valueDp = settings.rowHeightDp,
+            value = settings.rowHeightDp,
             range = KeyboardSettings.ROW_HEIGHT_RANGE,
+            valueFormat = R.string.settings_dp,
             onValueChangeFinished = onRowHeightChange,
         )
-        HeightSlider(
+        SettingSlider(
             text = stringResource(R.string.settings_landscape_row_height),
-            valueDp = settings.landscapeRowHeightDp,
+            value = settings.landscapeRowHeightDp,
             range = KeyboardSettings.LANDSCAPE_ROW_HEIGHT_RANGE,
+            valueFormat = R.string.settings_dp,
             onValueChangeFinished = onLandscapeRowHeightChange,
+        )
+        SettingSlider(
+            text = stringResource(R.string.settings_label_size),
+            value = settings.labelScalePercent,
+            range = KeyboardSettings.LABEL_SCALE_RANGE,
+            valueFormat = R.string.settings_percent,
+            step = KeyboardSettings.LABEL_SCALE_STEP,
+            onValueChangeFinished = onLabelScaleChange,
         )
         SectionTitle(stringResource(R.string.settings_feedback))
         SwitchRow(
@@ -106,6 +117,7 @@ private fun KeyboardSettingsScreenPreview() {
         KeyboardSettingsScreen(
             KeyboardSettings.defaults("el"),
             { _, _ -> },
+            {},
             {},
             {},
             {},
