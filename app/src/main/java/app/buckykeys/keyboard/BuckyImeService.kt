@@ -28,7 +28,11 @@ class BuckyImeService : InputMethodService() {
 
     private var keyboardView: KeyboardView? = null
 
-    private val layout: Layout by lazy { BuiltInLayouts.load(assets, BuiltInLayouts.PC_FULL_EN_US) }
+    private val languages: List<Layout> by lazy {
+        listOf(BuiltInLayouts.PC_FULL_EN_US, BuiltInLayouts.PC_FULL_EL).map {
+            BuiltInLayouts.load(assets, it)
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -40,7 +44,7 @@ class BuckyImeService : InputMethodService() {
     override fun onCreateInputView(): View =
         KeyboardView(
                 context = this,
-                layout = layout,
+                languages = languages,
                 sink = InputDispatcher { currentInputConnection },
                 latencyLogging = BuildConfig.DEBUG,
             )

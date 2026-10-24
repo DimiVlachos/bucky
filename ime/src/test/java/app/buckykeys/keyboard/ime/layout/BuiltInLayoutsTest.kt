@@ -36,4 +36,52 @@ class BuiltInLayoutsTest {
             BuiltInLayouts.loadOrFallback { throw IOException("layouts/pc_full_en_us.json") },
         )
     }
+
+    @Test
+    fun `the greek layout parses`() {
+        assertEquals(
+            "pc_full_el",
+            LayoutParser.parse(asset(BuiltInLayouts.PC_FULL_EL)).getOrThrow().id,
+        )
+    }
+
+    @Test
+    fun `the greek layout keeps every key of the english one in place`() {
+        val en = LayoutParser.parse(asset(BuiltInLayouts.PC_FULL_EN_US)).getOrThrow()
+        val el = LayoutParser.parse(asset(BuiltInLayouts.PC_FULL_EL)).getOrThrow()
+        assertEquals(
+            en.rows.map { row -> row.keys.map { it.width } },
+            el.rows.map { row -> row.keys.map { it.width } },
+        )
+        en.rows.zip(el.rows).forEach { (enRow, elRow) ->
+            enRow.keys.zip(elRow.keys).forEach { (enKey, elKey) ->
+                val enDef = enKey.def
+                val elDef = elKey.def
+                val latin =
+                    when (elDef) {
+                        is KeyDef.Char -> elDef.latin ?: elDef.primary
+                        is KeyDef.Dead -> elDef.latin
+                        else -> null
+                    }
+                if (enDef is KeyDef.Char) assertEquals(elKey.label, enDef.primary, latin)
+                else assertEquals(enDef, elDef)
+            }
+        }
+    }
+
+    @Test
+    fun `every greek vowel composes with the tonos`() {
+        val el = LayoutParser.parse(asset(BuiltInLayouts.PC_FULL_EL)).getOrThrow()
+        val chars =
+            el.rows
+                .flatMap { it.keys }
+                .mapNotNull { it.def as? KeyDef.Char }
+                .associateBy { it.primary }
+        mapOf("α" to "ά", "ε" to "έ", "η" to "ή", "ι" to "ί", "ο" to "ό", "υ" to "ύ", "ω" to "ώ")
+            .forEach { (vowel, accented) ->
+                assertEquals(vowel, accented, chars.getValue(vowel).composed["΄"])
+            }
+        assertEquals("ϊ", chars.getValue("ι").composed["¨"])
+        assertEquals("Ϋ", chars.getValue("υ").composedShifted["¨"])
+    }
 }

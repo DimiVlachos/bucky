@@ -17,6 +17,7 @@ import app.buckykeys.keyboard.ime.engine.InputSink
 import app.buckykeys.keyboard.ime.engine.KeyboardEngine
 import app.buckykeys.keyboard.ime.engine.PointerAction
 import app.buckykeys.keyboard.ime.geometry.KeyboardGeometry
+import app.buckykeys.keyboard.ime.layout.BuiltInLayouts
 import app.buckykeys.keyboard.ime.layout.DefaultLabels
 import app.buckykeys.keyboard.ime.layout.KeyDef
 import app.buckykeys.keyboard.ime.layout.Layout
@@ -26,7 +27,7 @@ import timber.log.Timber
 @SuppressLint("ViewConstructor")
 public class KeyboardView(
     context: Context,
-    private val layout: Layout,
+    private val languages: List<Layout>,
     private val sink: InputSink,
     private val latencyLogging: Boolean,
 ) : View(context) {
@@ -62,6 +63,10 @@ public class KeyboardView(
     private val labelPaint = labelPaint(R.dimen.key_label_size)
     private val smallLabelPaint = labelPaint(R.dimen.key_label_small_size)
 
+    private var languageIndex = 0
+    private val layout: Layout
+        get() = languages[languageIndex]
+
     private var geometry = KeyboardGeometry(layout, 0, rowHeightPx)
     private var engine = KeyboardEngine(geometry, longPressMs)
     private var labelX = FloatArray(0)
@@ -71,6 +76,7 @@ public class KeyboardView(
     private var pendingDownTime = NO_PENDING
     private var scheduledDeadline = KeyboardEngine.NO_DEADLINE
     private val timerTick = Runnable { onTimer() }
+    private val nextLanguage = Runnable { switchToNextLanguage() }
 
     init {
         ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
@@ -140,6 +146,7 @@ public class KeyboardView(
             val fill =
                 when {
                     engine.isPressed(i) -> pressedPaint
+                    i == engine.pendingDeadKey -> activePaint
                     modifierBits[i] and locked != 0 -> lockedPaint
                     modifierBits[i] and mask != 0 -> activePaint
                     else -> keyPaint
@@ -188,6 +195,7 @@ public class KeyboardView(
                 MotionEvent.ACTION_CANCEL ->
                     for (i in 0 until event.pointerCount) dispatch(event, i, PointerAction.CANCEL)
             }
+            handleSwitchRequest()
         } catch (e: RuntimeException) {
             Timber.e(e, "onTouchEvent: engine failed, resetting")
             engine.reset()
@@ -205,8 +213,25 @@ public class KeyboardView(
 
     override fun onDetachedFromWindow() {
         removeCallbacks(timerTick)
+        removeCallbacks(nextLanguage)
         scheduledDeadline = KeyboardEngine.NO_DEADLINE
         super.onDetachedFromWindow()
+    }
+
+    private fun handleSwitchRequest() {
+        val target = engine.takeSwitchRequest() ?: return
+        if (target == BuiltInLayouts.NEXT_LANGUAGE && languages.size > 1) {
+            post(nextLanguage)
+        } else {
+            Timber.w("no layout for switch target %s", target)
+        }
+    }
+
+    private fun switchToNextLanguage() {
+        languageIndex = (languageIndex + 1) % languages.size
+        rebuildGeometry()
+        requestLayout()
+        invalidate()
     }
 
     private fun onTimer() {
