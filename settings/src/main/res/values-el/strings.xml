@@ -28,4 +28,5 @@
     <string name="settings_extra_row_preview">Πλήκτρα: %1$s</string>
     <string name="settings_extra_row_unknown">Δεν είναι πλήκτρο: %1$s</string>
     <string name="settings_extra_row_limit">Χρησιμοποιούνται μόνο τα πρώτα %1$d πλήκτρα.</string>
+    <string name="settings_extra_row_termux_default">Προεπιλεγμένα πλήκτρα του Termux</string>
 </resources>
