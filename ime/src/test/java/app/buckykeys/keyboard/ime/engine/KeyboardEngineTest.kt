@@ -413,7 +413,7 @@ class KeyboardEngineTest {
     }
 
     @Test
-    fun `holding a letter for 300 ms types its shifted form`() {
+    fun `holding a letter past the long-press timeout types its shifted form`() {
         down("a", pointer = 0)
         assertEquals(300L, engine.nextDeadline)
         tick(300)
@@ -423,7 +423,7 @@ class KeyboardEngineTest {
     }
 
     @Test
-    fun `a letter released before 300 ms types normally`() {
+    fun `a letter released before the long-press timeout types normally`() {
         down("a", pointer = 0)
         tick(299)
         up("a", pointer = 0)
@@ -504,7 +504,7 @@ class KeyboardEngineTest {
     }
 
     @Test
-    fun `pressing the next key before 300 ms cancels the long press`() {
+    fun `pressing the next key before the long-press timeout cancels the long press`() {
         down("a", pointer = 0)
         now = 100
         down("s", pointer = 1)
@@ -722,6 +722,209 @@ class KeyboardEngineTest {
         assertEquals(listOf(Text("α")), sink.emitted)
     }
 
+    @Test
+    fun `locked and one-shot modifiers survive a geometry change`() {
+        tap("Ctrl")
+        tap("Ctrl")
+        tap("Shift")
+        swapGeometry(KeyboardGeometry(FallbackLayout.pcFullEnUs, 720, 100))
+        tap("↑")
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_DPAD_UP, ctrl or shift)), sink.emitted)
+        assertEquals(ctrlBit, engine.lockedMask)
+    }
+
+    @Test
+    fun `a pending dead key survives a geometry change`() {
+        useGreek()
+        tap("΄")
+        swapGeometry(KeyboardGeometry(lastLayout, 800, 90))
+        assertEquals(indexOf("΄"), engine.pendingDeadKey)
+        tap("α")
+        assertEquals(listOf(Text("ά")), sink.emitted)
+    }
+
+    @Test
+    fun `a geometry with no matching dead key drops the pending mark`() {
+        useGreek()
+        tap("΄")
+        swapGeometry(KeyboardGeometry(FallbackLayout.pcFullEnUs, 1080, 120))
+        assertEquals(KeyboardEngine.NO_DEAD_KEY, engine.pendingDeadKey)
+        tap("a")
+        assertEquals(listOf(Text("a")), sink.emitted)
+    }
+
+    @Test
+    fun `a finger held through a geometry change types nothing when it lifts`() {
+        down("a", pointer = 0)
+        swapGeometry(KeyboardGeometry(FallbackLayout.pcFullEnUs, 720, 100))
+        assertFalse(engine.isPressed(indexOf("a")))
+        up("a", pointer = 0)
+        assertTrue(sink.emitted.isEmpty())
+    }
+
+    @Test
+    fun `a held modifier does not stick after a geometry change`() {
+        down("Ctrl", pointer = 0)
+        swapGeometry(KeyboardGeometry(FallbackLayout.pcFullEnUs, 720, 100))
+        up("Ctrl", pointer = 0)
+        assertEquals(0, engine.modifierMask)
+    }
+
+    @Test
+    fun `a geometry change stops the long press and closes the popup`() {
+        down("1", pointer = 0)
+        tick(300)
+        swapGeometry(KeyboardGeometry(FallbackLayout.pcFullEnUs, 720, 100))
+        assertFalse(engine.popup.isOpen)
+        down("a", pointer = 0)
+        swapGeometry(KeyboardGeometry(FallbackLayout.pcFullEnUs, 1080, 120))
+        assertEquals(KeyboardEngine.NO_DEADLINE, engine.nextDeadline)
+    }
+
+    @Test
+    fun `two ctrl keys held and released first to last leave ctrl off`() {
+        useTwoCtrls()
+        down("Ctrl", pointer = 0)
+        down("RCtrl", pointer = 1)
+        up("Ctrl", pointer = 0)
+        assertEquals(ctrlBit, engine.modifierMask)
+        up("RCtrl", pointer = 1)
+        assertEquals(0, engine.modifierMask)
+    }
+
+    @Test
+    fun `two ctrl keys held and released last to first leave ctrl off`() {
+        useTwoCtrls()
+        down("Ctrl", pointer = 0)
+        down("RCtrl", pointer = 1)
+        up("RCtrl", pointer = 1)
+        assertEquals(ctrlBit, engine.modifierMask)
+        up("Ctrl", pointer = 0)
+        assertEquals(0, engine.modifierMask)
+    }
+
+    @Test
+    fun `releasing one of two held ctrl keys keeps ctrl for the next key`() {
+        useTwoCtrls()
+        down("Ctrl", pointer = 0)
+        down("RCtrl", pointer = 1)
+        up("Ctrl", pointer = 0)
+        tap("c", pointer = 2)
+        up("RCtrl", pointer = 1)
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_C, ctrl)), sink.emitted)
+        assertEquals(0, engine.modifierMask)
+    }
+
+    @Test
+    fun `ctrl on the tonos key clears a tonos that was already pending`() {
+        useGreek()
+        tap("΄")
+        tap("Ctrl")
+        tap("΄")
+        tap("α")
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_SEMICOLON, ctrl), Text("α")), sink.emitted)
+    }
+
+    @Test
+    fun `ctrl on a dead key with no latin key code still arms the dead key`() {
+        useRow(
+            KeySpec(KeyDef.Dead("΄", "¨", latin = "§"), "΄"),
+            KeySpec(KeyDef.Char("α", "Α", composed = mapOf("΄" to "ά")), "α"),
+            KeySpec(KeyDef.Modifier(ModifierKind.CTRL), "Ctrl"),
+        )
+        tap("Ctrl")
+        tap("΄")
+        tap("α")
+        assertEquals(listOf(Text("ά")), sink.emitted)
+    }
+
+    @Test
+    fun `with shift locked the tonos still gives the accented capital`() {
+        useGreek()
+        tap("Shift")
+        tap("Shift")
+        tap("΄")
+        tap("α")
+        assertEquals(listOf(Text("Ά")), sink.emitted)
+    }
+
+    @Test
+    fun `holding shift on the tonos key gives dialytika`() {
+        useGreek()
+        down("Shift", pointer = 1)
+        tap("΄", pointer = 0)
+        up("Shift", pointer = 1)
+        tap("ι")
+        assertEquals(listOf(Text("ϊ")), sink.emitted)
+    }
+
+    @Test
+    fun `the dead key shows its shifted mark for one-shot shift but not locked shift`() {
+        useGreek()
+        assertFalse(engine.deadKeyShifted)
+        tap("Shift")
+        assertTrue(engine.deadKeyShifted)
+        tap("Shift")
+        assertFalse(engine.deadKeyShifted)
+    }
+
+    @Test
+    fun `lifting on a popup cell commits that cell even without a move`() {
+        useRow(accented, char("x"), char("y"), char("z"))
+        down("e", pointer = 0)
+        tick(300)
+        engine.onPointer(0, 250f, 60f, PointerAction.UP, now, sink)
+        assertEquals(listOf(Text("ê")), sink.emitted)
+    }
+
+    @Test
+    fun `lifting below the key after sliding along the popup types nothing`() {
+        useRow(accented, char("x"), char("y"), char("z"))
+        down("e", pointer = 0)
+        tick(300)
+        engine.onPointer(0, 150f, 60f, PointerAction.MOVE, now, sink)
+        engine.onPointer(0, 150f, 300f, PointerAction.UP, now, sink)
+        assertTrue(sink.emitted.isEmpty())
+    }
+
+    @Test
+    fun `a long press that types the shifted letter is counted`() {
+        down("a", pointer = 0)
+        assertEquals(0, engine.longPressCount)
+        tick(300)
+        assertEquals(1, engine.longPressCount)
+    }
+
+    @Test
+    fun `a long press that opens the popup is counted`() {
+        down("1", pointer = 0)
+        tick(300)
+        assertEquals(1, engine.longPressCount)
+    }
+
+    @Test
+    fun `a key repeat is not counted as a long press`() {
+        down("⌫", pointer = 0)
+        tick(400)
+        tick(450)
+        assertEquals(0, engine.longPressCount)
+    }
+
+    private fun swapGeometry(next: KeyboardGeometry) {
+        geometry = next
+        engine.setGeometry(next)
+    }
+
+    private var lastLayout: Layout = FallbackLayout.pcFullEnUs
+
+    private fun useTwoCtrls() {
+        useRow(
+            KeySpec(KeyDef.Modifier(ModifierKind.CTRL), "Ctrl"),
+            char("c"),
+            KeySpec(KeyDef.Modifier(ModifierKind.CTRL), "RCtrl"),
+        )
+    }
+
     private fun useGreek() {
         useRow(
             KeySpec(KeyDef.Dead("΄", "¨", latin = ";"), "΄"),
@@ -766,7 +969,8 @@ class KeyboardEngineTest {
     private fun char(c: String): KeySpec = KeySpec(KeyDef.Char(c, c.uppercase()), c)
 
     private fun useRow(vararg keys: KeySpec) {
-        geometry = KeyboardGeometry(Layout("test", "test", listOf(Row(keys.toList()))), 400, 120)
+        lastLayout = Layout("test", "test", listOf(Row(keys.toList())))
+        geometry = KeyboardGeometry(lastLayout, 400, 120)
         engine = KeyboardEngine(geometry, LONG_PRESS_MS)
     }
 
