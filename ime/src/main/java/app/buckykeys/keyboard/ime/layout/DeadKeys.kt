@@ -6,6 +6,8 @@ internal object DeadKeys {
 
     private val asciiMarks = mapOf("^" to "\u0302", "`" to "\u0300", "~" to "\u0303")
 
+    fun composes(mark: String): Boolean = combining(mark).isNotEmpty()
+
     fun compose(base: String, mark: String): String? {
         val combining = combining(mark)
         if (combining.isEmpty()) return null

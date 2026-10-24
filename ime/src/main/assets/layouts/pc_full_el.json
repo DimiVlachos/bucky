@@ -25,7 +25,7 @@
         { "key": "TAB", "width": 1.5 },
         { "chars": [";", ":"], "latin": "q" },
         { "chars": ["ς", "Σ"], "latin": "w" },
-        { "chars": ["ε"], "latin": "e", "longPress": ["έ"] },
+        { "chars": ["ε"], "latin": "e", "longPress": ["έ", "€"] },
         { "chars": ["ρ"], "latin": "r" },
         { "chars": ["τ"], "latin": "t" },
         { "chars": ["υ"], "latin": "y", "longPress": ["ύ", "ϋ", "ΰ"] },

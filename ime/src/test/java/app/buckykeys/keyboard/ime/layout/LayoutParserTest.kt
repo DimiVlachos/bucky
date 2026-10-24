@@ -97,8 +97,8 @@ class LayoutParserTest {
     @Test
     fun `switchTo makes a layout switch key`() {
         assertEquals(
-            KeySpec(KeyDef.LayoutSwitch("numeric"), "123"),
-            parseKeys("""{ "switchTo": "numeric", "label": "123" }""").single(),
+            KeySpec(KeyDef.LayoutSwitch("@language"), "🌐"),
+            parseKeys("""{ "switchTo": "@language", "label": "🌐" }""").single(),
         )
     }
 
@@ -260,5 +260,66 @@ class LayoutParserTest {
             "$.rows[0].keys[0].chars",
             failureOf(layoutWithKeys("""{ "chars": "q" }""")).path,
         )
+    }
+
+    @Test
+    fun `a switch target other than the next language is rejected`() {
+        val error = failureOf(layoutWithKeys("""{ "switchTo": "numeric" }"""))
+
+        assertEquals("$.rows[0].keys[0].switchTo", error.path)
+        assertTrue(error.reason, error.reason.startsWith("unsupported switch target"))
+    }
+
+    @Test
+    fun `a long press entry that looks like an unknown key name is rejected`() {
+        listOf("ESCAPE", "CTRL", "f1", "esc").forEach { name ->
+            val error =
+                failureOf(layoutWithKeys("""{ "chars": ["e"], "longPress": ["é", "$name"] }"""))
+            assertEquals(name, "$.rows[0].keys[0].longPress[1]", error.path)
+        }
+    }
+
+    @Test
+    fun `long press keeps single characters and non-ascii words as text`() {
+        assertEquals(
+            listOf(KeyDef.Char("Q", "Q"), KeyDef.Char("ου", "ΟΥ")),
+            (parseKeys("""{ "chars": ["o"], "longPress": ["Q", "ου"] }""").single().def
+                    as KeyDef.Char)
+                .alternates,
+        )
+    }
+
+    @Test
+    fun `latin must be a key the us layout has`() {
+        listOf("é", "ψ", "!", " ").forEach { latin ->
+            assertEquals(
+                latin,
+                "$.rows[0].keys[0].latin",
+                failureOf(layoutWithKeys("""{ "chars": ["ψ"], "latin": "$latin" }""")).path,
+            )
+        }
+        assertEquals(
+            listOf("c", "7", ";", "/"),
+            listOf("c", "7", ";", "/").map { latin ->
+                (parseKeys("""{ "chars": ["ψ"], "latin": "$latin" }""").single().def as KeyDef.Char)
+                    .latin
+            },
+        )
+    }
+
+    @Test
+    fun `a dead mark that composes with nothing is rejected`() {
+        val error = failureOf(layoutWithKeys("""{ "dead": ["΄", "'"] }"""))
+
+        assertEquals("$.rows[0].keys[0].dead[1]", error.path)
+        assertEquals("dead mark has no combining form", error.reason)
+    }
+
+    @Test
+    fun `the fn modifier is rejected until it does something`() {
+        val error = failureOf(layoutWithKeys("""{ "key": "FN" }"""))
+
+        assertEquals("$.rows[0].keys[0].key", error.path)
+        assertEquals("FN is not supported yet", error.reason)
     }
 }
