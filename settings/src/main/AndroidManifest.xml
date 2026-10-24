@@ -4,6 +4,7 @@
     <application>
         <activity
             android:name=".SettingsActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true"
             android:label="@string/settings_title"
             android:theme="@style/Theme.BuckySettings">

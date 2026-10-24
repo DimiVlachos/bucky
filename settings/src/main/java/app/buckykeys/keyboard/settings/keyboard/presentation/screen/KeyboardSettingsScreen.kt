@@ -31,16 +31,18 @@ internal fun KeyboardSettingsScreen(
     Column(verticalArrangement = Arrangement.spacedBy(BuckyTheme.spacing.medium)) {
         SectionTitle(stringResource(R.string.settings_languages))
         val requiredDescription = stringResource(R.string.settings_language_required)
-        KeyboardLanguage.entries.forEach { language ->
-            val checked = language in settings.languages
-            val enabled = !checked || settings.languages.size > 1
-            CheckboxRow(
-                text = stringResource(language.labelRes()),
-                checked = checked,
-                enabled = enabled,
-                onCheckedChange = { onLanguageChange(language, it) },
-                stateDescription = if (enabled) null else requiredDescription,
-            )
+        Column {
+            KeyboardLanguage.entries.forEach { language ->
+                val checked = language in settings.languages
+                val enabled = !checked || settings.languages.size > 1
+                CheckboxRow(
+                    text = stringResource(language.labelRes()),
+                    checked = checked,
+                    enabled = enabled,
+                    onCheckedChange = { onLanguageChange(language, it) },
+                    stateDescription = if (enabled) null else requiredDescription,
+                )
+            }
         }
         Text(
             text = stringResource(R.string.settings_languages_hint),

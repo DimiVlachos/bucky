@@ -14,7 +14,11 @@ import androidx.compose.ui.Modifier
 import app.buckykeys.keyboard.settings.core.presentation.theme.BuckyTheme
 
 @Composable
-internal fun HomeScreen(setup: @Composable () -> Unit, settings: @Composable () -> Unit) {
+internal fun HomeScreen(
+    setup: @Composable () -> Unit,
+    settings: @Composable () -> Unit,
+    footer: @Composable () -> Unit,
+) {
     Scaffold { innerPadding ->
         Column(
             modifier =
@@ -28,6 +32,8 @@ internal fun HomeScreen(setup: @Composable () -> Unit, settings: @Composable () 
             setup()
             HorizontalDivider()
             settings()
+            HorizontalDivider()
+            footer()
         }
     }
 }
