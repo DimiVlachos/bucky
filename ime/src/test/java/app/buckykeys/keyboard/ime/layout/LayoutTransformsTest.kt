@@ -34,7 +34,8 @@ class LayoutTransformsTest {
     fun `removing the language key gives its width to the space bar`() {
         val bottom = withLanguageKey.withoutLanguageKey().rows.last().keys
         assertFalse(bottom.any { it.def == KeyDef.LayoutSwitch(BuiltInLayouts.NEXT_LANGUAGE) })
-        assertEquals(7f, bottom.first { it.def == KeyDef.Char(" ", " ") }.width, 0.001f)
+        val space = pcFull.rows.last().keys.first { it.def == KeyDef.Char(" ", " ") }
+        assertEquals(space.width, bottom.first { it.def == space.def }.width, 0.001f)
     }
 
     @Test

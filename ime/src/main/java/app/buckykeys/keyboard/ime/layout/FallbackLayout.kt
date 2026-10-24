@@ -102,18 +102,19 @@ public object FallbackLayout {
                                 "/?",
                                 "`~",
                             ) +
-                            special(KeyCode.UP, "↑", 1.25f) +
-                            special(KeyCode.FORWARD_DEL, "Del", 1.25f),
+                            special(KeyCode.UP, "↑", 1.25f, KeyCode.PAGE_UP) +
+                            special(KeyCode.FORWARD_DEL, "Del", 1.25f, KeyCode.INSERT),
                     ),
                     Row(
                         listOf(
                             modifier(ModifierKind.ALT, "Alt", 1.25f),
                             special(KeyCode.HOME, "Home", 1.5f),
                             special(KeyCode.END, "End", 1.5f),
-                            KeySpec(KeyDef.Char(" ", " "), "", 7f),
-                            special(KeyCode.LEFT, "←", 1.25f),
-                            special(KeyCode.DOWN, "↓", 1.25f),
-                            special(KeyCode.RIGHT, "→", 1.25f),
+                            KeySpec(KeyDef.Char(" ", " "), "", 5.75f),
+                            modifier(ModifierKind.FN, "Fn", 1.25f),
+                            special(KeyCode.LEFT, "←", 1.25f, KeyCode.HOME),
+                            special(KeyCode.DOWN, "↓", 1.25f, KeyCode.PAGE_DOWN),
+                            special(KeyCode.RIGHT, "→", 1.25f, KeyCode.END),
                         ),
                     ),
                 ),
@@ -132,11 +133,16 @@ public object FallbackLayout {
         KeySpec(
             KeyDef.Char(pair.substring(0, 1), pair.substring(1, 2), listOf(fKey)),
             pair.substring(0, 1),
+            fn = fKey,
         )
     }
 
-    private fun special(code: KeyCode, label: String, width: Float = 1f): KeySpec =
-        KeySpec(KeyDef.Special(code), label, width)
+    private fun special(
+        code: KeyCode,
+        label: String,
+        width: Float = 1f,
+        fn: KeyCode? = null,
+    ): KeySpec = KeySpec(KeyDef.Special(code), label, width, fn?.let { KeyDef.Special(it) })
 
     private fun modifier(kind: ModifierKind, label: String, width: Float): KeySpec =
         KeySpec(KeyDef.Modifier(kind), label, width)

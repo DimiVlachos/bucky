@@ -13,7 +13,7 @@ public object LayoutParser {
     private val layoutFields = setOf("id", "name", "language", "rows")
     private val rowFields = setOf("keys")
     private val keyFields =
-        setOf("chars", "dead", "key", "switchTo", "label", "width", "longPress", "latin")
+        setOf("chars", "dead", "key", "switchTo", "label", "width", "longPress", "latin", "fn")
     private val keyKinds = listOf("chars", "dead", "key", "switchTo")
     private const val LATIN_KEYS =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-=[];',./\\`"
@@ -70,7 +70,8 @@ public object LayoutParser {
         }
         val label = if ("label" in obj) obj.string("label", path) else DefaultLabels.of(def)
         val width = obj["width"]?.let { width(it, "$path.width") } ?: 1f
-        return KeySpec(def, label, width)
+        val fn = if ("fn" in obj) alternate(obj.string("fn", path), "$path.fn") else null
+        return KeySpec(def, label, width, fn)
     }
 
     private fun chars(obj: JsonObject, path: String): KeyDef.Char {
@@ -163,12 +164,8 @@ public object LayoutParser {
 
     private fun named(name: String, path: String): KeyDef =
         KeyCode.entries.firstOrNull { it.name == name }?.let { KeyDef.Special(it) }
-            ?: ModifierKind.entries.firstOrNull { it.name == name }?.let { modifier(it, path) }
+            ?: ModifierKind.entries.firstOrNull { it.name == name }?.let { KeyDef.Modifier(it) }
             ?: fail(path, "unknown key \"$name\"")
-
-    private fun modifier(kind: ModifierKind, path: String): KeyDef.Modifier =
-        if (kind == ModifierKind.FN) fail(path, "FN is not supported yet")
-        else KeyDef.Modifier(kind)
 
     private fun width(element: JsonElement, path: String): Float {
         val value =

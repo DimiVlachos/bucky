@@ -316,11 +316,25 @@ class LayoutParserTest {
     }
 
     @Test
-    fun `the fn modifier is rejected until it does something`() {
-        val error = failureOf(layoutWithKeys("""{ "key": "FN" }"""))
+    fun `the fn modifier parses`() {
+        assertEquals(
+            KeySpec(KeyDef.Modifier(ModifierKind.FN), "Fn"),
+            parseKeys("""{ "key": "FN" }""").single(),
+        )
+    }
 
-        assertEquals("$.rows[0].keys[0].key", error.path)
-        assertEquals("FN is not supported yet", error.reason)
+    @Test
+    fun `a key can name its fn variant`() {
+        assertEquals(
+            KeySpec(KeyDef.Special(KeyCode.UP), "↑", fn = KeyDef.Special(KeyCode.PAGE_UP)),
+            parseKeys("""{ "key": "UP", "fn": "PAGE_UP" }""").single(),
+        )
+    }
+
+    @Test
+    fun `an unknown fn variant is rejected`() {
+        val error = failureOf(layoutWithKeys("""{ "key": "UP", "fn": "PAGE_SIDEWAYS" }"""))
+        assertEquals("$.rows[0].keys[0].fn", error.path)
     }
 
     @Test
