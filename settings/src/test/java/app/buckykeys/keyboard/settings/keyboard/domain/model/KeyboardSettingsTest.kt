@@ -63,4 +63,29 @@ class KeyboardSettingsTest {
         assertEquals(48, defaults.rowHeightDp)
         assertEquals(34, defaults.landscapeRowHeightDp)
     }
+
+    @Test
+    fun `the extra row is split into words`() {
+        assertEquals(
+            listOf("ESC", "TAB", "~", "|"),
+            english.withExtraRow("  ESC TAB\t~   |\n").extraRow,
+        )
+    }
+
+    @Test
+    fun `the extra row keeps at most fifteen words`() {
+        assertEquals(15, english.withExtraRow(List(20) { "/" }.joinToString(" ")).extraRow.size)
+    }
+
+    @Test
+    fun `an empty extra row clears it`() {
+        assertEquals(emptyList<String>(), english.withExtraRow("ESC").withExtraRow("   ").extraRow)
+    }
+
+    @Test
+    fun `no extra rows by default`() {
+        val defaults = KeyboardSettings.defaults(systemLanguage = "en")
+        assertEquals(false, defaults.fKeyRow)
+        assertEquals(emptyList<String>(), defaults.extraRow)
+    }
 }

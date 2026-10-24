@@ -44,6 +44,14 @@ constructor(private val repository: KeyboardSettingsRepository) : ViewModel() {
         update { it.copy(haptics = enabled) }
     }
 
+    fun onFKeyRowChange(enabled: Boolean) {
+        update { it.copy(fKeyRow = enabled) }
+    }
+
+    fun onExtraRowSave(text: String) {
+        update { it.withExtraRow(text) }
+    }
+
     private fun update(transform: (KeyboardSettings) -> KeyboardSettings) {
         viewModelScope.launch { repository.update(transform) }
     }
