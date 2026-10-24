@@ -52,11 +52,11 @@ Where Gate 0 stands on 2026-10-20: Stop needs fewer than 25 signups **and** fewe
 |---|---|---|---|
 | More language layouts (Estonian) | 1 | #875 ketas (6.9" phone, already runs a full custom layout) | Layouts are JSON data (week 6 adds EL and others); Estonian is cheap to add |
 | Custom / own layouts (more keys by default) | 1 (+1 pointing to HeliBoard, which has it) | r/termux EDGE223x, Proteu__ | Planned (JSON layouts, week 3). PLAN makes the editor Pro; reconsider, since HeliBoard offers it free |
-| Configurable extra row inside the keyboard, any key or symbol | 1 (+1 who keeps Termux's own row) | r/termux d333d, BillGossAU | In PLAN v1 since 2026-10-24 (free, week 6) |
+| Configurable extra row inside the keyboard, any key or symbol | 1 (+1 who keeps Termux's own row) | r/termux d333d, BillGossAU | Built 2026-10-24: settings → «Your own row», Termux extra-keys names |
 | Clipboard manager, pasting into password fields | 1 | r/termux ExplanationNo5955 | Not in PLAN v1; keep password-field clips out of history if built |
 | Landscape cut off on the right on Android 15 and One UI 7 | 1 thread (#957, opened by netllama; several Samsung users) | hackerskeyboard#957 | Width from the measure pass plus a manual width and padding fallback, in PLAN v1 since 2026-10-24 (week 5) |
 | Floating keyboard on tablets (movable and smaller; split is not enough) | 1 | r/termux AdImmediate2565 | PLAN has split mode for tablets, not floating |
-| Easy access to F1–F12 (one asks for a dedicated row) | 2 | #875 netllama, r/termux gsmitheidw1 (F10 in Midnight Commander) | Fn layer plus an optional permanent F-key row, in PLAN v1 since 2026-10-24 (week 6) |
+| Easy access to F1–F12 (one asks for a dedicated row) | 2 | #875 netllama, r/termux gsmitheidw1 (F10 in Midnight Commander) | Built 2026-10-24: F1–F12 as long-press on the number row and an optional F-key row in settings |
 | Home, End and Esc on the main layer, not behind Fn | 1 (+1 whose Termux extra-keys row has them) | r/termux EDGE223x (vim, helix), BillGossAU | PLAN's PC Full layout has them (v1) |
 
 ## Notable replies
