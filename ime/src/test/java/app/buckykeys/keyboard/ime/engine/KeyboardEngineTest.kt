@@ -20,6 +20,7 @@ class KeyboardEngineTest {
 
     private val ctrl = KeyEvent.META_CTRL_ON or KeyEvent.META_CTRL_LEFT_ON
     private val shift = KeyEvent.META_SHIFT_ON or KeyEvent.META_SHIFT_LEFT_ON
+    private val ctrlBit = 1 shl ModifierKind.CTRL.ordinal
 
     private var geometry = KeyboardGeometry(FallbackLayout.pcFullEnUs, 1080, 120)
     private var engine = KeyboardEngine(geometry)
@@ -80,11 +81,109 @@ class KeyboardEngineTest {
     }
 
     @Test
-    fun `tapping ctrl twice turns it off`() {
+    fun `tapping ctrl twice locks it for every following key`() {
+        tap("Ctrl")
+        tap("Ctrl")
+        tap("c")
+        tap("d")
+        assertEquals(
+            listOf(Key(KeyEvent.KEYCODE_C, ctrl), Key(KeyEvent.KEYCODE_D, ctrl)),
+            sink.emitted,
+        )
+        assertEquals(ctrlBit, engine.lockedMask)
+    }
+
+    @Test
+    fun `tapping ctrl a third time turns it off`() {
+        tap("Ctrl")
         tap("Ctrl")
         tap("Ctrl")
         tap("c")
         assertEquals(listOf(Text("c")), sink.emitted)
+        assertEquals(0, engine.modifierMask)
+        assertEquals(0, engine.lockedMask)
+    }
+
+    @Test
+    fun `a one-shot modifier is not locked`() {
+        tap("Ctrl")
+        assertEquals(ctrlBit, engine.modifierMask)
+        assertEquals(0, engine.lockedMask)
+    }
+
+    @Test
+    fun `a locked modifier and a one-shot one combine, and only the one-shot one clears`() {
+        tap("Ctrl")
+        tap("Ctrl")
+        tap("Shift")
+        tap("↑")
+        tap("↑")
+        assertEquals(
+            listOf(
+                Key(KeyEvent.KEYCODE_DPAD_UP, ctrl or shift),
+                Key(KeyEvent.KEYCODE_DPAD_UP, ctrl),
+            ),
+            sink.emitted,
+        )
+    }
+
+    @Test
+    fun `holding ctrl while tapping c chords them`() {
+        down("Ctrl", pointer = 0)
+        tap("c", pointer = 1)
+        up("Ctrl", pointer = 0)
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_C, ctrl)), sink.emitted)
+    }
+
+    @Test
+    fun `releasing a chorded modifier leaves it off`() {
+        down("Ctrl", pointer = 0)
+        tap("c", pointer = 1)
+        up("Ctrl", pointer = 0)
+        tap("d")
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_C, ctrl), Text("d")), sink.emitted)
+        assertEquals(0, engine.modifierMask)
+    }
+
+    @Test
+    fun `a held modifier applies to every key tapped while it is down`() {
+        down("Shift", pointer = 0)
+        tap("a", pointer = 1)
+        tap("b", pointer = 1)
+        up("Shift", pointer = 0)
+        assertEquals(listOf(Text("A"), Text("B")), sink.emitted)
+    }
+
+    @Test
+    fun `a held modifier shows as active`() {
+        down("Ctrl", pointer = 0)
+        assertEquals(ctrlBit, engine.modifierMask)
+    }
+
+    @Test
+    fun `a cancelled modifier press changes nothing`() {
+        down("Ctrl", pointer = 0)
+        cancel(pointer = 0)
+        tap("c")
+        assertEquals(listOf(Text("c")), sink.emitted)
+        assertEquals(0, engine.modifierMask)
+    }
+
+    @Test
+    fun `sliding off a modifier before lifting does not toggle it`() {
+        down("Ctrl", pointer = 0)
+        up("c", pointer = 0)
+        assertEquals(0, engine.modifierMask)
+        assertTrue(sink.emitted.isEmpty())
+    }
+
+    @Test
+    fun `reset clears locked modifiers too`() {
+        tap("Ctrl")
+        tap("Ctrl")
+        engine.reset()
+        assertEquals(0, engine.lockedMask)
+        assertEquals(0, engine.modifierMask)
     }
 
     @Test
@@ -175,10 +274,23 @@ class KeyboardEngineTest {
         assertEquals(0, engine.modifierMask)
     }
 
-    private fun tap(label: String) {
+    private fun tap(label: String, pointer: Int = 0) {
+        down(label, pointer)
+        up(label, pointer)
+    }
+
+    private fun down(label: String, pointer: Int) {
         val (x, y) = centre(label)
-        engine.onPointer(0, x, y, PointerAction.DOWN, sink)
-        engine.onPointer(0, x, y, PointerAction.UP, sink)
+        engine.onPointer(pointer, x, y, PointerAction.DOWN, sink)
+    }
+
+    private fun up(label: String, pointer: Int) {
+        val (x, y) = centre(label)
+        engine.onPointer(pointer, x, y, PointerAction.UP, sink)
+    }
+
+    private fun cancel(pointer: Int) {
+        engine.onPointer(pointer, 0f, 0f, PointerAction.CANCEL, sink)
     }
 
     private fun indexOf(label: String): Int =
