@@ -2,6 +2,31 @@ package app.buckykeys.keyboard.ime.layout
 
 public object FallbackLayout {
 
+    private val alternates =
+        mapOf(
+            "a" to "A à á â ä ã å æ ā",
+            "c" to "C ç ć č",
+            "d" to "D ď ð",
+            "e" to "E è é ê ë ē ę ě €",
+            "g" to "G ğ",
+            "i" to "I ì í î ï ī ı",
+            "l" to "L ł",
+            "n" to "N ñ ń ň",
+            "o" to "O ò ó ô ö õ ø œ ō",
+            "r" to "R ř",
+            "s" to "S ś š ş ß",
+            "t" to "T ť þ",
+            "u" to "U ù ú û ü ū ů",
+            "y" to "Y ý ÿ",
+            "z" to "Z ź ż ž",
+            "." to "… ·",
+            "'" to "’ ‘ ´",
+            "," to "„ ‚",
+            "/" to "÷ ¿",
+            "[" to "« ‹",
+            "]" to "» ›",
+        )
+
     public val pcFullEnUs: Layout =
         Layout(
             id = "pc_full_en_us",
@@ -95,8 +120,12 @@ public object FallbackLayout {
         )
 
     private fun chars(vararg pairs: String): List<KeySpec> = pairs.map { pair ->
-        KeySpec(KeyDef.Char(pair.substring(0, 1), pair.substring(1, 2)), pair.substring(0, 1))
+        val primary = pair.substring(0, 1)
+        KeySpec(KeyDef.Char(primary, pair.substring(1, 2), alternatesOf(primary)), primary)
     }
+
+    private fun alternatesOf(primary: String): List<KeyDef> =
+        alternates[primary]?.split(" ")?.map { KeyDef.Char(it, it.uppercase()) }.orEmpty()
 
     private fun numberRow(vararg pairs: String): List<KeySpec> = pairs.mapIndexed { index, pair ->
         val fKey = KeyDef.Special(KeyCode.entries[KeyCode.F1.ordinal + index])

@@ -23,6 +23,9 @@ public class AlternatesPopup internal constructor() {
     public var cellHeight: Float = 0f
         private set
 
+    public var reversed: Boolean = false
+        private set
+
     private var keyBottom = 0f
 
     public val isOpen: Boolean
@@ -34,7 +37,10 @@ public class AlternatesPopup internal constructor() {
         this.count = count
         cellWidth = minOf(rects[i + 2] - rects[i], keyboardWidth / count)
         cellHeight = rects[i + 3] - rects[i + 1]
-        left = rects[i].coerceAtMost(keyboardWidth - count * cellWidth).coerceAtLeast(0f)
+        val width = count * cellWidth
+        reversed = rects[i] + width > keyboardWidth
+        left =
+            (if (reversed) rects[i + 2] - width else rects[i]).coerceIn(0f, keyboardWidth - width)
         top = rects[i + 1] - cellHeight
         keyBottom = rects[i + 3]
         select((rects[i] + rects[i + 2]) / 2f, rects[i + 1])
@@ -42,13 +48,20 @@ public class AlternatesPopup internal constructor() {
 
     internal fun select(x: Float, y: Float) {
         selected =
-            if (y > keyBottom) NONE else ((x - left) / cellWidth).toInt().coerceIn(0, count - 1)
+            if (y > keyBottom) {
+                NONE
+            } else {
+                alternateAt(((x - left) / cellWidth).toInt().coerceIn(0, count - 1))
+            }
     }
+
+    public fun alternateAt(cell: Int): Int = if (reversed) count - 1 - cell else cell
 
     internal fun close() {
         keyIndex = NONE
         count = 0
         selected = NONE
+        reversed = false
     }
 
     public companion object {
