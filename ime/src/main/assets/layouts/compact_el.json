@@ -1,0 +1,58 @@
+{
+  "id": "compact_el",
+  "name": "Compact (Ελληνικά)",
+  "language": "Ελληνικά",
+  "rows": [
+    {
+      "keys": [
+        { "chars": [";", ":"], "latin": "q", "longPress": ["1"] },
+        { "chars": ["ς", "Σ"], "latin": "w", "longPress": ["2"] },
+        { "chars": ["ε"], "latin": "e", "longPress": ["3", "έ", "€"] },
+        { "chars": ["ρ"], "latin": "r", "longPress": ["4"] },
+        { "chars": ["τ"], "latin": "t", "longPress": ["5"] },
+        { "chars": ["υ"], "latin": "y", "longPress": ["6", "ύ", "ϋ", "ΰ"] },
+        { "chars": ["θ"], "latin": "u", "longPress": ["7"] },
+        { "chars": ["ι"], "latin": "i", "longPress": ["8", "ί", "ϊ", "ΐ"] },
+        { "chars": ["ο"], "latin": "o", "longPress": ["9", "ό"] },
+        { "chars": ["π"], "latin": "p", "longPress": ["0"] }
+      ]
+    },
+    {
+      "keys": [
+        { "chars": ["α"], "latin": "a", "longPress": ["ά"] },
+        { "chars": ["σ"], "latin": "s" },
+        { "chars": ["δ"], "latin": "d" },
+        { "chars": ["φ"], "latin": "f" },
+        { "chars": ["γ"], "latin": "g" },
+        { "chars": ["η"], "latin": "h", "longPress": ["ή"] },
+        { "chars": ["ξ"], "latin": "j" },
+        { "chars": ["κ"], "latin": "k" },
+        { "chars": ["λ"], "latin": "l" },
+        { "dead": ["΄", "¨"], "latin": ";" }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "SHIFT", "width": 1.5 },
+        { "chars": ["ζ"], "latin": "z" },
+        { "chars": ["χ"], "latin": "x" },
+        { "chars": ["ψ"], "latin": "c" },
+        { "chars": ["ω"], "latin": "v", "longPress": ["ώ"] },
+        { "chars": ["β"], "latin": "b" },
+        { "chars": ["ν"], "latin": "n" },
+        { "chars": ["μ"], "latin": "m" },
+        { "key": "BACKSPACE", "width": 1.5 }
+      ]
+    },
+    {
+      "keys": [
+        { "switchTo": "@page:symbols", "width": 1.5 },
+        { "chars": [","], "longPress": ["!"] },
+        { "switchTo": "@keyboard", "holdTo": "@full" },
+        { "chars": [" ", " "], "width": 4 },
+        { "chars": ["."], "longPress": ["?"] },
+        { "key": "ENTER", "width": 1.5 }
+      ]
+    }
+  ]
+}

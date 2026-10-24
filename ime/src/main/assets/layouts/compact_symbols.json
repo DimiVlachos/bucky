@@ -1,0 +1,57 @@
+{
+  "id": "compact_symbols",
+  "name": "Symbols",
+  "rows": [
+    {
+      "keys": [
+        { "chars": ["1"] },
+        { "chars": ["2"] },
+        { "chars": ["3"] },
+        { "chars": ["4"] },
+        { "chars": ["5"] },
+        { "chars": ["6"] },
+        { "chars": ["7"] },
+        { "chars": ["8"] },
+        { "chars": ["9"] },
+        { "chars": ["0"] }
+      ]
+    },
+    {
+      "keys": [
+        { "chars": ["@"] },
+        { "chars": ["#"] },
+        { "chars": ["€"], "longPress": ["$"] },
+        { "chars": ["_"] },
+        { "chars": ["&"] },
+        { "chars": ["-"], "longPress": ["–"] },
+        { "chars": ["+"] },
+        { "chars": ["("] },
+        { "chars": [")"] },
+        { "chars": ["/"], "longPress": ["\\"] }
+      ]
+    },
+    {
+      "keys": [
+        { "switchTo": "@page:symbols-more", "width": 1.5 },
+        { "chars": ["*"] },
+        { "chars": ["\""], "longPress": ["“"] },
+        { "chars": ["'"], "longPress": ["’"] },
+        { "chars": [":"] },
+        { "chars": [";"] },
+        { "chars": ["!"] },
+        { "chars": ["?"] },
+        { "key": "BACKSPACE", "width": 1.5 }
+      ]
+    },
+    {
+      "keys": [
+        { "switchTo": "@page:letters", "width": 1.5 },
+        { "chars": [","] },
+        { "switchTo": "@keyboard", "holdTo": "@full" },
+        { "chars": [" ", " "], "width": 4, "then": "@page:letters" },
+        { "chars": ["."], "longPress": ["…"] },
+        { "key": "ENTER", "width": 1.5 }
+      ]
+    }
+  ]
+}
