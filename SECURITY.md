@@ -16,4 +16,4 @@ Worth knowing: the app has no `INTERNET` permission, so anything that would let 
 
 ## Supported versions
 
-Only the latest alpha on [GitHub Releases](https://github.com/DimiVlachos/bucky/releases) (currently 0.1.0-alpha1) is supported. Fixes go to the `main` branch and ship in the next alpha.
+Only the latest alpha on [GitHub Releases](https://github.com/DimiVlachos/bucky/releases) is supported. Fixes go to the `main` branch and ship in the next alpha.
