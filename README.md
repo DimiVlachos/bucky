@@ -8,30 +8,31 @@ It is a from-scratch successor to [Hacker's Keyboard](https://github.com/klausw/
   <img src="site/public/hero-vim.png" alt="vim editing a script in Termux, with Bucky Keys below and its Ctrl key latched" width="320">
 </p>
 
-**Status: early development. There is no release yet.** Join the beta waitlist at [buckykeys.app](https://buckykeys.app) to get one email when testing opens.
+**Status: alpha.** Download the APK from [the latest pre-release](https://github.com/DimiVlachos/bucky/releases) and tell us what breaks. The Play Store beta waitlist is at [buckykeys.app](https://buckykeys.app) (one email when testing opens).
 
 ## What works today
 
 - Full 5-row PC layout with `~`, `|` and `\` where you expect them
-- Ctrl, Alt and Shift as one-shot modifiers that send real `KeyEvent`s: Ctrl+C interrupts a command in Termux, Esc leaves vim's insert mode, and the arrows walk shell history
-- Esc, Tab, Home, End, Del and the arrow keys as real keys
+- Ctrl, Alt and Shift that send real `KeyEvent`s: tap once for the next key, twice to lock, or hold. Ctrl+C interrupts a command in Termux, Esc leaves vim's insert mode, and the arrows walk shell history
+- Esc, Tab, Home, End, Del and the arrow keys as real keys, with key repeat
+- Long-press for F1–F12 on the number row and the shifted character on other keys
+- An optional F1–F12 row and an extra row you define yourself, using Termux extra-keys names
+- US English and Greek layouts from JSON, with the Greek tonos dead key
+- Settings for key height (portrait and landscape), key preview and vibration
 - About 13 ms from touch to drawing the key (median, debug build on a Galaxy S23 Ultra, before the screen's own frame); see the [spike report](docs/spike-report.md)
 
 ## Planned
 
-- Long-press alternates, key repeat, locked modifiers
-- F1–F12
-- Layouts from JSON: US, UK, Greek, Dvorak, Colemak, plus your own
-- Per-app profiles (for example, Termux and SSH clients get the full layout automatically)
-- Settings, themes, split layout for tablets
-
-The full plan, in Greek, is in [PLAN.md](PLAN.md).
+- Per-app profiles (for example, Termux and SSH clients get the full layout automatically, other apps a compact one)
+- More layouts: UK, Dvorak, Colemak, Estonian, plus your own
+- TalkBack support
+- Themes, split layout for tablets
 
 ## Principles
 
 - **No INTERNET permission.** The keyboard cannot open network connections, so it cannot upload what you type.
 - **Open source** under Apache-2.0.
-- **Every key, layout and modifier Hacker's Keyboard had stays free.** Optional extras later (layout editor, themes, word prediction) are sold on Google Play to pay for the work. They are in this same repo, and the `foss` build (built from source today, F-Droid planned) unlocks everything for free.
+- **Every key, layout and modifier Hacker's Keyboard had stays free.** Optional extras later (layout editor, themes, word prediction) are sold on Google Play to pay for the work. They are in this same repo, and the `foss` build (GitHub Releases today, F-Droid planned) unlocks everything for free.
 
 ## Building
 

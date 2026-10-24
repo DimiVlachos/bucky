@@ -4,7 +4,7 @@ Thanks for helping. Bucky is early, so the most useful contributions right now a
 
 ## Before writing code
 
-Open an issue first for anything bigger than a small fix, so we can agree on the approach. [PLAN.md](PLAN.md) holds the scope and architecture (in Greek); [CLAUDE.md](CLAUDE.md) lists the code rules in English.
+Open an issue first for anything bigger than a small fix, so we can agree on the approach. [CLAUDE.md](CLAUDE.md) describes the modules, their dependency rules and the code rules. [PLAN.md](PLAN.md) is the maintainer's working plan, in Greek; you don't need to read it to contribute.
 
 ## Ground rules
 
