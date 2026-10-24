@@ -3,8 +3,11 @@ package app.buckykeys.keyboard.settings.keyboard.presentation.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +28,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import app.buckykeys.keyboard.settings.R
+import app.buckykeys.keyboard.settings.core.presentation.theme.BuckyTheme
 import kotlin.math.roundToInt
 
 private val MinRowHeight = 48.dp
@@ -60,6 +64,7 @@ internal fun CheckboxRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(checked = checked, onCheckedChange = null, enabled = enabled)
+        Spacer(modifier = Modifier.width(BuckyTheme.spacing.small))
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
@@ -83,7 +88,7 @@ internal fun SwitchRow(text: String, checked: Boolean, onCheckedChange: (Boolean
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).padding(end = BuckyTheme.spacing.medium),
         )
         Switch(checked = checked, onCheckedChange = null)
     }

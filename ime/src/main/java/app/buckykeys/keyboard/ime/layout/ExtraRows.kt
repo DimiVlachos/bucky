@@ -2,10 +2,18 @@ package app.buckykeys.keyboard.ime.layout
 
 import java.text.BreakIterator
 
+public fun parseExtraRow(userKeys: List<String>): ExtraRowParse {
+    val items = userKeys.flatMap(::termuxItems)
+    val accepted = items.mapNotNull(::userKey)
+    val unknown = items.filter { userKey(it) == null }
+    val kept = accepted.take(MAX_USER_KEYS)
+    val keys = if (kept.isEmpty()) emptyList() else sharedRow(kept).keys
+    return ExtraRowParse(keys = keys, unknown = unknown, overLimit = accepted.size > MAX_USER_KEYS)
+}
+
 public fun Layout.withExtraRows(fKeyRow: Boolean, userKeys: List<String>): Layout {
-    val user = userKeys.flatMap(::termuxItems).mapNotNull(::userKey).take(MAX_USER_KEYS)
-    val extra =
-        listOfNotNull(if (fKeyRow) fKeys else null, if (user.isEmpty()) null else sharedRow(user))
+    val user = parseExtraRow(userKeys).keys
+    val extra = listOfNotNull(if (fKeyRow) fKeys else null, if (user.isEmpty()) null else Row(user))
     return if (extra.isEmpty()) this else copy(rows = extra + rows)
 }
 
