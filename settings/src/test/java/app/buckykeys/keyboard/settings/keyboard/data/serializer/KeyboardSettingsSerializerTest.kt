@@ -97,6 +97,16 @@ class KeyboardSettingsSerializerTest {
     }
 
     @Test
+    fun `settings saved before the label size existed load at one hundred percent`() {
+        assertEquals(100, read("""{ "rowHeightDp": 48 }""").labelScalePercent)
+    }
+
+    @Test
+    fun `an out of range label size is clamped`() {
+        assertEquals(80, read("""{ "labelScalePercent": 5 }""").labelScalePercent)
+    }
+
+    @Test
     fun `an empty language list falls back to the default languages`() {
         val greekDefaults = KeyboardSettings.defaults(systemLanguage = "el")
         val greekSerializer = KeyboardSettingsSerializer(greekDefaults)

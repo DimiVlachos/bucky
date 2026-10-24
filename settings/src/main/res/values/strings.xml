@@ -13,6 +13,8 @@
     <string name="settings_row_height">Key height</string>
     <string name="settings_landscape_row_height">Key height in landscape</string>
     <string name="settings_dp">%1$d dp</string>
+    <string name="settings_label_size">Label size</string>
+    <string name="settings_percent">%1$d%%</string>
     <string name="settings_feedback">Feedback</string>
     <string name="settings_key_preview">Show the pressed key above your finger</string>
     <string name="settings_haptics">Vibrate on key press</string>
