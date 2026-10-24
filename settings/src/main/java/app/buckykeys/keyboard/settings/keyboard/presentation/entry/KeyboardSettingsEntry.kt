@@ -17,6 +17,8 @@ internal fun KeyboardSettingsEntry(viewModel: KeyboardSettingsViewModel) {
             onLandscapeRowHeightChange = viewModel::onLandscapeRowHeightChange,
             onKeyPreviewChange = viewModel::onKeyPreviewChange,
             onHapticsChange = viewModel::onHapticsChange,
+            onFKeyRowChange = viewModel::onFKeyRowChange,
+            onExtraRowSave = viewModel::onExtraRowSave,
         )
     }
 }
