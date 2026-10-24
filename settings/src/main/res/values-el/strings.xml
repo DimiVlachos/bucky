@@ -31,4 +31,12 @@
     <string name="settings_extra_row_unknown">Δεν είναι πλήκτρο: %1$s</string>
     <string name="settings_extra_row_limit">Χρησιμοποιούνται μόνο τα πρώτα %1$d πλήκτρα.</string>
     <string name="settings_extra_row_termux_default">Προεπιλεγμένα πλήκτρα του Termux</string>
+    <string name="settings_apps">Εφαρμογές</string>
+    <string name="settings_outside_terminals">Εκτός εφαρμογών τερματικού</string>
+    <string name="settings_outside_compact">Συμπαγής διάταξη</string>
+    <string name="settings_outside_full">Πλήρης διάταξη</string>
+    <string name="settings_outside_other">Εναλλαγή στο άλλο μου πληκτρολόγιο</string>
+    <string name="settings_outside_other_hint">Για να επιστρέψει το Bucky στο Termux, χρησιμοποιήστε το κουμπί εναλλαγής πληκτρολογίου.</string>
+    <string name="settings_auto_capitalize">Κεφαλαίο στην αρχή της πρότασης</string>
+    <string name="settings_double_space_period">Διπλό space για τελεία</string>
 </resources>

@@ -1,0 +1,67 @@
+<style>
+  .kb { background:#1e1f22; border-radius:10px; padding:6px; width:100%; max-width:420px; margin:0 auto; font-family: system-ui, sans-serif; }
+  .row { display:flex; gap:4px; margin:4px 0; }
+  .k { flex:1; background:#2e3135; color:#e8eaed; border-radius:6px; height:40px; display:flex; align-items:center; justify-content:center; font-size:15px; position:relative; }
+  .k.s { font-size:11px; }
+  .k.mod { background:#262a2e; }
+  .k .h { position:absolute; top:2px; right:4px; font-size:9px; color:#9aa0a6; }
+  .k.space { color:#9aa0a6; font-size:11px; }
+  .w15 { flex:1.5; } .w125 { flex:1.25; } .w2 { flex:2; } .w5 { flex:5; } .w4 { flex:4; } .w3 { flex:3; } .w05 { flex:0.5; background:transparent; }
+  .note { font-size:13px; margin-top:10px; line-height:1.45; }
+  .note b { color: inherit; }
+</style>
+
+<h2>Compact layout outside terminals: which direction?</h2>
+<p class="subtitle">Same phone width as the full layout. Grey corner text = long-press hint. The full PC layout stays exactly as it is in Termux.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="phone" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="kb">
+        <div class="row">
+          <div class="k">q<span class="h">1</span></div><div class="k">w<span class="h">2</span></div><div class="k">e<span class="h">3</span></div><div class="k">r<span class="h">4</span></div><div class="k">t<span class="h">5</span></div><div class="k">y<span class="h">6</span></div><div class="k">u<span class="h">7</span></div><div class="k">i<span class="h">8</span></div><div class="k">o<span class="h">9</span></div><div class="k">p<span class="h">0</span></div>
+        </div>
+        <div class="row">
+          <div class="k w05"></div><div class="k">a</div><div class="k">s</div><div class="k">d</div><div class="k">f</div><div class="k">g</div><div class="k">h</div><div class="k">j</div><div class="k">k</div><div class="k">l</div><div class="k w05"></div>
+        </div>
+        <div class="row">
+          <div class="k mod w15 s">Shift</div><div class="k">z</div><div class="k">x</div><div class="k">c</div><div class="k">v</div><div class="k">b</div><div class="k">n</div><div class="k">m</div><div class="k mod w15">⌫</div>
+        </div>
+        <div class="row">
+          <div class="k mod w15 s">?123</div><div class="k">,<span class="h">!</span></div><div class="k mod s">⌨</div><div class="k space w4">English (US)</div><div class="k">.<span class="h">?</span></div><div class="k mod w15 s">Enter</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. Phone-style</h3>
+      <p>Looks like Gboard: 10 big keys per row. Digits on long-press of the top row, symbols on a <b>?123</b> page (new). <b>⌨</b> jumps to your other keyboard. No Ctrl, Esc or arrows.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="hk4" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="kb">
+        <div class="row">
+          <div class="k">q<span class="h">1</span></div><div class="k">w<span class="h">2</span></div><div class="k">e<span class="h">3</span></div><div class="k">r<span class="h">4</span></div><div class="k">t<span class="h">5</span></div><div class="k">y<span class="h">6</span></div><div class="k">u<span class="h">7</span></div><div class="k">i<span class="h">8</span></div><div class="k">o<span class="h">9</span></div><div class="k">p<span class="h">0</span></div><div class="k mod">⌫</div>
+        </div>
+        <div class="row">
+          <div class="k mod s">Tab</div><div class="k">a</div><div class="k">s</div><div class="k">d</div><div class="k">f</div><div class="k">g</div><div class="k">h</div><div class="k">j</div><div class="k">k</div><div class="k">l</div><div class="k mod s">Enter</div>
+        </div>
+        <div class="row">
+          <div class="k mod s">Shift</div><div class="k">z</div><div class="k">x</div><div class="k">c</div><div class="k">v</div><div class="k">b</div><div class="k">n</div><div class="k">m</div><div class="k">,<span class="h">;</span></div><div class="k">.<span class="h">:</span></div><div class="k mod">↑</div>
+        </div>
+        <div class="row">
+          <div class="k mod s">Ctrl</div><div class="k mod s">Fn</div><div class="k mod s">⌨</div><div class="k space w4">English (US)</div><div class="k mod">←</div><div class="k mod">↓</div><div class="k mod">→</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. Compact PC (HK 4-row style)</h3>
+      <p>11 keys per row, so keys about 35% wider than the full layout. Keeps Ctrl, Tab, Fn and arrows; digits and symbols on long-press or Fn. Esc is Fn+Tab. <b>⌨</b> jumps to your other keyboard.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="note">Today's full layout has 15 key-widths per row; A has 10, B has 11. Both need roughly the same work, except A also needs a ?123 symbol page.</p>

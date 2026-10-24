@@ -35,4 +35,16 @@ class RowHeightTest {
     fun `the cap never drops below one pixel`() {
         assertEquals(1, cappedRowHeightPx(100, rows = 7, screenHeightPx = 3, landscape = true))
     }
+
+    @Test
+    fun `compact rows share the height of five full rows`() {
+        assertEquals(150, compactRowHeightPx(120))
+    }
+
+    @Test
+    fun `compact keeps the capped landscape height of the full layout`() {
+        val fullRow =
+            cappedRowHeightPx(chosenPx = 200, rows = 7, screenHeightPx = 1440, landscape = true)
+        assertEquals(fullRow * 5 / 4, compactRowHeightPx(fullRow))
+    }
 }

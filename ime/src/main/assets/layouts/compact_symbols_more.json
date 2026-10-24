@@ -1,0 +1,57 @@
+{
+  "id": "compact_symbols_more",
+  "name": "More symbols",
+  "rows": [
+    {
+      "keys": [
+        { "chars": ["~"] },
+        { "chars": ["`"] },
+        { "chars": ["|"] },
+        { "chars": ["•"] },
+        { "chars": ["√"] },
+        { "chars": ["π"] },
+        { "chars": ["÷"] },
+        { "chars": ["×"] },
+        { "chars": ["¶"] },
+        { "chars": ["∆"] }
+      ]
+    },
+    {
+      "keys": [
+        { "chars": ["£"] },
+        { "chars": ["¥"] },
+        { "chars": ["^"] },
+        { "chars": ["°"] },
+        { "chars": ["="] },
+        { "chars": ["{"] },
+        { "chars": ["}"] },
+        { "chars": ["\\"] },
+        { "chars": ["%"] },
+        { "chars": ["©"] }
+      ]
+    },
+    {
+      "inset": 0.5,
+      "keys": [
+        { "switchTo": "@page:symbols", "width": 1.5 },
+        { "chars": ["®"] },
+        { "chars": ["™"] },
+        { "chars": ["["] },
+        { "chars": ["]"] },
+        { "chars": ["<"] },
+        { "chars": [">"] },
+        { "key": "BACKSPACE", "width": 1.5 }
+      ]
+    },
+    {
+      "keys": [
+        { "switchTo": "@page:letters", "width": 1.5 },
+        { "chars": [","] },
+        { "switchTo": "@keyboard", "holdTo": "@full" },
+        { "chars": [" ", " "], "width": 4, "then": "@page:letters" },
+        { "chars": ["."], "longPress": ["…"] },
+        { "key": "ENTER", "width": 1.5 }
+      ]
+    }
+  ]
+}

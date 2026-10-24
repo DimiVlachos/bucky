@@ -82,6 +82,20 @@ class KeyboardSettingsTest {
     }
 
     @Test
+    fun `apps default to compact with both helpers on`() {
+        val defaults = KeyboardSettings.defaults(systemLanguage = "en")
+        assertEquals(OutsideTerminals.COMPACT, defaults.outsideTerminals)
+        assertEquals(true, defaults.autoCapitalize)
+        assertEquals(true, defaults.doubleSpacePeriod)
+    }
+
+    @Test
+    fun `each language names its compact layout`() {
+        assertEquals("compact_en_us", KeyboardLanguage.EN_US.compactLayoutId)
+        assertEquals("compact_el", KeyboardLanguage.EL.compactLayoutId)
+    }
+
+    @Test
     fun `the extra row is split into words`() {
         assertEquals(
             listOf("ESC", "TAB", "~", "|"),

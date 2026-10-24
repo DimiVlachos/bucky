@@ -14,6 +14,9 @@ public data class KeyboardSettings(
     val haptics: Boolean = true,
     val fKeyRow: Boolean = false,
     val extraRow: List<String> = emptyList(),
+    val outsideTerminals: OutsideTerminals = OutsideTerminals.COMPACT,
+    val autoCapitalize: Boolean = true,
+    val doubleSpacePeriod: Boolean = true,
 ) {
 
     public fun withExtraRow(text: String): KeyboardSettings =
