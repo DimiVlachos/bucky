@@ -2,6 +2,8 @@ package app.buckykeys.keyboard.settings.keyboard.presentation.view_model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.buckykeys.keyboard.settings.keyboard.domain.interpreter.ExtraRowInterpreter
+import app.buckykeys.keyboard.settings.keyboard.domain.model.ExtraRowPreview
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardLanguage
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
 import app.buckykeys.keyboard.settings.keyboard.domain.repository.KeyboardSettingsRepository
@@ -19,7 +21,10 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 internal class KeyboardSettingsViewModel
 @Inject
-constructor(private val repository: KeyboardSettingsRepository) : ViewModel() {
+constructor(
+    private val repository: KeyboardSettingsRepository,
+    private val extraRowInterpreter: ExtraRowInterpreter,
+) : ViewModel() {
 
     private val saveFailed = MutableStateFlow(false)
 
@@ -61,6 +66,9 @@ constructor(private val repository: KeyboardSettingsRepository) : ViewModel() {
         update { it.withExtraRow(text) }
     }
 
+    fun previewExtraRow(text: String): ExtraRowPreview =
+        extraRowInterpreter.interpret(text.split(Whitespace).filter { it.isNotEmpty() })
+
     fun onSaveErrorShown() {
         saveFailed.value = false
     }
@@ -77,5 +85,6 @@ constructor(private val repository: KeyboardSettingsRepository) : ViewModel() {
 
     private companion object {
         const val STOP_TIMEOUT_MS = 5_000L
+        val Whitespace = Regex("\\s+")
     }
 }

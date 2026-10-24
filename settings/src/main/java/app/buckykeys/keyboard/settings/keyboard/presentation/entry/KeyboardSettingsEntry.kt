@@ -2,6 +2,7 @@ package app.buckykeys.keyboard.settings.keyboard.presentation.entry
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -17,6 +18,8 @@ internal fun KeyboardSettingsEntry(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
     state.settings?.let {
+        val extraRowText = extraRowDraft.display(it.extraRow)
+        val extraRowPreview = remember(extraRowText) { viewModel.previewExtraRow(extraRowText) }
         KeyboardSettingsScreen(
             settings = it,
             onLanguageChange = viewModel::onLanguageChange,
@@ -26,7 +29,10 @@ internal fun KeyboardSettingsEntry(
             onHapticsChange = viewModel::onHapticsChange,
             onFKeyRowChange = viewModel::onFKeyRowChange,
             extraRowDraft = extraRowDraft,
-            onExtraRowSave = { saveExtraRow(viewModel, extraRowDraft, focusManager) },
+            extraRowPreview = extraRowPreview,
+            onExtraRowSave = {
+                if (extraRowPreview.valid) saveExtraRow(viewModel, extraRowDraft, focusManager)
+            },
         )
     }
 }
