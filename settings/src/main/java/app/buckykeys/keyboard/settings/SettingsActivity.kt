@@ -25,7 +25,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import app.buckykeys.keyboard.settings.core.presentation.theme.BuckyTheme
 import app.buckykeys.keyboard.settings.home.presentation.components.AboutFooter
 import app.buckykeys.keyboard.settings.home.presentation.screen.HomeScreen
-import app.buckykeys.keyboard.settings.keyboard.presentation.entry.ExtraRowSaveBarEntry
 import app.buckykeys.keyboard.settings.keyboard.presentation.entry.KeyboardSettingsEntry
 import app.buckykeys.keyboard.settings.keyboard.presentation.state.rememberExtraRowDraftState
 import app.buckykeys.keyboard.settings.keyboard.presentation.view_model.KeyboardSettingsViewModel
@@ -74,7 +73,6 @@ public class SettingsActivity : ComponentActivity() {
                     },
                     settings = { KeyboardSettingsEntry(keyboardSettings, extraRowDraft) },
                     footer = { AboutFooter(versionName(), ::openSource) },
-                    bottomBar = { ExtraRowSaveBarEntry(keyboardSettings, extraRowDraft) },
                 )
             }
         }

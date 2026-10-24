@@ -1,8 +1,8 @@
 package app.buckykeys.keyboard.settings.home.presentation.screen
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,7 +35,6 @@ internal fun HomeScreen(
     setup: @Composable () -> Unit,
     settings: @Composable () -> Unit,
     footer: @Composable () -> Unit,
-    bottomBar: @Composable () -> Unit,
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -74,9 +73,7 @@ internal fun HomeScreen(
                     footer()
                 }
             }
-            Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().imePadding()) {
-                bottomBar()
-            }
+            Spacer(modifier = Modifier.navigationBarsPadding().imePadding())
         }
     }
 }
