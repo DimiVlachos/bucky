@@ -8,8 +8,8 @@ import app.buckykeys.keyboard.settings.keyboard.presentation.view_model.Keyboard
 
 @Composable
 internal fun KeyboardSettingsEntry(viewModel: KeyboardSettingsViewModel) {
-    val settings by viewModel.state.collectAsStateWithLifecycle()
-    settings?.let {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    state.settings?.let {
         KeyboardSettingsScreen(
             settings = it,
             onLanguageChange = viewModel::onLanguageChange,
