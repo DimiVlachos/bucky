@@ -9,7 +9,12 @@ public data class KeyboardSettings(
     val landscapeRowHeightDp: Int = DEFAULT_LANDSCAPE_ROW_HEIGHT_DP,
     val keyPreview: Boolean = true,
     val haptics: Boolean = true,
+    val fKeyRow: Boolean = false,
+    val extraRow: List<String> = emptyList(),
 ) {
+
+    public fun withExtraRow(text: String): KeyboardSettings =
+        copy(extraRow = text.split(WHITESPACE).filter { it.isNotEmpty() }.take(MAX_EXTRA_KEYS))
 
     public fun withLanguage(language: KeyboardLanguage, enabled: Boolean): KeyboardSettings {
         val updated = if (enabled) (languages + language).distinct() else languages - language
@@ -27,6 +32,8 @@ public data class KeyboardSettings(
         public const val DEFAULT_LANDSCAPE_ROW_HEIGHT_DP: Int = 34
         public val ROW_HEIGHT_RANGE: IntRange = 36..64
         public val LANDSCAPE_ROW_HEIGHT_RANGE: IntRange = 26..56
+        public const val MAX_EXTRA_KEYS: Int = 15
+        private val WHITESPACE = Regex("\\s+")
 
         public fun defaults(systemLanguage: String): KeyboardSettings =
             KeyboardSettings(

@@ -15,4 +15,9 @@
     <string name="settings_feedback">Απόκριση</string>
     <string name="settings_key_preview">Εμφάνιση του πλήκτρου πάνω από το δάχτυλο</string>
     <string name="settings_haptics">Δόνηση στο πάτημα</string>
+    <string name="settings_extra_rows">Επιπλέον σειρές</string>
+    <string name="settings_f_key_row">Σειρά F1–F12</string>
+    <string name="settings_extra_row">Δική σας σειρά</string>
+    <string name="settings_extra_row_hint">Ονόματα πλήκτρων ή μεμονωμένοι χαρακτήρες, χωρισμένα με κενά, όπως στα extra keys του Termux: ESC TAB CTRL ALT ~ | / - HOME END PGUP PGDN</string>
+    <string name="settings_save">Αποθήκευση</string>
 </resources>

@@ -9,6 +9,7 @@ import app.buckykeys.keyboard.billing.domain.repository.BillingRepository
 import app.buckykeys.keyboard.ime.dispatch.InputDispatcher
 import app.buckykeys.keyboard.ime.layout.BuiltInLayouts
 import app.buckykeys.keyboard.ime.layout.Layout
+import app.buckykeys.keyboard.ime.layout.withExtraRows
 import app.buckykeys.keyboard.ime.layout.withoutLanguageKey
 import app.buckykeys.keyboard.ime.view.KeyboardView
 import app.buckykeys.keyboard.ime.view.isPasswordInput
@@ -102,7 +103,8 @@ class BuckyImeService : InputMethodService() {
                     BuiltInLayouts.load(assets, language.layoutId)
                 }
             }
-        return if (enabled.size == 1) enabled.map { it.withoutLanguageKey() } else enabled
+        val switchable = if (enabled.size == 1) enabled.map { it.withoutLanguageKey() } else enabled
+        return switchable.map { it.withExtraRows(settings.fKeyRow, settings.extraRow) }
     }
 
     private fun rowHeightPx(): Int {

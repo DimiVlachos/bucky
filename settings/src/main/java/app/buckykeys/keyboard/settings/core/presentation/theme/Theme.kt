@@ -15,7 +15,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-@Immutable internal data class Spacing(val medium: Dp = 16.dp, val large: Dp = 24.dp)
+@Immutable
+internal data class Spacing(val small: Dp = 8.dp, val medium: Dp = 16.dp, val large: Dp = 24.dp)
 
 private val LocalSpacing = staticCompositionLocalOf { Spacing() }
 
