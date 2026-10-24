@@ -105,7 +105,7 @@ internal fun ExtraRowEditor(
             },
             isError = invalid,
         )
-    val edge = TEXT_EDGE
+    val edge = START_EDGE
     val indent = with(LocalDensity.current) { edge.toSp() }
     BasicTextField(
         state = draft.textField,
@@ -130,8 +130,8 @@ internal fun ExtraRowEditor(
             decorator.Decoration {
                 Box(
                     modifier =
-                        Modifier.extendIntoPadding(start = edge, end = edge)
-                            .horizontalFadingEdges(scroll, start = edge, end = edge),
+                        Modifier.extendIntoPadding(start = edge, end = 0.dp)
+                            .horizontalFadingEdges(scroll, start = edge, end = END_FADE),
                 ) {
                     innerTextField()
                 }
@@ -198,7 +198,8 @@ private fun ExtraRowSupportingText(
 
 private const val ENTER_MS = 150
 private const val FILL_MS = 200
-private val TEXT_EDGE = 16.dp
+private val START_EDGE = 12.dp
+private val END_FADE = 16.dp
 private const val SWAP_OUT_MS = 100
 private const val SWAP_IN_MS = 150
 private const val EXIT_MS = 120
