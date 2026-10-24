@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import app.buckykeys.keyboard.settings.R
+import app.buckykeys.keyboard.settings.core.presentation.components.keepVisibleWhenFocused
 import app.buckykeys.keyboard.settings.core.presentation.theme.BuckyTheme
 import app.buckykeys.keyboard.settings.onboarding.domain.model.SetupState
 
@@ -25,10 +26,6 @@ internal fun OnboardingSection(
     onChooseClick: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(BuckyTheme.spacing.medium)) {
-        Text(
-            text = stringResource(R.string.settings_title),
-            style = MaterialTheme.typography.headlineMedium,
-        )
         Text(
             text = stringResource(R.string.onboarding_body),
             style = MaterialTheme.typography.bodyLarge,
@@ -60,7 +57,7 @@ internal fun OnboardingSection(
             value = tryText,
             onValueChange = onTryTextChange,
             label = { Text(stringResource(R.string.onboarding_try)) },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().keepVisibleWhenFocused(),
         )
     }
 }
