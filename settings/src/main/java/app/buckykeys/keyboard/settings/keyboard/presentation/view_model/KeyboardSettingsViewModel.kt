@@ -6,6 +6,7 @@ import app.buckykeys.keyboard.settings.keyboard.domain.interpreter.ExtraRowInter
 import app.buckykeys.keyboard.settings.keyboard.domain.model.ExtraRowPreview
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardLanguage
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
+import app.buckykeys.keyboard.settings.keyboard.domain.model.OutsideTerminals
 import app.buckykeys.keyboard.settings.keyboard.domain.repository.KeyboardSettingsRepository
 import app.buckykeys.keyboard.settings.keyboard.presentation.state.KeyboardSettingsState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -64,6 +65,18 @@ constructor(
 
     fun onFKeyRowChange(enabled: Boolean) {
         update { it.copy(fKeyRow = enabled) }
+    }
+
+    fun onOutsideTerminalsChange(choice: OutsideTerminals) {
+        update { it.copy(outsideTerminals = choice) }
+    }
+
+    fun onAutoCapitalizeChange(enabled: Boolean) {
+        update { it.copy(autoCapitalize = enabled) }
+    }
+
+    fun onDoubleSpacePeriodChange(enabled: Boolean) {
+        update { it.copy(doubleSpacePeriod = enabled) }
     }
 
     fun onExtraRowSave(text: String) {

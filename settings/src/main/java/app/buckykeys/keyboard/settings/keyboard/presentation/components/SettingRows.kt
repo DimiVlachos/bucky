@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -76,21 +78,58 @@ internal fun CheckboxRow(
 }
 
 @Composable
-internal fun SwitchRow(text: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+internal fun SwitchRow(
+    text: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true,
+) {
     Row(
         modifier =
             Modifier.fillMaxWidth()
                 .heightIn(min = MinRowHeight)
-                .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange),
+                .toggleable(
+                    value = checked,
+                    enabled = enabled,
+                    role = Role.Switch,
+                    onValueChange = onCheckedChange,
+                ),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
+            color =
+                if (enabled) MaterialTheme.colorScheme.onSurface
+                else MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_ALPHA),
             modifier = Modifier.weight(1f).padding(end = BuckyTheme.spacing.medium),
         )
-        Switch(checked = checked, onCheckedChange = null)
+        Switch(checked = checked, onCheckedChange = null, enabled = enabled)
+    }
+}
+
+@Composable
+internal fun RadioRow(text: String, description: String?, selected: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier =
+            Modifier.fillMaxWidth()
+                .heightIn(min = MinRowHeight)
+                .selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(selected = selected, onClick = null)
+        Spacer(modifier = Modifier.width(BuckyTheme.spacing.small))
+        Column {
+            Text(text = text, style = MaterialTheme.typography.bodyLarge)
+            description?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 }
 
