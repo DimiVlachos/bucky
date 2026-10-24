@@ -30,9 +30,10 @@ public class KeyboardView(
     private val languages: List<Layout>,
     private val sink: InputSink,
     private val latencyLogging: Boolean,
+    private val rowHeightPx: Int,
+    private val haptics: Boolean,
 ) : View(context) {
 
-    private val rowHeightPx = resources.getDimensionPixelSize(R.dimen.key_row_height)
     private val gapPx = resources.getDimension(R.dimen.key_gap)
     private val cornerPx = resources.getDimension(R.dimen.key_corner_radius)
     private val labelPaddingPx = resources.getDimension(R.dimen.key_label_padding)
@@ -184,7 +185,7 @@ public class KeyboardView(
                 MotionEvent.ACTION_DOWN,
                 MotionEvent.ACTION_POINTER_DOWN -> {
                     dispatch(event, event.actionIndex, PointerAction.DOWN)
-                    performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                    if (haptics) performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                     if (latencyLogging) pendingDownTime = event.eventTime
                 }
                 MotionEvent.ACTION_MOVE ->
@@ -244,7 +245,7 @@ public class KeyboardView(
             engine.reset()
         }
         if (!popupWasOpen && engine.popup.isOpen) {
-            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            if (haptics) performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
         }
         scheduleTimer()
         invalidate()
