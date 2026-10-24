@@ -60,7 +60,13 @@ internal fun CheckboxRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(checked = checked, onCheckedChange = null, enabled = enabled)
-        Text(text = text, style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            color =
+                if (enabled) MaterialTheme.colorScheme.onSurface
+                else MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_ALPHA),
+        )
     }
 }
 
@@ -106,7 +112,6 @@ internal fun HeightSlider(
             onValueChange = { dragValue = it },
             onValueChangeFinished = { onValueChangeFinished(dragValue.roundToInt()) },
             valueRange = range.first.toFloat()..range.last.toFloat(),
-            steps = range.last - range.first - 1,
             modifier =
                 Modifier.semantics {
                     contentDescription = text
@@ -115,3 +120,5 @@ internal fun HeightSlider(
         )
     }
 }
+
+private const val DISABLED_ALPHA = 0.38f

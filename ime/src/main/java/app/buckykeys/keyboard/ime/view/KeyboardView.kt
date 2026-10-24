@@ -113,8 +113,10 @@ public class KeyboardView(
                         WindowInsetsCompat.Type.tappableElement() or
                         WindowInsetsCompat.Type.displayCutout(),
                 )
+            val gestures = insets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())
+            val bottom = maxOf(bars.bottom, gestures.bottom)
             val sidesChanged = bars.left != view.paddingLeft || bars.right != view.paddingRight
-            view.setPadding(bars.left, 0, bars.right, bars.bottom)
+            view.setPadding(bars.left, 0, bars.right, bottom)
             if (sidesChanged && width > 0) rebuildGeometryIfNeeded()
             insets
         }
