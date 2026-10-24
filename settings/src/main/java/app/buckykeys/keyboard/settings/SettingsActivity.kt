@@ -7,15 +7,23 @@ import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
 import app.buckykeys.keyboard.settings.core.presentation.theme.BuckyTheme
-import app.buckykeys.keyboard.settings.onboarding.presentation.screen.OnboardingScreen
+import app.buckykeys.keyboard.settings.home.presentation.screen.HomeScreen
+import app.buckykeys.keyboard.settings.keyboard.presentation.entry.KeyboardSettingsEntry
+import app.buckykeys.keyboard.settings.keyboard.presentation.view_model.KeyboardSettingsViewModel
+import app.buckykeys.keyboard.settings.onboarding.presentation.screen.OnboardingSection
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 public class SettingsActivity : ComponentActivity() {
+
+    private val keyboardSettings: KeyboardSettingsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,15 +31,20 @@ public class SettingsActivity : ComponentActivity() {
         setContent {
             BuckyTheme {
                 var tryText by rememberSaveable { mutableStateOf("") }
-                OnboardingScreen(
-                    tryText = tryText,
-                    onTryTextChange = { tryText = it },
-                    onEnableClick = {
-                        startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
+                HomeScreen(
+                    setup = {
+                        OnboardingSection(
+                            tryText = tryText,
+                            onTryTextChange = { tryText = it },
+                            onEnableClick = {
+                                startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
+                            },
+                            onChooseClick = {
+                                getSystemService<InputMethodManager>()?.showInputMethodPicker()
+                            },
+                        )
                     },
-                    onChooseClick = {
-                        getSystemService<InputMethodManager>()?.showInputMethodPicker()
-                    },
+                    settings = { KeyboardSettingsEntry(keyboardSettings) },
                 )
             }
         }
