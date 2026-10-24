@@ -2,7 +2,7 @@
 
 Bucky ("Bucky Keys" in stores, named after the *bucky bits* that Ctrl, Alt, Meta and Super set; trademark check pending) is a full PC-layout soft keyboard for Android: an `InputMethodService` with a Canvas keyboard, for Termux, SSH clients and coding.
 
-`PLAN.md` is the source of truth for scope and architecture. Read it before any non-trivial change. Any change of scope or any new module updates `PLAN.md` first, in the same commit.
+`PLAN.md` is the current plan for scope and architecture, not a contract. Read it before any non-trivial change, question its calls, and propose better options when you see them; ask before changing architecture or scope. Once a change of scope, a new module or a different approach is agreed, update `PLAN.md` in the same commit so it stays current.
 
 Conventions follow Dimitris's other Android apps. When a convention is unclear, ask; do not guess, especially on architecture.
 
