@@ -19,7 +19,6 @@ import app.buckykeys.keyboard.ime.engine.PointerAction
 import app.buckykeys.keyboard.ime.geometry.KeyboardGeometry
 import app.buckykeys.keyboard.ime.layout.BuiltInLayouts
 import app.buckykeys.keyboard.ime.layout.DefaultLabels
-import app.buckykeys.keyboard.ime.layout.FallbackLayout
 import app.buckykeys.keyboard.ime.layout.KeyDef
 import app.buckykeys.keyboard.ime.layout.Layout
 import app.buckykeys.keyboard.ime.layout.ModifierKind
@@ -41,6 +40,8 @@ public class KeyboardView(
     private val rowHeightPx: Int,
     private val haptics: Boolean,
     labelScale: Float = 1f,
+    pages: Map<String, Layout> = emptyMap(),
+    private val actions: KeyboardActions = KeyboardActions {},
 ) : View(context) {
 
     private val gapPx = resources.getDimension(R.dimen.key_gap)
@@ -97,13 +98,17 @@ public class KeyboardView(
             color = ContextCompat.getColor(context, R.color.key_label_secondary)
         }
 
-    private val languages: List<Layout> = languages.ifEmpty { listOf(FallbackLayout.pcFullEnUs) }
-    private var languageIndex = initialLanguageIndex.coerceIn(0, this.languages.lastIndex)
+    private val pageSet = PageSet(languages, pages)
+    private var languageIndex = initialLanguageIndex.coerceIn(0, pageSet.languageCount - 1)
+    private var page = BuiltInLayouts.PAGE_LETTERS
+    private var pendingPage = BuiltInLayouts.PAGE_LETTERS
+    private var pendingAction: String? = null
     private val layout: Layout
-        get() = languages[languageIndex]
+        get() = pageSet.current(languageIndex, page)
 
     private var geometry = KeyboardGeometry(layout, 0, rowHeightPx)
     private var geometryLanguage = languageIndex
+    private var geometryPage = page
     private val engine = KeyboardEngine(geometry, longPressMs)
     private var labelX = FloatArray(0)
     private var labelY = FloatArray(0)
@@ -130,12 +135,14 @@ public class KeyboardView(
     private val timerTick = Runnable { onTimer() }
     private val nextLanguage = Runnable { switchLanguage(1) }
     private val previousLanguage = Runnable { switchLanguage(-1) }
+    private val pageSwitch = Runnable { switchPage(pendingPage) }
+    private val actionRequest = Runnable { pendingAction?.let { actions.onAction(it) } }
     private val logLatency = Runnable {
         Timber.tag(LATENCY_TAG).d("touch-to-draw %d ms", lastLatencyMs)
     }
 
     init {
-        engine.languageSwipe = this.languages.size > 1
+        engine.languageSwipe = pageSet.languageCount > 1
         buildLabels()
         ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
             val bars =
@@ -168,9 +175,16 @@ public class KeyboardView(
 
     private fun rebuildGeometryIfNeeded() {
         val contentWidth = (width - paddingLeft - paddingRight - 2 * keysEdgeGapPx).coerceAtLeast(0)
-        if (contentWidth == geometry.widthPx && geometryLanguage == languageIndex) return
+        if (
+            contentWidth == geometry.widthPx &&
+                geometryLanguage == languageIndex &&
+                geometryPage == page
+        ) {
+            return
+        }
         geometry = KeyboardGeometry(layout, contentWidth, rowHeightPx)
         geometryLanguage = languageIndex
+        geometryPage = page
         try {
             engine.setGeometry(geometry)
         } catch (e: RuntimeException) {
@@ -223,7 +237,7 @@ public class KeyboardView(
             labelY[i] =
                 (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f - (paint.ascent() + paint.descent()) / 2f
             modifierBits[i] = if (def is KeyDef.Modifier) 1 shl def.kind.ordinal else 0
-            if (engine.languageSwipe && def is KeyDef.Char && def.primary == " ") spaceKey = i
+            if (showsLanguage() && def is KeyDef.Char && def.primary == " ") spaceKey = i
             if (fnLabels[i].isNotEmpty()) buildFnLabel(i, rects)
         }
         evenOut(labelSize, labelSmall, labelY, rects) { true }
@@ -277,6 +291,9 @@ public class KeyboardView(
         if (def.primary.uppercase() != def.primary) return ""
         return DefaultLabels.of(def.alternates.first())
     }
+
+    private fun showsLanguage(): Boolean =
+        engine.languageSwipe && page == BuiltInLayouts.PAGE_LETTERS
 
     private fun buildSpaceLabel(rects: FloatArray) {
         val i = spaceKey
@@ -456,8 +473,17 @@ public class KeyboardView(
         return true
     }
 
+    public fun setAutoShift(on: Boolean) {
+        engine.setAutoShift(on)
+        invalidate()
+    }
+
     public fun resetState() {
         engine.reset()
+        if (page != BuiltInLayouts.PAGE_LETTERS) {
+            page = BuiltInLayouts.PAGE_LETTERS
+            rebuildGeometryIfNeeded()
+        }
         scheduleTimer()
         invalidate()
     }
@@ -471,6 +497,8 @@ public class KeyboardView(
         removeCallbacks(timerTick)
         removeCallbacks(nextLanguage)
         removeCallbacks(previousLanguage)
+        removeCallbacks(pageSwitch)
+        removeCallbacks(actionRequest)
         removeCallbacks(logLatency)
         scheduledDeadline = KeyboardEngine.NO_DEADLINE
         super.onDetachedFromWindow()
@@ -478,16 +506,41 @@ public class KeyboardView(
 
     private fun handleSwitchRequest() {
         val target = engine.takeSwitchRequest() ?: return
-        when {
-            languages.size < 2 -> Timber.w("no other language for switch target %s", target)
-            target == BuiltInLayouts.NEXT_LANGUAGE -> post(nextLanguage)
-            target == BuiltInLayouts.PREVIOUS_LANGUAGE -> post(previousLanguage)
-            else -> Timber.w("no layout for switch target %s", target)
+        when (target) {
+            BuiltInLayouts.NEXT_LANGUAGE,
+            BuiltInLayouts.PREVIOUS_LANGUAGE -> switchLanguageLater(target)
+            BuiltInLayouts.OTHER_KEYBOARD,
+            BuiltInLayouts.FULL_LAYOUT -> {
+                pendingAction = target
+                post(actionRequest)
+            }
+            else ->
+                if (pageSet.isPage(target)) {
+                    pendingPage = target
+                    post(pageSwitch)
+                } else {
+                    Timber.w("no layout for switch target %s", target)
+                }
         }
     }
 
+    private fun switchLanguageLater(target: String) {
+        when {
+            pageSet.languageCount < 2 -> Timber.w("no other language for switch target %s", target)
+            target == BuiltInLayouts.NEXT_LANGUAGE -> post(nextLanguage)
+            else -> post(previousLanguage)
+        }
+    }
+
+    private fun switchPage(target: String) {
+        page = target
+        rebuildGeometryIfNeeded()
+        invalidate()
+    }
+
     private fun switchLanguage(step: Int) {
-        languageIndex = (languageIndex + step).mod(languages.size)
+        languageIndex = (languageIndex + step).mod(pageSet.languageCount)
+        page = BuiltInLayouts.PAGE_LETTERS
         rebuildGeometryIfNeeded()
         languageChangeListener.onLanguageChanged(languageIndex)
         requestLayout()
