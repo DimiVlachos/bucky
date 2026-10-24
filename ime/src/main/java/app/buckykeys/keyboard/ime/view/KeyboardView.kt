@@ -38,6 +38,7 @@ public class KeyboardView(
     private val keyPaint = fillPaint(R.color.key_background)
     private val pressedPaint = fillPaint(R.color.key_pressed)
     private val activePaint = fillPaint(R.color.key_modifier_active)
+    private val lockedPaint = fillPaint(R.color.key_modifier_locked)
     private val labelPaint = labelPaint(R.dimen.key_label_size)
     private val smallLabelPaint = labelPaint(R.dimen.key_label_small_size)
 
@@ -103,11 +104,13 @@ public class KeyboardView(
     override fun onDraw(canvas: Canvas) {
         val rects = geometry.rects
         val mask = engine.modifierMask
+        val locked = engine.lockedMask
         val shifted = mask and (1 shl ModifierKind.SHIFT.ordinal) != 0
         for (i in 0 until geometry.keyCount) {
             val fill =
                 when {
                     engine.isPressed(i) -> pressedPaint
+                    modifierBits[i] and locked != 0 -> lockedPaint
                     modifierBits[i] and mask != 0 -> activePaint
                     else -> keyPaint
                 }

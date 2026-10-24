@@ -3,5 +3,6 @@
     <color name="key_background">#FF2E3135</color>
     <color name="key_pressed">#FF4A4F55</color>
     <color name="key_modifier_active">#FF3D5A80</color>
+    <color name="key_modifier_locked">#FF5B8BD0</color>
     <color name="key_label">#FFE8EAED</color>
 </resources>
