@@ -45,10 +45,20 @@ class LayoutParserTest {
     }
 
     @Test
-    fun `long press entries become alternates`() {
+    fun `long press key names become special keys`() {
         assertEquals(
-            KeyDef.Char("1", "!", listOf("F1")),
+            KeyDef.Char("1", "!", listOf(KeyDef.Special(KeyCode.F1))),
             parseKeys("""{ "chars": ["1", "!"], "longPress": ["F1"] }""").single().def,
+        )
+    }
+
+    @Test
+    fun `other long press entries become characters with their uppercase`() {
+        assertEquals(
+            listOf(KeyDef.Char("é", "É"), KeyDef.Char("1", "1")),
+            (parseKeys("""{ "chars": ["e"], "longPress": ["é", "1"] }""").single().def
+                    as KeyDef.Char)
+                .alternates,
         )
     }
 

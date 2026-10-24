@@ -10,7 +10,7 @@ public object FallbackLayout {
                 listOf(
                     Row(
                         listOf(special(KeyCode.ESC, "Esc", 1.25f)) +
-                            chars(
+                            numberRow(
                                 "1!",
                                 "2@",
                                 "3#",
@@ -95,6 +95,14 @@ public object FallbackLayout {
 
     private fun chars(vararg pairs: String): List<KeySpec> = pairs.map { pair ->
         KeySpec(KeyDef.Char(pair.substring(0, 1), pair.substring(1, 2)), pair.substring(0, 1))
+    }
+
+    private fun numberRow(vararg pairs: String): List<KeySpec> = pairs.mapIndexed { index, pair ->
+        val fKey = KeyDef.Special(KeyCode.entries[KeyCode.F1.ordinal + index])
+        KeySpec(
+            KeyDef.Char(pair.substring(0, 1), pair.substring(1, 2), listOf(fKey)),
+            pair.substring(0, 1),
+        )
     }
 
     private fun special(code: KeyCode, label: String, width: Float = 1f): KeySpec =

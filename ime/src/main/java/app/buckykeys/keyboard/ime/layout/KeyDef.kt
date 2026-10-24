@@ -4,7 +4,7 @@ public sealed interface KeyDef {
     public data class Char(
         val primary: String,
         val shifted: String,
-        val alternates: List<String> = emptyList(),
+        val alternates: List<KeyDef> = emptyList(),
     ) : KeyDef
 
     public data class Special(val code: KeyCode) : KeyDef

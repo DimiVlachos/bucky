@@ -16,6 +16,7 @@ import app.buckykeys.keyboard.ime.engine.InputSink
 import app.buckykeys.keyboard.ime.engine.KeyboardEngine
 import app.buckykeys.keyboard.ime.engine.PointerAction
 import app.buckykeys.keyboard.ime.geometry.KeyboardGeometry
+import app.buckykeys.keyboard.ime.layout.DefaultLabels
 import app.buckykeys.keyboard.ime.layout.KeyDef
 import app.buckykeys.keyboard.ime.layout.Layout
 import app.buckykeys.keyboard.ime.layout.ModifierKind
@@ -34,6 +35,12 @@ public class KeyboardView(
     private val cornerPx = resources.getDimension(R.dimen.key_corner_radius)
     private val labelPaddingPx = resources.getDimension(R.dimen.key_label_padding)
     private val labelMinSizePx = resources.getDimension(R.dimen.key_label_min_size)
+    private val labelSizePx = resources.getDimension(R.dimen.key_label_size)
+    private val smallLabelSizePx = resources.getDimension(R.dimen.key_label_small_size)
+
+    public val keysTop: Int = rowHeightPx
+
+    private val backgroundPaint = fillPaint(R.color.keyboard_background)
 
     private val keyPaint = fillPaint(R.color.key_background)
     private val pressedPaint = fillPaint(R.color.key_pressed)
@@ -50,10 +57,9 @@ public class KeyboardView(
     private var modifierBits = IntArray(0)
     private var pendingDownTime = NO_PENDING
     private var scheduledDeadline = KeyboardEngine.NO_DEADLINE
-    private val repeatTick = Runnable { onRepeatTick() }
+    private val timerTick = Runnable { onTimer() }
 
     init {
-        setBackgroundColor(ContextCompat.getColor(context, R.color.keyboard_background))
         ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
             val bottom =
                 insets
@@ -70,14 +76,14 @@ public class KeyboardView(
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         setMeasuredDimension(
             MeasureSpec.getSize(widthMeasureSpec),
-            layout.rows.size * rowHeightPx + paddingBottom,
+            keysTop + layout.rows.size * rowHeightPx + paddingBottom,
         )
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         geometry = KeyboardGeometry(layout, w, rowHeightPx)
         engine = KeyboardEngine(geometry)
-        scheduleRepeat()
+        scheduleTimer()
         val count = geometry.keyCount
         labelX = FloatArray(count)
         labelY = FloatArray(count)
@@ -105,6 +111,9 @@ public class KeyboardView(
     }
 
     override fun onDraw(canvas: Canvas) {
+        canvas.drawRect(0f, keysTop.toFloat(), width.toFloat(), height.toFloat(), backgroundPaint)
+        canvas.save()
+        canvas.translate(0f, keysTop.toFloat())
         val rects = geometry.rects
         val mask = engine.modifierMask
         val locked = engine.lockedMask
@@ -133,6 +142,8 @@ public class KeyboardView(
             paint.textSize = labelSize[i]
             canvas.drawText(label, labelX[i], labelY[i], paint)
         }
+        drawPopup(canvas, shifted)
+        canvas.restore()
         if (pendingDownTime != NO_PENDING) {
             Timber.tag(LATENCY_TAG)
                 .d("touch-to-draw %d ms", SystemClock.uptimeMillis() - pendingDownTime)
@@ -162,41 +173,88 @@ public class KeyboardView(
             Timber.e(e, "onTouchEvent: engine failed, resetting")
             engine.reset()
         }
-        scheduleRepeat()
+        scheduleTimer()
         invalidate()
         return true
     }
 
     public fun resetState() {
         engine.reset()
-        scheduleRepeat()
+        scheduleTimer()
         invalidate()
     }
 
     override fun onDetachedFromWindow() {
-        removeCallbacks(repeatTick)
+        removeCallbacks(timerTick)
         scheduledDeadline = KeyboardEngine.NO_DEADLINE
         super.onDetachedFromWindow()
     }
 
-    private fun onRepeatTick() {
+    private fun onTimer() {
         scheduledDeadline = KeyboardEngine.NO_DEADLINE
+        val popupWasOpen = engine.popup.isOpen
         try {
             engine.onTick(SystemClock.uptimeMillis(), sink)
         } catch (e: RuntimeException) {
-            Timber.e(e, "onRepeatTick: engine failed, resetting")
+            Timber.e(e, "onTimer: engine failed, resetting")
             engine.reset()
         }
-        scheduleRepeat()
+        if (!popupWasOpen && engine.popup.isOpen) {
+            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+        }
+        scheduleTimer()
+        invalidate()
     }
 
-    private fun scheduleRepeat() {
+    private fun scheduleTimer() {
         val deadline = engine.nextDeadline
         if (deadline == scheduledDeadline) return
-        removeCallbacks(repeatTick)
+        removeCallbacks(timerTick)
         scheduledDeadline = deadline
         if (deadline != KeyboardEngine.NO_DEADLINE) {
-            postDelayed(repeatTick, (deadline - SystemClock.uptimeMillis()).coerceAtLeast(0L))
+            postDelayed(timerTick, (deadline - SystemClock.uptimeMillis()).coerceAtLeast(0L))
+        }
+    }
+
+    private fun drawPopup(canvas: Canvas, shifted: Boolean) {
+        val popup = engine.popup
+        if (!popup.isOpen) return
+        val def = geometry.spec(popup.keyIndex).def as? KeyDef.Char ?: return
+        val top = popup.top
+        val bottom = top + popup.cellHeight
+        canvas.drawRoundRect(
+            popup.left,
+            top,
+            popup.left + popup.count * popup.cellWidth,
+            bottom,
+            cornerPx,
+            cornerPx,
+            backgroundPaint,
+        )
+        for (i in 0 until popup.count) {
+            val left = popup.left + i * popup.cellWidth
+            val right = left + popup.cellWidth
+            canvas.drawRoundRect(
+                left + gapPx,
+                top + gapPx,
+                right - gapPx,
+                bottom - gapPx,
+                cornerPx,
+                cornerPx,
+                if (i == popup.selected) activePaint else keyPaint,
+            )
+            val alternate = def.alternates[i]
+            val label =
+                if (shifted && alternate is KeyDef.Char) alternate.shifted
+                else DefaultLabels.of(alternate)
+            val paint = paintFor(label)
+            paint.textSize = baseSizeFor(label)
+            canvas.drawText(
+                label,
+                (left + right) / 2f,
+                (top + bottom) / 2f - (paint.ascent() + paint.descent()) / 2f,
+                paint,
+            )
         }
     }
 
@@ -204,7 +262,7 @@ public class KeyboardView(
         engine.onPointer(
             event.getPointerId(index),
             event.getX(index),
-            event.getY(index),
+            event.getY(index) - keysTop,
             action,
             event.eventTime,
             sink,
@@ -215,9 +273,7 @@ public class KeyboardView(
         if (label.length > 1) smallLabelPaint else labelPaint
 
     private fun baseSizeFor(label: String): Float =
-        resources.getDimension(
-            if (label.length > 1) R.dimen.key_label_small_size else R.dimen.key_label_size,
-        )
+        if (label.length > 1) smallLabelSizePx else labelSizePx
 
     private fun fillPaint(colorRes: Int): Paint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply { color = ContextCompat.getColor(context, colorRes) }
