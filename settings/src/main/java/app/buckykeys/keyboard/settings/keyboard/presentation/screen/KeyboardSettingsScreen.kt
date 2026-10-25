@@ -2,10 +2,12 @@ package app.buckykeys.keyboard.settings.keyboard.presentation.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import app.buckykeys.keyboard.settings.R
@@ -102,6 +104,7 @@ internal fun KeyboardSettingsScreen(
         )
         ExtraRowEditor(
             saved = settings.extraRow,
+            changed = settings.extraRowChangedBy(extraRowDraft.text),
             draft = extraRowDraft,
             preview = extraRowPreview,
             onSave = onExtraRowSave,
@@ -111,7 +114,7 @@ internal fun KeyboardSettingsScreen(
             text = stringResource(R.string.settings_outside_terminals),
             style = MaterialTheme.typography.bodyLarge,
         )
-        Column {
+        Column(modifier = Modifier.selectableGroup()) {
             OutsideTerminals.entries.forEach { choice ->
                 RadioRow(
                     text = stringResource(choice.labelRes()),
@@ -126,7 +129,7 @@ internal fun KeyboardSettingsScreen(
                 )
             }
         }
-        val helpersApply = settings.outsideTerminals != OutsideTerminals.FULL
+        val helpersApply = settings.outsideTerminals == OutsideTerminals.COMPACT
         SwitchRow(
             text = stringResource(R.string.settings_auto_capitalize),
             checked = settings.autoCapitalize,
@@ -172,7 +175,7 @@ private fun KeyboardSettingsScreenPreview() {
             {},
             {},
             ExtraRowDraftState(TextFieldState()),
-            ExtraRowPreview(emptyList(), emptyList(), overLimit = false),
+            ExtraRowPreview(emptyList(), emptyList(), overLimit = false, limit = 15),
             {},
         )
     }

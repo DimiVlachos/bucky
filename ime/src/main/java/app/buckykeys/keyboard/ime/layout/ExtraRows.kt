@@ -6,9 +6,13 @@ public fun parseExtraRow(userKeys: List<String>): ExtraRowParse {
     val items = userKeys.flatMap(::termuxItems)
     val accepted = items.mapNotNull(::userKey)
     val unknown = items.filter { userKey(it) == null }
-    val kept = accepted.take(MAX_USER_KEYS)
+    val kept = accepted.take(MAX_EXTRA_ROW_KEYS)
     val keys = if (kept.isEmpty()) emptyList() else sharedRow(kept).keys
-    return ExtraRowParse(keys = keys, unknown = unknown, overLimit = accepted.size > MAX_USER_KEYS)
+    return ExtraRowParse(
+        keys = keys,
+        unknown = unknown,
+        overLimit = accepted.size > MAX_EXTRA_ROW_KEYS,
+    )
 }
 
 public fun Layout.withExtraRows(fKeyRow: Boolean, userKeys: List<String>): Layout {
@@ -18,7 +22,7 @@ public fun Layout.withExtraRows(fKeyRow: Boolean, userKeys: List<String>): Layou
 }
 
 private const val ROW_UNITS = 15f
-private const val MAX_USER_KEYS = 15
+public const val MAX_EXTRA_ROW_KEYS: Int = 15
 private const val SPACE_LABEL = "␣"
 private const val TERMUX_PUNCTUATION = "[]'\""
 

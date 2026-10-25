@@ -10,6 +10,6 @@ internal class FakeExtraRowInterpreter : ExtraRowInterpreter {
 
     override fun interpret(words: List<String>): ExtraRowPreview {
         lastWords = words
-        return ExtraRowPreview(labels = words, unknown = emptyList(), overLimit = false)
+        return ExtraRowPreview(labels = words, unknown = emptyList(), overLimit = false, limit = 15)
     }
 }

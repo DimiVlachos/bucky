@@ -4,6 +4,7 @@ public data class ExtraRowPreview(
     val labels: List<String>,
     val unknown: List<String>,
     val overLimit: Boolean,
+    val limit: Int,
 ) {
     val valid: Boolean
         get() = unknown.isEmpty()

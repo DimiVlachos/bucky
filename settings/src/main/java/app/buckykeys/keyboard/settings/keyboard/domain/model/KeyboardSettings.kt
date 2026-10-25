@@ -22,6 +22,8 @@ public data class KeyboardSettings(
     public fun withExtraRow(text: String): KeyboardSettings =
         copy(extraRow = text.split(WHITESPACE).filter { it.isNotEmpty() }.take(MAX_EXTRA_ROW_WORDS))
 
+    public fun extraRowChangedBy(text: String): Boolean = withExtraRow(text).extraRow != extraRow
+
     public fun withLanguage(language: KeyboardLanguage, enabled: Boolean): KeyboardSettings {
         val updated = if (enabled) (languages + language).distinct() else languages - language
         return if (updated.isEmpty()) this else copy(languages = updated)
@@ -64,9 +66,8 @@ public data class KeyboardSettings(
         private val WHITESPACE = Regex("\\s+")
 
         private fun snapLabelScale(percent: Int): Int =
-            ((percent / LABEL_SCALE_STEP.toFloat()).roundToInt() * LABEL_SCALE_STEP).coerceIn(
-                LABEL_SCALE_RANGE,
-            )
+            (percent.coerceIn(LABEL_SCALE_RANGE) / LABEL_SCALE_STEP.toFloat()).roundToInt() *
+                LABEL_SCALE_STEP
 
         public fun defaults(systemLanguage: String): KeyboardSettings =
             KeyboardSettings(
