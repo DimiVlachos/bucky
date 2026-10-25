@@ -14,8 +14,8 @@ import app.buckykeys.keyboard.ime.layout.BuiltInLayouts
 import app.buckykeys.keyboard.ime.layout.FallbackLayout
 import app.buckykeys.keyboard.ime.layout.Layout
 import app.buckykeys.keyboard.ime.layout.withExtraRows
+import app.buckykeys.keyboard.ime.layout.withSwitchTarget
 import app.buckykeys.keyboard.ime.layout.withoutLanguageKey
-import app.buckykeys.keyboard.ime.layout.withoutSwitchKey
 import app.buckykeys.keyboard.ime.view.KeyboardActions
 import app.buckykeys.keyboard.ime.view.KeyboardView
 import app.buckykeys.keyboard.ime.view.LanguageChangeListener
@@ -23,7 +23,9 @@ import app.buckykeys.keyboard.ime.view.isPasswordInput
 import app.buckykeys.keyboard.profile.Profile
 import app.buckykeys.keyboard.profile.fieldFlags
 import app.buckykeys.keyboard.profile.profileFor
+import app.buckykeys.keyboard.profile.startPageFor
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
+import app.buckykeys.keyboard.settings.keyboard.domain.model.OutsideTerminals
 import app.buckykeys.keyboard.settings.keyboard.domain.repository.KeyboardSettingsRepository
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
@@ -66,8 +68,6 @@ class BuckyImeService : InputMethodService() {
 
     private var viewUsedFallback = false
 
-    private var languageIndex = 0
-
     private var profile = Profile.FULL
 
     private var lastPackage: String? = null
@@ -76,11 +76,11 @@ class BuckyImeService : InputMethodService() {
 
     private var autoCapitalizeField = false
 
-    private val layouts = mutableMapOf<String, Layout>()
+    private val layouts = ImeSession.layouts
 
     private val dispatcher = InputDispatcher { currentInputConnection }
 
-    private val languageChangeListener = LanguageChangeListener { languageIndex = it }
+    private val languageChangeListener = LanguageChangeListener { ImeSession.languageIndex = it }
 
     private val actions = KeyboardActions { target ->
         when (target) {
@@ -109,37 +109,14 @@ class BuckyImeService : InputMethodService() {
                 .collect { latest ->
                     preload(latest)
                     settings = latest
-                    languageIndex = languageIndex.coerceIn(0, maxOf(0, latest.languages.lastIndex))
+                    ImeSession.languageIndex =
+                        ImeSession.languageIndex.coerceIn(0, maxOf(0, latest.languages.lastIndex))
                     if (isInputViewShown) startField(currentInputEditorInfo) else refreshView()
                 }
         }
     }
 
-    override fun onCreateInputView(): View {
-        val compact = profile == Profile.COMPACT
-        val languages = if (compact) compactLanguages() else fullLanguages()
-        return KeyboardView(
-                context = this,
-                languages = languages,
-                initialLanguageIndex = languageIndex,
-                languageChangeListener = languageChangeListener,
-                sink = dispatcher,
-                latencyLogging = BuildConfig.DEBUG,
-                rowHeightPx =
-                    if (compact) compactRowHeightPx(rowHeightPx(fullRowCount()))
-                    else rowHeightPx(languages.maxOf { it.rows.size }),
-                haptics = settings.haptics,
-                labelScale = settings.labelScalePercent / PERCENT,
-                pages = if (compact) compactPages() else emptyMap(),
-                actions = actions,
-            )
-            .also {
-                it.previewEnabled = previewAllowed(currentInputEditorInfo)
-                keyboardView = it
-                viewSettings = settings
-                viewProfile = profile
-            }
-    }
+    override fun onCreateInputView(): View = createView().also(::adopt)
 
     override fun onEvaluateFullscreenMode(): Boolean = false
 
@@ -153,6 +130,7 @@ class BuckyImeService : InputMethodService() {
         if (packageName != lastPackage) {
             lastPackage = packageName
             forcedFull = false
+            if (packageName != ImeSession.handedOffFrom) ImeSession.handedOffFrom = null
         }
         val chosen =
             profileFor(
@@ -160,7 +138,8 @@ class BuckyImeService : InputMethodService() {
                 settings.outsideTerminals,
                 this.packageName,
                 forcedFull,
-                canHandOff(),
+                settings.outsideTerminals == OutsideTerminals.OTHER_KEYBOARD && canHandOff(),
+                ImeSession.handedOffFrom,
             )
         if (chosen == Profile.HAND_OFF && handOff()) return
         applyProfile(if (chosen == Profile.HAND_OFF) Profile.COMPACT else chosen)
@@ -183,7 +162,7 @@ class BuckyImeService : InputMethodService() {
             candidatesStart,
             candidatesEnd,
         )
-        updateAutoShift()
+        if (autoCapitalizeField) updateAutoShift()
     }
 
     override fun onComputeInsets(outInsets: Insets) {
@@ -220,6 +199,7 @@ class BuckyImeService : InputMethodService() {
         dispatcher.doubleSpacePeriod = flags.doubleSpacePeriod
         autoCapitalizeField = flags.autoCapitalize
         keyboardView?.previewEnabled = previewAllowed(info)
+        if (profile == Profile.COMPACT) keyboardView?.showPage(startPageFor(inputType))
         updateAutoShift()
     }
 
@@ -234,8 +214,11 @@ class BuckyImeService : InputMethodService() {
     private fun canHandOff(): Boolean =
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && shouldOfferSwitchingToNextInputMethod()
 
-    private fun handOff(): Boolean =
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && switchToPreviousInputMethod()
+    private fun handOff(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return false
+        ImeSession.handedOffFrom = currentInputEditorInfo?.packageName
+        return switchToPreviousInputMethod()
+    }
 
     private suspend fun preload(target: KeyboardSettings) {
         val wanted =
@@ -253,16 +236,62 @@ class BuckyImeService : InputMethodService() {
 
     private fun refreshView() {
         if (keyboardView == null) return
-        if (settings == viewSettings && profile == viewProfile && !viewUsedFallback) return
+        val upToDate =
+            viewSettings?.let { viewKey(it) == viewKey(settings) } == true && profile == viewProfile
+        if (upToDate && !viewUsedFallback) return
         rebuildView()
     }
 
     private fun rebuildView() {
         try {
-            setInputView(onCreateInputView())
+            val view = createView()
+            setInputView(view)
+            adopt(view)
         } catch (e: RuntimeException) {
             Timber.e(e, "rebuilding the keyboard failed, keeping the current one")
         }
+    }
+
+    private fun adopt(view: KeyboardView) {
+        view.previewEnabled = previewAllowed(currentInputEditorInfo)
+        keyboardView = view
+        viewSettings = settings
+        viewProfile = profile
+    }
+
+    private fun createView(): KeyboardView =
+        try {
+            keyboardView(profile == Profile.COMPACT)
+        } catch (e: RuntimeException) {
+            Timber.e(e, "building the keyboard failed, using the built-in layout")
+            viewUsedFallback = true
+            keyboardView(compact = false, fallback = true)
+        }
+
+    private fun keyboardView(compact: Boolean, fallback: Boolean = false): KeyboardView {
+        val languages =
+            when {
+                fallback -> listOf(FallbackLayout.pcFullEnUs)
+                compact -> compactLanguages()
+                else -> fullLanguages()
+            }
+        val rows = languages.maxOf { it.rows.size }
+        val compactRows = compact && rows <= COMPACT_ROWS
+        return KeyboardView(
+            context = this,
+            languages = languages,
+            initialLanguageIndex = ImeSession.languageIndex,
+            languageChangeListener = languageChangeListener,
+            sink = dispatcher,
+            latencyLogging = BuildConfig.DEBUG,
+            rowHeightPx =
+                if (compactRows) compactRowHeightPx(rowHeightPx(fullRowCount()))
+                else rowHeightPx(rows),
+            haptics = settings.haptics,
+            labelScale = settings.labelScalePercent / PERCENT,
+            pages = if (compact && !fallback) compactPages() else emptyMap(),
+            actions = actions,
+        )
     }
 
     private fun fullLanguages(): List<Layout> {
@@ -272,20 +301,23 @@ class BuckyImeService : InputMethodService() {
 
     private fun compactLanguages(): List<Layout> {
         val switchable = switchable(settings.languages.map { layouts[it.compactLayoutId] })
-        return if (canHandOff()) switchable else switchable.map { it.withoutKeyboardKey() }
+        return if (canHandOff()) switchable else switchable.map { it.withKeyboardKeyToFull() }
     }
 
-    private fun compactPages(): Map<String, Layout> =
-        mapOf(
+    private fun compactPages(): Map<String, Layout> {
+        val handOff = canHandOff()
+        return mapOf(
                 BuiltInLayouts.PAGE_SYMBOLS to layouts[BuiltInLayouts.COMPACT_SYMBOLS],
                 BuiltInLayouts.PAGE_SYMBOLS_MORE to layouts[BuiltInLayouts.COMPACT_SYMBOLS_MORE],
             )
             .mapNotNull { (page, layout) -> layout?.let { page to it } }
             .toMap()
-            .mapValues { (_, layout) -> if (canHandOff()) layout else layout.withoutKeyboardKey() }
+            .mapValues { (_, layout) -> if (handOff) layout else layout.withKeyboardKeyToFull() }
+    }
 
-    private fun Layout.withoutKeyboardKey(): Layout =
-        withoutSwitchKey(BuiltInLayouts.OTHER_KEYBOARD)
+    // Without another keyboard ⌨ can't hand off, so a tap shows the full layout instead.
+    private fun Layout.withKeyboardKeyToFull(): Layout =
+        withSwitchTarget(BuiltInLayouts.OTHER_KEYBOARD, BuiltInLayouts.FULL_LAYOUT)
 
     private fun switchable(cached: List<Layout?>): List<Layout> {
         viewUsedFallback = cached.any { it == null }
@@ -310,9 +342,7 @@ class BuckyImeService : InputMethodService() {
         )
 
     private fun fullRowCount(): Int =
-        FULL_MAIN_ROWS +
-            (if (settings.fKeyRow) 1 else 0) +
-            (if (settings.extraRow.isNotEmpty()) 1 else 0)
+        FallbackLayout.pcFullEnUs.withExtraRows(settings.fKeyRow, settings.extraRow).rows.size
 
     private fun isLandscape(): Boolean =
         resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -322,6 +352,13 @@ class BuckyImeService : InputMethodService() {
 
     private companion object {
         const val PERCENT = 100f
-        const val FULL_MAIN_ROWS = 5
+        const val COMPACT_ROWS = 4
     }
 }
+
+private fun viewKey(settings: KeyboardSettings): KeyboardSettings =
+    settings.copy(
+        outsideTerminals = OutsideTerminals.COMPACT,
+        autoCapitalize = true,
+        doubleSpacePeriod = true,
+    )

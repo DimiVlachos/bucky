@@ -20,3 +20,16 @@ public fun Layout.withoutSwitchKey(targetId: String): Layout =
 
 private fun KeySpec.switchesTo(targetId: String): Boolean =
     (def as? KeyDef.LayoutSwitch)?.targetId == targetId
+
+public fun Layout.withSwitchTarget(from: String, to: String): Layout =
+    copy(
+        rows =
+            rows.map { row ->
+                row.copy(
+                    keys =
+                        row.keys.map {
+                            if (it.switchesTo(from)) it.copy(def = KeyDef.LayoutSwitch(to)) else it
+                        },
+                )
+            },
+    )
