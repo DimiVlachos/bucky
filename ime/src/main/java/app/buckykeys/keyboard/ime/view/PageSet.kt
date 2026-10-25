@@ -4,7 +4,7 @@ import app.buckykeys.keyboard.ime.layout.BuiltInLayouts
 import app.buckykeys.keyboard.ime.layout.FallbackLayout
 import app.buckykeys.keyboard.ime.layout.Layout
 
-public class PageSet(letters: List<Layout>, private val pages: Map<String, Layout>) {
+internal class PageSet(letters: List<Layout>, private val pages: Map<String, Layout>) {
 
     private val letters: List<Layout> = letters.ifEmpty { listOf(FallbackLayout.pcFullEnUs) }
 

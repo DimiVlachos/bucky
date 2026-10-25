@@ -14,6 +14,7 @@ internal object DefaultLabels {
                     BuiltInLayouts.PAGE_LETTERS -> "ABC"
                     BuiltInLayouts.PAGE_SYMBOLS_MORE -> "=\\<"
                     BuiltInLayouts.OTHER_KEYBOARD -> "⌨"
+                    BuiltInLayouts.NEXT_LANGUAGE -> "🌐"
                     else -> def.targetId
                 }
         }

@@ -8,7 +8,7 @@ import app.buckykeys.keyboard.ime.layout.KeyDef
 import app.buckykeys.keyboard.ime.layout.ModifierKind
 import kotlin.math.abs
 
-public class KeyboardEngine(
+internal class KeyboardEngine(
     geometry: KeyboardGeometry,
     private val longPressMs: Long,
 ) {
@@ -19,6 +19,9 @@ public class KeyboardEngine(
     private val pointerConsumed = BooleanArray(MAX_POINTERS)
     private val pointerDownX = FloatArray(MAX_POINTERS)
     private val pointerFn = BooleanArray(MAX_POINTERS)
+    private val pointerX = FloatArray(MAX_POINTERS)
+    private val pointerY = FloatArray(MAX_POINTERS)
+    private val keptKeys = IntArray(MAX_POINTERS)
     private var timerPointer = NO_POINTER
     private var timerAt = NO_DEADLINE
     private var timerRepeats = false
@@ -68,9 +71,20 @@ public class KeyboardEngine(
     public var longPressCount: Int = 0
         private set
 
-    public fun setGeometry(geometry: KeyboardGeometry) {
+    public fun setGeometry(geometry: KeyboardGeometry, keepPointers: Boolean = false) {
+        val previous = this.geometry
+        for (p in 0 until MAX_POINTERS) {
+            val key = pointerKeys[p]
+            val keep =
+                keepPointers &&
+                    key != NO_KEY &&
+                    !pointerConsumed[p] &&
+                    previous.spec(key).def !is KeyDef.Modifier
+            keptKeys[p] = if (keep) geometry.keyAt(pointerX[p], pointerY[p]) else NO_KEY
+        }
         this.geometry = geometry
         releaseAllPointers()
+        for (p in 0 until MAX_POINTERS) pointerKeys[p] = keptKeys[p]
         deadKey = findDeadKey(deadMark)
         if (deadKey == NO_DEAD_KEY) deadMark = null
     }
@@ -91,7 +105,7 @@ public class KeyboardEngine(
     ) {
         if (pointerId !in 0 until MAX_POINTERS) return
         when (action) {
-            PointerAction.DOWN -> press(pointerId, geometry.keyAt(x, y), x, timeMs)
+            PointerAction.DOWN -> press(pointerId, geometry.keyAt(x, y), x, y, timeMs)
             PointerAction.MOVE -> move(pointerId, x, y)
             PointerAction.CANCEL -> cancel(pointerId)
             PointerAction.UP -> lift(pointerId, x, y, sink)
@@ -149,7 +163,7 @@ public class KeyboardEngine(
         return NO_DEAD_KEY
     }
 
-    private fun press(pointerId: Int, key: Int, x: Float, timeMs: Long) {
+    private fun press(pointerId: Int, key: Int, x: Float, y: Float, timeMs: Long) {
         val def = if (key == NO_KEY) null else geometry.spec(key).def
         if (def !is KeyDef.Modifier) {
             stopTimer()
@@ -159,6 +173,8 @@ public class KeyboardEngine(
         pointerKeys[pointerId] = key
         pointerConsumed[pointerId] = false
         pointerDownX[pointerId] = x
+        pointerX[pointerId] = x
+        pointerY[pointerId] = y
         pointerFn[pointerId] =
             key != NO_KEY && geometry.spec(key).fn != null && isActive(ModifierKind.FN)
         if (def is KeyDef.Modifier) startHold(def.kind)
@@ -176,6 +192,8 @@ public class KeyboardEngine(
     }
 
     private fun move(pointerId: Int, x: Float, y: Float) {
+        pointerX[pointerId] = x
+        pointerY[pointerId] = y
         if (isLanguageSwipe(pointerId, x)) {
             swipeLanguage(pointerId, forward = x > pointerDownX[pointerId])
             return
@@ -422,7 +440,7 @@ public class KeyboardEngine(
     }
 
     private fun emitChar(def: KeyDef.Char, sink: InputSink, forceShift: Boolean) {
-        val shifted = forceShift || isActive(ModifierKind.SHIFT)
+        val shifted = forceShift || userShift() || (autoShift && isLetter(def.primary))
         if (isActive(ModifierKind.CTRL) || isActive(ModifierKind.ALT)) {
             val keyCode = KeyCodes.forChar((def.latin ?: def.primary)[0])
             if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
@@ -457,6 +475,9 @@ public class KeyboardEngine(
     }
 
     private fun isActive(kind: ModifierKind): Boolean = modifierMask and bit(kind) != 0
+
+    private fun isLetter(text: String): Boolean =
+        text.isNotEmpty() && Character.isLetter(text.codePointAt(0))
 
     // Auto shift only capitalises letters; key events carry the user's own Shift.
     private fun userShift(): Boolean =

@@ -1,6 +1,6 @@
 # Per-app profiles and the compact layout: design
 
-Date: 2026-10-25. Status: draft for Dimitris's review, after a builder check. Decisions move into `PLAN.md` (§3.2, §4.3, §4.5, §4.6, §4.7) in the same PR that implements them.
+Date: 2026-10-25. Status: approved by Dimitris on 2026-10-25 and built in #47; later decisions (review pass 2) are in PLAN.md §4.4–§4.6. Decisions move into `PLAN.md` (§3.2, §4.3, §4.5, §4.6, §4.7) in the same PR that implements them.
 
 ## Why
 
@@ -54,7 +54,7 @@ Two kinds of users have shown up:
 - **Capital at the start of a sentence** and **double space → ". "** are in, in the compact layout.
 - **Long-press ⌨ shows the full layout** until the next app switch, for SSH apps that aren't on the list. It's free. Remembering that per app stays Pro (custom profiles, v1.1).
 - **Existing alpha users get Compact** after the update, like new users. The alpha3 release notes say where to switch back. No settings migration.
-- **Compact keeps the keyboard's total height:** its 4 rows share the height the full layout's 5 main rows would take, so compact keys are about 25% taller. It follows the existing key-height sliders, with no new setting. The F-key row and the extra row don't count, since compact doesn't show them.
+- **Compact keeps the keyboard's total height:** its 4 rows share the height the full layout's main rows would take, so compact keys are about 25% taller, with no new setting. In practice the full row height is first capped for all the full layout's rows (F-key and extra row included), then scaled by 5/4.
 - The terminal list is built in and free: `com.termux`, `org.connectbot`, `com.sonelli.juicessh`, `com.server.auditor.ssh.client` (PLAN §4.6), with raw Enter.
 
 ## My calls (Claude), for Dimitris to check

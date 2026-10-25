@@ -13,7 +13,8 @@ class ProfilesTest {
         outside: OutsideTerminals,
         forcedFull: Boolean = false,
         canHandOff: Boolean = true,
-    ): Profile = profileFor(packageName, outside, own, forcedFull, canHandOff)
+        handedOffFrom: String? = null,
+    ): Profile = profileFor(packageName, outside, own, forcedFull, canHandOff, handedOffFrom)
 
     @Test
     fun `each terminal app gets the full layout whatever the setting`() {
@@ -67,5 +68,29 @@ class ProfilesTest {
     @Test
     fun `a null package follows the setting`() {
         assertEquals(Profile.COMPACT, profile(null, OutsideTerminals.COMPACT))
+    }
+
+    @Test
+    fun `picking bucky again in the app it handed off from keeps compact`() {
+        assertEquals(
+            Profile.COMPACT,
+            profile(
+                "com.whatsapp",
+                OutsideTerminals.OTHER_KEYBOARD,
+                handedOffFrom = "com.whatsapp",
+            ),
+        )
+    }
+
+    @Test
+    fun `another app still hands off`() {
+        assertEquals(
+            Profile.HAND_OFF,
+            profile(
+                "com.android.chrome",
+                OutsideTerminals.OTHER_KEYBOARD,
+                handedOffFrom = "com.whatsapp",
+            ),
+        )
     }
 }

@@ -50,7 +50,7 @@
         { "chars": [","], "longPress": ["!"] },
         { "switchTo": "@keyboard", "holdTo": "@full" },
         { "chars": [" ", " "], "width": 4 },
-        { "chars": ["."], "longPress": ["?"] },
+        { "chars": ["."], "longPress": ["?", "·"] },
         { "key": "ENTER", "width": 1.5 }
       ]
     }

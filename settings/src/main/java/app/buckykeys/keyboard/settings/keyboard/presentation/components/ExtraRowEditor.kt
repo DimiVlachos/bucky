@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -49,6 +50,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun ExtraRowEditor(
     saved: List<String>,
+    changed: Boolean,
     draft: ExtraRowDraftState,
     preview: ExtraRowPreview,
     onSave: () -> Unit,
@@ -73,7 +75,7 @@ internal fun ExtraRowEditor(
             label = { Text(stringResource(R.string.settings_extra_row)) },
             trailingIcon = {
                 AnimatedVisibility(
-                    visible = text.isNotBlank() && preview.valid,
+                    visible = changed && preview.valid,
                     enter =
                         fadeIn(tween(ENTER_MS)) +
                             scaleIn(tween(ENTER_MS), initialScale = HIDDEN_SCALE),
@@ -177,19 +179,21 @@ private fun ExtraRowSupportingText(
                     )
             }
         }
-        if (preview.unknown.isNotEmpty()) {
+        val unknown = preview.unknown.distinct()
+        if (unknown.isNotEmpty()) {
             Text(
                 text =
-                    stringResource(
-                        R.string.settings_extra_row_unknown,
-                        preview.unknown.joinToString(", "),
+                    pluralStringResource(
+                        R.plurals.settings_extra_row_unknown,
+                        unknown.size,
+                        unknown.joinToString(", "),
                     ),
                 color = MaterialTheme.colorScheme.error,
             )
         }
         if (preview.overLimit) {
             Text(
-                text = stringResource(R.string.settings_extra_row_limit, MAX_KEYS),
+                text = stringResource(R.string.settings_extra_row_limit, preview.limit),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -205,4 +209,3 @@ private const val SWAP_OUT_MS = 100
 private const val SWAP_IN_MS = 150
 private const val EXIT_MS = 120
 private const val HIDDEN_SCALE = 0.6f
-private const val MAX_KEYS = 15

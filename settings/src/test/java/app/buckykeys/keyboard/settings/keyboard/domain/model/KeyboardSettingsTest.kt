@@ -90,9 +90,26 @@ class KeyboardSettingsTest {
     }
 
     @Test
-    fun `each language names its compact layout`() {
-        assertEquals("compact_en_us", KeyboardLanguage.EN_US.compactLayoutId)
-        assertEquals("compact_el", KeyboardLanguage.EL.compactLayoutId)
+    fun `clearing the field counts as a change to a saved row`() {
+        assertEquals(true, english.copy(extraRow = listOf("ESC")).extraRowChangedBy(" "))
+    }
+
+    @Test
+    fun `the same words with other spacing are not a change`() {
+        assertEquals(
+            false,
+            english.copy(extraRow = listOf("ESC", "TAB")).extraRowChangedBy(" ESC   TAB "),
+        )
+    }
+
+    @Test
+    fun `different words are a change`() {
+        assertEquals(true, english.copy(extraRow = listOf("ESC")).extraRowChangedBy("ESC TAB"))
+    }
+
+    @Test
+    fun `a huge label size clamps to the maximum`() {
+        assertEquals(140, english.withLabelScale(Int.MAX_VALUE).labelScalePercent)
     }
 
     @Test

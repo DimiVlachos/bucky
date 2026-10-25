@@ -87,6 +87,9 @@ public object LayoutParser {
             }
         if (def !is KeyDef.Char && "longPress" in obj) fail("$path.longPress", "needs chars")
         if (def !is KeyDef.LayoutSwitch && "holdTo" in obj) fail("$path.holdTo", "needs switchTo")
+        val types = def is KeyDef.Char || def is KeyDef.Special
+        if (!types && "then" in obj) fail("$path.then", "needs chars or key")
+        if (!types && "fn" in obj) fail("$path.fn", "needs chars or key")
         if (def !is KeyDef.Char && def !is KeyDef.Dead && "latin" in obj) {
             fail("$path.latin", "needs chars or dead")
         }
@@ -100,6 +103,8 @@ public object LayoutParser {
     private fun chars(obj: JsonObject, path: String): KeyDef.Char {
         val chars = obj.strings("chars", path)
         if (chars.size !in 1..2) fail("$path.chars", "needs one or two strings")
+        if (chars[0] == " " && "longPress" in obj)
+            fail("$path.longPress", "not allowed on the space bar")
         val alternates =
             if ("longPress" in obj) {
                 obj.strings("longPress", path).mapIndexed { index, name ->
@@ -145,17 +150,18 @@ public object LayoutParser {
                 .distinct()
         if (marks.isEmpty()) return rows
         return rows.map { row ->
-            Row(
-                row.keys.map { spec ->
-                    val def = spec.def as? KeyDef.Char ?: return@map spec
-                    spec.copy(
-                        def =
-                            def.copy(
-                                composed = compositions(def.primary, marks),
-                                composedShifted = compositions(def.shifted, marks),
-                            ),
-                    )
-                },
+            row.copy(
+                keys =
+                    row.keys.map { spec ->
+                        val def = spec.def as? KeyDef.Char ?: return@map spec
+                        spec.copy(
+                            def =
+                                def.copy(
+                                    composed = compositions(def.primary, marks),
+                                    composedShifted = compositions(def.shifted, marks),
+                                ),
+                        )
+                    },
             )
         }
     }

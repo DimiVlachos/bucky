@@ -28,7 +28,7 @@ body:
     attributes:
       label: Bucky version or commit
       description: Shown at the bottom of the Bucky app.
-      placeholder: e.g. 0.1.0-alpha1, or the commit you built from
+      placeholder: e.g. 0.1.0-alpha3, or the commit you built from
   - type: textarea
     id: extra
     attributes:

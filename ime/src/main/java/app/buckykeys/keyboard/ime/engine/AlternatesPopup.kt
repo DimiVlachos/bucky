@@ -1,6 +1,6 @@
 package app.buckykeys.keyboard.ime.engine
 
-public class AlternatesPopup internal constructor() {
+internal class AlternatesPopup {
 
     public var keyIndex: Int = NONE
         private set
@@ -28,6 +28,8 @@ public class AlternatesPopup internal constructor() {
 
     private var keyBottom = 0f
 
+    private var anchor = 0
+
     public val isOpen: Boolean
         get() = keyIndex != NONE
 
@@ -38,12 +40,13 @@ public class AlternatesPopup internal constructor() {
         cellWidth = minOf(rects[i + 2] - rects[i], keyboardWidth / count)
         cellHeight = rects[i + 3] - rects[i + 1]
         val width = count * cellWidth
-        reversed = rects[i] + width > keyboardWidth
-        left =
-            (if (reversed) rects[i + 2] - width else rects[i]).coerceIn(0f, keyboardWidth - width)
+        val centre = (rects[i] + rects[i + 2]) / 2f
+        left = rects[i].coerceAtMost(keyboardWidth - width).coerceAtLeast(0f)
+        anchor = ((centre - left) / cellWidth).toInt().coerceIn(0, count - 1)
+        reversed = count - 1 - anchor < anchor
         top = rects[i + 1] - cellHeight
         keyBottom = rects[i + 3]
-        select((rects[i] + rects[i + 2]) / 2f, rects[i + 1])
+        select(centre, rects[i + 1])
     }
 
     internal fun select(x: Float, y: Float) {
@@ -55,13 +58,21 @@ public class AlternatesPopup internal constructor() {
             }
     }
 
-    public fun alternateAt(cell: Int): Int = if (reversed) count - 1 - cell else cell
+    // The first alternate sits under the finger; the rest fill toward the wider side, then wrap.
+    public fun alternateAt(cell: Int): Int =
+        when {
+            !reversed && cell >= anchor -> cell - anchor
+            !reversed -> count - anchor + (anchor - 1 - cell)
+            cell <= anchor -> anchor - cell
+            else -> anchor + 1 + (cell - anchor - 1)
+        }
 
     internal fun close() {
         keyIndex = NONE
         count = 0
         selected = NONE
         reversed = false
+        anchor = 0
     }
 
     public companion object {

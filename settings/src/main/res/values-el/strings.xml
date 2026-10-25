@@ -8,14 +8,14 @@
     <string name="settings_language_en_us">Αγγλικά (ΗΠΑ)</string>
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_required">Απαιτείται τουλάχιστον μία γλώσσα</string>
-    <string name="settings_languages_hint">Εναλλαγή με σύρσιμο του space αριστερά ή δεξιά. Τουλάχιστον μία μένει ενεργή.</string>
+    <string name="settings_languages_hint">Σύρετε το πλήκτρο διαστήματος αριστερά ή δεξιά για εναλλαγή. Τουλάχιστον μία μένει ενεργή.</string>
     <string name="settings_size">Μέγεθος</string>
     <string name="settings_row_height">Ύψος πλήκτρων</string>
     <string name="settings_landscape_row_height">Ύψος πλήκτρων σε οριζόντιο προσανατολισμό</string>
     <string name="settings_dp">%1$d dp</string>
-    <string name="settings_label_size">Μέγεθος ετικετών</string>
+    <string name="settings_label_size">Μέγεθος γραμμάτων πλήκτρων</string>
     <string name="settings_percent">%1$d%%</string>
-    <string name="settings_feedback">Ανάδραση</string>
+    <string name="settings_feedback">Απόκριση πλήκτρων</string>
     <string name="settings_key_preview">Εμφάνιση του πλήκτρου πάνω από το δάχτυλο</string>
     <string name="settings_haptics">Δόνηση κατά το πάτημα πλήκτρων</string>
     <string name="settings_extra_rows">Επιπλέον σειρές</string>
@@ -26,17 +26,21 @@
     <string name="onboarding_status_ready">✓ Το Bucky είναι ενεργό και επιλεγμένο ως πληκτρολόγιο.</string>
     <string name="onboarding_status_enabled">✓ Το Bucky είναι ενεργό. Επιλέξτε το τώρα ως πληκτρολόγιο.</string>
     <string name="settings_version">Έκδοση %1$s</string>
-    <string name="settings_source">Ο κώδικας στο GitHub</string>
+    <string name="settings_source">Πηγαίος κώδικας στο GitHub</string>
     <string name="settings_extra_row_preview">Πλήκτρα: %1$s</string>
-    <string name="settings_extra_row_unknown">Δεν είναι πλήκτρο: %1$s</string>
+    <plurals name="settings_extra_row_unknown">
+        <item quantity="one">Δεν είναι πλήκτρο: %1$s</item>
+        <item quantity="other">Δεν είναι πλήκτρα: %1$s</item>
+    </plurals>
     <string name="settings_extra_row_limit">Χρησιμοποιούνται μόνο τα πρώτα %1$d πλήκτρα.</string>
-    <string name="settings_extra_row_termux_default">Προεπιλεγμένα πλήκτρα του Termux</string>
+    <string name="settings_extra_row_termux_default">Χρήση των προεπιλεγμένων πλήκτρων του Termux</string>
     <string name="settings_apps">Εφαρμογές</string>
     <string name="settings_outside_terminals">Εκτός εφαρμογών τερματικού</string>
-    <string name="settings_outside_compact">Συμπαγής διάταξη</string>
+    <string name="settings_outside_compact">Διάταξη κινητού</string>
     <string name="settings_outside_full">Πλήρης διάταξη</string>
     <string name="settings_outside_other">Εναλλαγή στο άλλο μου πληκτρολόγιο</string>
     <string name="settings_outside_other_hint">Για να επιστρέψει το Bucky στο Termux, χρησιμοποιήστε το κουμπί εναλλαγής πληκτρολογίου.</string>
     <string name="settings_auto_capitalize">Κεφαλαίο στην αρχή της πρότασης</string>
-    <string name="settings_double_space_period">Διπλό space για τελεία</string>
+    <string name="settings_double_space_period">Τελεία με διπλό πάτημα του διαστήματος</string>
+    <string name="settings_save_failed">Η ρύθμιση δεν αποθηκεύτηκε. Δοκιμάστε ξανά.</string>
 </resources>

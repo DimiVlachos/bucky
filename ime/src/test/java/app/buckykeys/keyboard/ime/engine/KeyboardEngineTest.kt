@@ -1171,6 +1171,73 @@ class KeyboardEngineTest {
     private val keyboardKey =
         KeySpec(KeyDef.LayoutSwitch(BuiltInLayouts.OTHER_KEYBOARD, BuiltInLayouts.FULL_LAYOUT), "⌨")
 
+    @Test
+    fun `a full width popup keeps the first alternate under a middle key`() {
+        useTenKeys()
+        down("k2", pointer = 0)
+        tick(LONG_PRESS_MS)
+        up("k2", pointer = 0)
+        assertEquals(listOf(Text("0")), sink.emitted)
+    }
+
+    @Test
+    fun `a full width popup fills toward the wider side and wraps`() {
+        useTenKeys()
+        down("k2", pointer = 0)
+        tick(LONG_PRESS_MS)
+        engine.onPointer(0, 350f, 60f, PointerAction.MOVE, now, sink)
+        assertEquals(1, engine.popup.selected)
+        engine.onPointer(0, 150f, 60f, PointerAction.MOVE, now, sink)
+        assertEquals(8, engine.popup.selected)
+        engine.onPointer(0, 50f, 60f, PointerAction.UP, now, sink)
+        assertEquals(listOf(Text("9")), sink.emitted)
+    }
+
+    private fun useTenKeys() {
+        val digits = List(10) { KeyDef.Char("$it", "$it") }
+        val keys =
+            List(10) { i ->
+                if (i == 2) KeySpec(KeyDef.Char("e", "E", digits), "k2")
+                else KeySpec(KeyDef.Char("k$i", "K$i"), "k$i")
+            }
+        lastLayout = Layout("ten", "ten", listOf(Row(keys)))
+        geometry = KeyboardGeometry(lastLayout, 1000, 120)
+        engine = KeyboardEngine(geometry, LONG_PRESS_MS)
+    }
+
+    @Test
+    fun `a key held through a page switch types the key under it on the new page`() {
+        useRow(
+            KeySpec(KeyDef.Char(" ", " "), "space", then = BuiltInLayouts.PAGE_LETTERS),
+            char("@"),
+        )
+        down("@", pointer = 1)
+        tap("space", pointer = 0)
+        assertEquals(BuiltInLayouts.PAGE_LETTERS, engine.takeSwitchRequest())
+        val letters =
+            KeyboardGeometry(Layout("l", "l", listOf(Row(listOf(char("q"), char("a"))))), 400, 120)
+        engine.setGeometry(letters, keepPointers = true)
+        geometry = letters
+        up("a", pointer = 1)
+        assertEquals(listOf(Text(" "), Text("a")), sink.emitted)
+    }
+
+    @Test
+    fun `auto shift leaves symbols alone`() {
+        useRow(KeySpec(KeyDef.Char(";", ":"), ";"), char("c"))
+        engine.setAutoShift(true)
+        tap(";")
+        assertEquals(listOf(Text(";")), sink.emitted)
+    }
+
+    @Test
+    fun `holding a punctuation key on the full layout types its shifted symbol`() {
+        down("/", pointer = 0)
+        tick(LONG_PRESS_MS)
+        up("/", pointer = 0)
+        assertEquals(listOf(Text("?")), sink.emitted)
+    }
+
     private fun swipeSpace(by: Float) {
         val (x, y) = centre("")
         engine.onPointer(0, x, y, PointerAction.DOWN, now, sink)

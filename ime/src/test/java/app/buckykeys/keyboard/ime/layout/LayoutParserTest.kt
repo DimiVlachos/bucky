@@ -263,7 +263,7 @@ class LayoutParserTest {
     }
 
     @Test
-    fun `a switch target other than the next language is rejected`() {
+    fun `an unknown switch target is rejected`() {
         val error = failureOf(layoutWithKeys("""{ "switchTo": "numeric" }"""))
 
         assertEquals("$.rows[0].keys[0].switchTo", error.path)
@@ -416,5 +416,35 @@ class LayoutParserTest {
         val error =
             failureOf(layoutWithKeys("""{ "switchTo": "@keyboard", "holdTo": "@language" }"""))
         assertEquals("$.rows[0].keys[0].holdTo", error.path)
+    }
+
+    @Test
+    fun `a row keeps its inset when the layout has a dead key`() {
+        val json =
+            """{ "id": "t", "name": "T", "rows": [ { "inset": 0.5, "keys": [ { "dead": ["΄"] }, { "chars": ["α"] } ] } ] }"""
+        assertEquals(0.5f, LayoutParser.parse(json).getOrThrow().rows.single().inset, 0.001f)
+    }
+
+    @Test
+    fun `then is rejected on keys that never type`() {
+        val error = failureOf(layoutWithKeys("""{ "key": "SHIFT", "then": "@page:letters" }"""))
+        assertEquals("$.rows[0].keys[0].then", error.path)
+    }
+
+    @Test
+    fun `fn is rejected on modifier keys`() {
+        val error = failureOf(layoutWithKeys("""{ "key": "SHIFT", "fn": "F1" }"""))
+        assertEquals("$.rows[0].keys[0].fn", error.path)
+    }
+
+    @Test
+    fun `long press is rejected on the space bar`() {
+        val error = failureOf(layoutWithKeys("""{ "chars": [" "], "longPress": ["_"] }"""))
+        assertEquals("$.rows[0].keys[0].longPress", error.path)
+    }
+
+    @Test
+    fun `a language key gets the globe label by default`() {
+        assertEquals("🌐", parseKeys("""{ "switchTo": "@language" }""").single().label)
     }
 }
