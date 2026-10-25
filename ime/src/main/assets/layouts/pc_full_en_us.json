@@ -34,8 +34,8 @@
         { "chars": ["i", "I"], "longPress": ["I", "ì", "í", "î", "ï", "ī", "ı"] },
         { "chars": ["o", "O"], "longPress": ["O", "ò", "ó", "ô", "ö", "õ", "ø", "œ", "ō"] },
         { "chars": ["p", "P"] },
-        { "chars": ["[", "{"], "longPress": ["«", "‹"] },
-        { "chars": ["]", "}"], "longPress": ["»", "›"] },
+        { "chars": ["[", "{"], "longPress": ["{", "«", "‹"] },
+        { "chars": ["]", "}"], "longPress": ["}", "»", "›"] },
         { "chars": ["\\", "|"], "width": 1.5 }
       ]
     },
@@ -52,7 +52,7 @@
         { "chars": ["k", "K"] },
         { "chars": ["l", "L"], "longPress": ["L", "ł"] },
         { "chars": [";", ":"] },
-        { "chars": ["'", "\""], "longPress": ["’", "‘", "´"] },
+        { "chars": ["'", "\""], "longPress": ["\"", "’", "‘", "´"] },
         { "key": "ENTER", "width": 2.25 }
       ]
     },
@@ -66,9 +66,9 @@
         { "chars": ["b", "B"] },
         { "chars": ["n", "N"], "longPress": ["N", "ñ", "ń", "ň"] },
         { "chars": ["m", "M"] },
-        { "chars": [",", "<"], "longPress": ["„", "‚"] },
-        { "chars": [".", ">"], "longPress": ["…", "·"] },
-        { "chars": ["/", "?"], "longPress": ["÷", "¿"] },
+        { "chars": [",", "<"], "longPress": ["<", "„", "‚"] },
+        { "chars": [".", ">"], "longPress": [">", "…", "·"] },
+        { "chars": ["/", "?"], "longPress": ["?", "÷", "¿"] },
         { "chars": ["`", "~"] },
         { "key": "UP", "width": 1.25, "fn": "PAGE_UP" },
         { "key": "FORWARD_DEL", "width": 1.25, "fn": "INSERT" }

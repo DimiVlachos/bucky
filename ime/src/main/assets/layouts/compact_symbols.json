@@ -20,7 +20,7 @@
       "keys": [
         { "chars": ["@"] },
         { "chars": ["#"] },
-        { "chars": ["€"], "longPress": ["$"] },
+        { "chars": ["$"], "longPress": ["€", "£"] },
         { "chars": ["_"] },
         { "chars": ["&"] },
         { "chars": ["-"], "longPress": ["–"] },
@@ -34,7 +34,7 @@
       "keys": [
         { "switchTo": "@page:symbols-more", "width": 1.5 },
         { "chars": ["*"] },
-        { "chars": ["\""], "longPress": ["“"] },
+        { "chars": ["\""], "longPress": ["“", "«", "»"] },
         { "chars": ["'"], "longPress": ["’"] },
         { "chars": [":"] },
         { "chars": [";"] },
