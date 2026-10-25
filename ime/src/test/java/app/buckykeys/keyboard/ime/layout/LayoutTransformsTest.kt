@@ -87,4 +87,35 @@ class LayoutTransformsTest {
         val row = layout.withoutSwitchKey(BuiltInLayouts.OTHER_KEYBOARD).rows.single()
         assertEquals(listOf(5f), row.keys.map { it.width })
     }
+
+    @Test
+    fun `a keyboard key can become a tap to full key`() {
+        val layout =
+            Layout(
+                "t",
+                "T",
+                listOf(
+                    Row(
+                        listOf(
+                            KeySpec(
+                                KeyDef.LayoutSwitch(
+                                    BuiltInLayouts.OTHER_KEYBOARD,
+                                    BuiltInLayouts.FULL_LAYOUT,
+                                ),
+                                "⌨",
+                            ),
+                        ),
+                    ),
+                ),
+            )
+        val key =
+            layout
+                .withSwitchTarget(BuiltInLayouts.OTHER_KEYBOARD, BuiltInLayouts.FULL_LAYOUT)
+                .rows
+                .single()
+                .keys
+                .single()
+        assertEquals(KeyDef.LayoutSwitch(BuiltInLayouts.FULL_LAYOUT), key.def)
+        assertEquals("⌨", key.label)
+    }
 }

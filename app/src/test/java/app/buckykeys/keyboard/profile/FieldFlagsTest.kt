@@ -51,7 +51,7 @@ class FieldFlagsTest {
     @Test
     fun `a field with no input type gets no helpers`() {
         assertEquals(
-            FieldFlags(rawEnter = false, doubleSpacePeriod = false, autoCapitalize = false),
+            FieldFlags(rawEnter = true, doubleSpacePeriod = false, autoCapitalize = false),
             fieldFlags(Profile.COMPACT, "com.example", InputType.TYPE_NULL, settings),
         )
     }
@@ -62,6 +62,44 @@ class FieldFlagsTest {
         assertEquals(
             FieldFlags(rawEnter = false, doubleSpacePeriod = false, autoCapitalize = false),
             fieldFlags(Profile.COMPACT, "com.whatsapp", text, off),
+        )
+    }
+
+    @Test
+    fun `number and phone fields get no helpers`() {
+        listOf(
+                InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL,
+                InputType.TYPE_CLASS_PHONE,
+                InputType.TYPE_CLASS_DATETIME,
+            )
+            .forEach { type ->
+                val flags = fieldFlags(Profile.COMPACT, "com.example", type, settings)
+                assertEquals(false, flags.autoCapitalize)
+                assertEquals(false, flags.doubleSpacePeriod)
+            }
+    }
+
+    @Test
+    fun `email and url fields get no double space period`() {
+        listOf(
+                InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+                InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
+                InputType.TYPE_TEXT_VARIATION_URI,
+            )
+            .forEach { variation ->
+                val type = InputType.TYPE_CLASS_TEXT or variation
+                assertEquals(
+                    false,
+                    fieldFlags(Profile.COMPACT, "com.example", type, settings).doubleSpacePeriod,
+                )
+            }
+    }
+
+    @Test
+    fun `a raw field gets raw enter in any app`() {
+        assertEquals(
+            true,
+            fieldFlags(Profile.FULL, "com.example.ssh", InputType.TYPE_NULL, settings).rawEnter,
         )
     }
 }
