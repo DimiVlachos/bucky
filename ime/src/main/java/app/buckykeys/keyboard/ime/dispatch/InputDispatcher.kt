@@ -40,12 +40,9 @@ public class InputDispatcher(private val connection: () -> InputConnection?) : I
     override fun sendKey(keyCode: Int, metaState: Int) {
         val target = connection() ?: return
         lastSpaceAt = NO_SPACE
-        if (keyCode == KeyEvent.KEYCODE_ENTER && metaState == 0) {
-            val action = enterAction(imeOptions, inputType, rawEnter)
-            if (action != NO_ENTER_ACTION) {
-                target.performEditorAction(action)
-                return
-            }
+        if (keyCode == KeyEvent.KEYCODE_ENTER) {
+            val action = enterKeyAction(metaState, imeOptions, rawEnter)
+            if (action != NO_ENTER_ACTION && target.performEditorAction(action)) return
         }
         val time = SystemClock.uptimeMillis()
         target.sendKeyEvent(KeyEvent(time, time, KeyEvent.ACTION_DOWN, keyCode, 0, metaState))
