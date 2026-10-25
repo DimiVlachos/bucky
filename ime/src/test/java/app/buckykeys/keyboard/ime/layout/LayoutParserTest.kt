@@ -263,7 +263,7 @@ class LayoutParserTest {
     }
 
     @Test
-    fun `a switch target other than the next language is rejected`() {
+    fun `an unknown switch target is rejected`() {
         val error = failureOf(layoutWithKeys("""{ "switchTo": "numeric" }"""))
 
         assertEquals("$.rows[0].keys[0].switchTo", error.path)

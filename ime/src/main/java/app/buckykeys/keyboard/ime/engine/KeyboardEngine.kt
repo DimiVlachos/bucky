@@ -8,7 +8,7 @@ import app.buckykeys.keyboard.ime.layout.KeyDef
 import app.buckykeys.keyboard.ime.layout.ModifierKind
 import kotlin.math.abs
 
-public class KeyboardEngine(
+internal class KeyboardEngine(
     geometry: KeyboardGeometry,
     private val longPressMs: Long,
 ) {

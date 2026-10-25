@@ -1,5 +1,7 @@
 # Per-app Profiles and Compact Layout Implementation Plan
 
+> **Done (#47, 2026-10-25), and superseded by the code where they differ:** `rawEnter` follows the terminal list (and `TYPE_NULL`), not the profile; the compact height is `compactRowHeightPx(rowHeightPx(full rows))`; a hidden ⌨ becomes tap-to-full. See PLAN.md §4.4–§4.6.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Show the full PC layout in terminal apps and, elsewhere, whatever the user picked in Settings: a phone-style compact layout (the default), the full layout, or a hand-off to their other keyboard.

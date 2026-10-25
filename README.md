@@ -20,7 +20,7 @@ It is a from-scratch successor to [Hacker's Keyboard](https://github.com/klausw/
 - An optional F1–F12 row and an extra row you define yourself, using Termux extra-keys names
 - US English and Greek layouts from JSON, with the Greek tonos dead key. Swipe the space bar to switch language
 - Settings for key height (portrait and landscape), label size, key preview and vibration
-- Per-app profiles: the full layout in Termux, ConnectBot, JuiceSSH and Termius; elsewhere a phone-style compact layout (with ?123 pages, a capital at the start of a sentence and double space for a full stop), the full layout, or a switch to your other keyboard. Long-press ⌨ for the full layout in any app
+- Per-app profiles: the full layout in Termux, ConnectBot, JuiceSSH and Termius; elsewhere a phone-style compact layout (with ?123 pages, a capital at the start of a sentence and double space for a full stop), the full layout, or a switch to your other keyboard. Long-press ⌨ for the full layout in any app (a tap does it when there's no other keyboard to switch to)
 - About 13 ms from touch to drawing the key (median, debug build on a Galaxy S23 Ultra, before the screen's own frame); see the [spike report](docs/spike-report.md)
 
 ## Planned
@@ -51,6 +51,7 @@ Checks run before every commit:
 ```sh
 ./gradlew spotlessApply
 ./gradlew detekt :detekt-rules:test testFossDebugUnitTest testDebugUnitTest :app:architectureTest lintFossDebug assembleFossDebug assemblePlayDebug
+scripts/check-manifest-permissions.sh   # no INTERNET or QUERY_ALL_PACKAGES
 ```
 
 ## Project layout

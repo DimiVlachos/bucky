@@ -90,12 +90,6 @@ class KeyboardSettingsTest {
     }
 
     @Test
-    fun `each language names its compact layout`() {
-        assertEquals("compact_en_us", KeyboardLanguage.EN_US.compactLayoutId)
-        assertEquals("compact_el", KeyboardLanguage.EL.compactLayoutId)
-    }
-
-    @Test
     fun `clearing the field counts as a change to a saved row`() {
         assertEquals(true, english.copy(extraRow = listOf("ESC")).extraRowChangedBy(" "))
     }

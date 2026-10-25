@@ -1,6 +1,6 @@
 package app.buckykeys.keyboard.ime.engine
 
-public class AlternatesPopup internal constructor() {
+internal class AlternatesPopup {
 
     public var keyIndex: Int = NONE
         private set

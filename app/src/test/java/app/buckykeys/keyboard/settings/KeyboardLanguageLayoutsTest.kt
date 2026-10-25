@@ -23,6 +23,18 @@ class KeyboardLanguageLayoutsTest {
     }
 
     @Test
+    fun `every settings language names a compact layout that parses`() {
+        KeyboardLanguage.entries.forEach { language ->
+            val file = File("../ime/src/main/assets/layouts/${language.compactLayoutId}.json")
+            assertEquals(
+                language.name,
+                language.compactLayoutId,
+                LayoutParser.parse(file.readText()).getOrThrow().id,
+            )
+        }
+    }
+
+    @Test
     fun `the termux default extra row is fourteen valid keys`() {
         val parsed = parseExtraRow(KeyboardSettings.TERMUX_DEFAULT_EXTRA_ROW.split(" "))
         assertEquals(emptyList<String>(), parsed.unknown)

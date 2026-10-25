@@ -9,7 +9,7 @@ Open an issue first for anything bigger than a small fix, so we can agree on the
 ## Ground rules
 
 - The keyboard never gets the `INTERNET` or `QUERY_ALL_PACKAGES` permission.
-- The `:ime` module stays free of Compose, billing and Play Services.
+- The `:ime` module stays free of Compose, billing, Play Services, settings, DataStore, DI, coroutines and lifecycle.
 - No allocations in `KeyboardView.onDraw` or `onTouchEvent`.
 - Logging is Timber only, in debug builds only.
 - User-facing strings live in resources, in English (`values/`) and Greek (`values-el/`).

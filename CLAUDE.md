@@ -10,15 +10,15 @@ Conventions follow Dimitris's other Android apps. When a convention is unclear, 
 
 | Module | Holds | May depend on |
 |---|---|---|
-| `:app` | Manifest, `play`/`foss` flavors, Hilt `Application`, `BuckyImeService`, `ExtraRowModule`, flavor `BillingModule` | everything |
-| `:ime` | Layout model and JSON parser, `KeyboardGeometry`, `KeyboardEngine`, `InputDispatcher`, `KeyboardView` | core-ktx, Timber, kotlinx-serialization-json |
+| `:app` | Manifest, `play`/`foss` flavors, Hilt `Application`, `BuckyImeService`, `ImeSession`, `profile/` (`profileFor`, `fieldFlags`, `startPageFor`), `ExtraRowModule`, flavor `BillingModule` | everything |
+| `:ime` | Layout model and JSON parser, `KeyboardGeometry`, `KeyboardEngine`, `InputDispatcher` and `TypingRules`, `KeyboardView` and `PageSet` | core-ktx, Timber, kotlinx-serialization-json |
 | `:settings` | Compose settings and onboarding, `KeyboardSettings` and its DataStore repository | `:billing`, DataStore, kotlinx-serialization, Hilt |
 | `:billing` | `ProEntitlement`, `BillingRepository` | coroutines |
 | `:billing-play` | Play implementation (`playImplementation` only) | `:billing` |
 | `:billing-foss` | Always-unlocked implementation (`fossImplementation` only) | `:billing` |
 | `:detekt-rules` | Custom detekt rules from Dimitris's other projects (build tooling, not shipped) | detekt-api |
 
-`:ime` never imports Compose, billing or Play Services. `KeyboardEngine` imports nothing from Android except `KeyEvent` constants.
+`:ime` never imports Compose, billing, Play Services, settings, DataStore, DI, coroutines or lifecycle (Konsist enforces it). `KeyboardEngine` imports nothing from Android except `KeyEvent` constants.
 
 ## Packages
 
