@@ -31,4 +31,15 @@ class HintsTest {
         assertEquals("", hintFor(KeyDef.Char("w", "W")))
         assertEquals("", hintFor(KeyDef.Special(KeyCode.ESC)))
     }
+
+    @Test
+    fun `a symbol that holds for its shifted form hints the next alternate`() {
+        val slash = KeyDef.Char("/", "?", listOf(KeyDef.Char("?", "?"), KeyDef.Char("÷", "÷")))
+        assertEquals("÷", hintFor(slash))
+    }
+
+    @Test
+    fun `a symbol whose only alternate is its shifted form shows nothing`() {
+        assertEquals("", hintFor(KeyDef.Char("/", "?", listOf(KeyDef.Char("?", "?")))))
+    }
 }

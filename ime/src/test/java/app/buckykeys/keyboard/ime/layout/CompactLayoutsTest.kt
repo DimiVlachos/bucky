@@ -99,4 +99,25 @@ class CompactLayoutsTest {
             }
         assertEquals(null, space.then)
     }
+
+    @Test
+    fun `greek compact offers the ano teleia on the full stop`() {
+        assertTrue(
+            KeyDef.Char("·", "·") in pages.getValue(BuiltInLayouts.COMPACT_EL).char(".").alternates,
+        )
+    }
+
+    @Test
+    fun `the symbol page offers guillemets on the quote`() {
+        val quote = pages.getValue(BuiltInLayouts.COMPACT_SYMBOLS).char("\"").alternates
+        assertTrue(KeyDef.Char("«", "«") in quote && KeyDef.Char("»", "»") in quote)
+    }
+
+    @Test
+    fun `the symbol page leads with the dollar and holds for the euro`() {
+        assertEquals(
+            KeyDef.Char("€", "€"),
+            pages.getValue(BuiltInLayouts.COMPACT_SYMBOLS).char("$").alternates.first(),
+        )
+    }
 }

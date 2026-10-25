@@ -19,12 +19,12 @@ public object FallbackLayout {
             "u" to "U ù ú û ü ū ů",
             "y" to "Y ý ÿ",
             "z" to "Z ź ż ž",
-            "." to "… ·",
-            "'" to "’ ‘ ´",
-            "," to "„ ‚",
-            "/" to "÷ ¿",
-            "[" to "« ‹",
-            "]" to "» ›",
+            "." to "> … ·",
+            "'" to "\" ’ ‘ ´",
+            "," to "< „ ‚",
+            "/" to "? ÷ ¿",
+            "[" to "{ « ‹",
+            "]" to "} » ›",
         )
 
     public val pcFullEnUs: Layout =
