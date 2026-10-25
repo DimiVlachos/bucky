@@ -78,7 +78,7 @@ jobs:
         run: >
           ./gradlew spotlessCheck detekt :detekt-rules:test
           testFossDebugUnitTest testDebugUnitTest :app:architectureTest
-          lintFossDebug assembleFossDebug assemblePlayDebug
+          lintFossDebug assembleFossDebug assemblePlayDebug assembleFossRelease
       - name: No INTERNET or QUERY_ALL_PACKAGES in merged manifests
         run: scripts/check-manifest-permissions.sh
       - name: Upload reports on failure

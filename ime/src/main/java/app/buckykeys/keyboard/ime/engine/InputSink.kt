@@ -6,7 +6,7 @@ public interface InputSink {
     public fun sendKey(keyCode: Int, metaState: Int)
 }
 
-public enum class PointerAction {
+internal enum class PointerAction {
     DOWN,
     MOVE,
     UP,

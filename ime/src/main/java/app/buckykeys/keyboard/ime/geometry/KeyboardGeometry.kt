@@ -3,7 +3,7 @@ package app.buckykeys.keyboard.ime.geometry
 import app.buckykeys.keyboard.ime.layout.KeySpec
 import app.buckykeys.keyboard.ime.layout.Layout
 
-public class KeyboardGeometry(
+internal class KeyboardGeometry(
     layout: Layout,
     public val widthPx: Int,
     private val rowHeightPx: Int,
