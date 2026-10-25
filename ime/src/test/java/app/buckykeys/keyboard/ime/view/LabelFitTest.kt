@@ -86,4 +86,12 @@ class LabelFitTest {
     fun `an empty label has no visible characters`() {
         assertEquals(0, visibleCharCount(""))
     }
+
+    @Test
+    fun `single character labels share the smallest size and word labels keep their own`() {
+        val sizes = floatArrayOf(40f, 36f, 20f, 30f)
+        val small = booleanArrayOf(false, false, true, true)
+        evenBigLabels(sizes, small)
+        assertEquals(listOf(36f, 36f, 20f, 30f), sizes.toList())
+    }
 }

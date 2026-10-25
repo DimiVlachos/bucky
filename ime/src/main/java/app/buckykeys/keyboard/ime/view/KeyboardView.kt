@@ -58,6 +58,8 @@ public class KeyboardView(
 
     private val keysEdgeGapPx = gapPx.roundToInt()
 
+    private val edgeBandPx = keysEdgeGapPx + gapPx
+
     private val longPressMs = ViewConfiguration.getLongPressTimeout().toLong()
 
     private val backgroundPaint = fillPaint(R.color.keyboard_background)
@@ -133,10 +135,13 @@ public class KeyboardView(
     private var lastLatencyMs = 0L
     private var scheduledDeadline = KeyboardEngine.NO_DEADLINE
     private val timerTick = Runnable { onTimer() }
-    private val nextLanguage = Runnable { switchLanguage(1) }
-    private val previousLanguage = Runnable { switchLanguage(-1) }
-    private val pageSwitch = Runnable { switchPage(pendingPage) }
-    private val actionRequest = Runnable { pendingAction?.let { actions.onAction(it) } }
+    private val nextLanguage = Runnable { guarded { switchLanguage(1) } }
+    private val previousLanguage = Runnable { guarded { switchLanguage(-1) } }
+    private val pageSwitch = Runnable { guarded { switchPage(pendingPage) } }
+    private val actionRequest = Runnable {
+        guarded { pendingAction?.let { actions.onAction(it) } }
+        pendingAction = null
+    }
     private val logLatency = Runnable {
         Timber.tag(LATENCY_TAG).d("touch-to-draw %d ms", lastLatencyMs)
     }
@@ -163,7 +168,10 @@ public class KeyboardView(
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         setMeasuredDimension(
             MeasureSpec.getSize(widthMeasureSpec),
-            keysTop + keysEdgeGapPx + layout.rows.size * rowHeightPx + paddingBottom,
+            keysTop +
+                keysEdgeGapPx +
+                layout.rows.size * rowHeightPx +
+                maxOf(paddingBottom, keysEdgeGapPx),
         )
     }
 
@@ -173,7 +181,7 @@ public class KeyboardView(
 
     private fun lastKeyX(): Float = (geometry.widthPx - 1).coerceAtLeast(0).toFloat()
 
-    private fun rebuildGeometryIfNeeded() {
+    private fun rebuildGeometryIfNeeded(keepPointers: Boolean = false) {
         val contentWidth = (width - paddingLeft - paddingRight - 2 * keysEdgeGapPx).coerceAtLeast(0)
         if (
             contentWidth == geometry.widthPx &&
@@ -186,7 +194,7 @@ public class KeyboardView(
         geometryLanguage = languageIndex
         geometryPage = page
         try {
-            engine.setGeometry(geometry)
+            engine.setGeometry(geometry, keepPointers)
         } catch (e: RuntimeException) {
             Timber.e(e, "setGeometry: engine failed, resetting")
             engine.reset()
@@ -240,29 +248,25 @@ public class KeyboardView(
             if (showsLanguage() && def is KeyDef.Char && def.primary == " ") spaceKey = i
             if (fnLabels[i].isNotEmpty()) buildFnLabel(i, rects)
         }
-        evenOut(labelSize, labelSmall, labelY, rects) { true }
-        evenOut(fnSize, fnSmall, fnY, rects) { fnLabels[it].isNotEmpty() }
+        evenBigLabels(labelSize, labelSmall)
+        recomputeY(labelSize, labelSmall, labelY, rects) { true }
+        val fnExcluded = BooleanArray(count) { fnSmall[it] || fnLabels[it].isEmpty() }
+        evenBigLabels(fnSize, fnExcluded)
+        recomputeY(fnSize, fnSmall, fnY, rects) { fnLabels[it].isNotEmpty() }
         if (spaceKey != NO_SPACE_KEY) buildSpaceLabel(rects)
     }
 
     // One size per label class, so a key whose shifted form is wider (5 and %) doesn't shrink
     // alone.
-    private inline fun evenOut(
+    private inline fun recomputeY(
         sizes: FloatArray,
         small: BooleanArray,
         ys: FloatArray,
         rects: FloatArray,
         included: (Int) -> Boolean,
     ) {
-        var bigMin = Float.MAX_VALUE
-        var smallMin = Float.MAX_VALUE
         for (i in sizes.indices) {
             if (!included(i)) continue
-            if (small[i]) smallMin = minOf(smallMin, sizes[i]) else bigMin = minOf(bigMin, sizes[i])
-        }
-        for (i in sizes.indices) {
-            if (!included(i)) continue
-            sizes[i] = if (small[i]) smallMin else bigMin
             val paint = if (small[i]) smallLabelPaint else labelPaint
             paint.textSize = sizes[i]
             ys[i] =
@@ -352,6 +356,7 @@ public class KeyboardView(
 
     override fun onDraw(canvas: Canvas) {
         canvas.drawRect(0f, keysTop.toFloat(), width.toFloat(), height.toFloat(), backgroundPaint)
+        if (labelX.size != geometry.keyCount) return
         canvas.save()
         canvas.translate(
             (paddingLeft + keysEdgeGapPx).toFloat(),
@@ -467,6 +472,16 @@ public class KeyboardView(
         return true
     }
 
+    private inline fun guarded(block: () -> Unit) {
+        try {
+            block()
+        } catch (e: RuntimeException) {
+            Timber.e(e, "keyboard switch failed, resetting")
+            engine.reset()
+            invalidate()
+        }
+    }
+
     public fun setAutoShift(on: Boolean) {
         engine.setAutoShift(on)
         invalidate()
@@ -476,12 +491,16 @@ public class KeyboardView(
         engine.reset()
         removeCallbacks(pageSwitch)
         removeCallbacks(actionRequest)
-        if (page != BuiltInLayouts.PAGE_LETTERS) {
-            page = BuiltInLayouts.PAGE_LETTERS
-            rebuildGeometryIfNeeded()
-        }
+        removeCallbacks(nextLanguage)
+        removeCallbacks(previousLanguage)
+        showPage(BuiltInLayouts.PAGE_LETTERS)
         scheduleTimer()
         invalidate()
+    }
+
+    public fun showPage(target: String) {
+        if (page == target || !pageSet.isPage(target)) return
+        switchPage(target)
     }
 
     override fun onAttachedToWindow() {
@@ -529,8 +548,10 @@ public class KeyboardView(
     }
 
     private fun switchPage(target: String) {
+        val rows = layout.rows.size
         page = target
-        rebuildGeometryIfNeeded()
+        rebuildGeometryIfNeeded(keepPointers = true)
+        if (layout.rows.size != rows) requestLayout()
         invalidate()
     }
 
@@ -648,8 +669,8 @@ public class KeyboardView(
     private fun dispatch(event: MotionEvent, index: Int, action: PointerAction) {
         engine.onPointer(
             event.getPointerId(index),
-            (event.getX(index) - paddingLeft - keysEdgeGapPx).coerceIn(0f, lastKeyX()),
-            (event.getY(index) - keysTop - keysEdgeGapPx).coerceAtLeast(0f),
+            edgeClamp(event.getX(index) - paddingLeft - keysEdgeGapPx, lastKeyX(), edgeBandPx),
+            edgeClamp(event.getY(index) - keysTop - keysEdgeGapPx, Float.MAX_VALUE, edgeBandPx),
             action,
             event.eventTime,
             sink,

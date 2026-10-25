@@ -1,6 +1,6 @@
 package app.buckykeys.keyboard.ime.dispatch
 
-import android.text.InputType
+import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -9,13 +9,11 @@ import org.junit.Test
 
 class TypingRulesTest {
 
-    private val text = InputType.TYPE_CLASS_TEXT
-
     @Test
     fun `raw enter always sends the key`() {
         assertEquals(
             NO_ENTER_ACTION,
-            enterAction(EditorInfo.IME_ACTION_SEND, text, rawEnter = true),
+            enterAction(EditorInfo.IME_ACTION_SEND, rawEnter = true),
         )
     }
 
@@ -23,7 +21,7 @@ class TypingRulesTest {
     fun `a send field performs send`() {
         assertEquals(
             EditorInfo.IME_ACTION_SEND,
-            enterAction(EditorInfo.IME_ACTION_SEND, text, rawEnter = false),
+            enterAction(EditorInfo.IME_ACTION_SEND, rawEnter = false),
         )
     }
 
@@ -33,7 +31,6 @@ class TypingRulesTest {
             EditorInfo.IME_ACTION_SEARCH,
             enterAction(
                 EditorInfo.IME_ACTION_SEARCH or EditorInfo.IME_FLAG_NO_EXTRACT_UI,
-                text,
                 rawEnter = false,
             ),
         )
@@ -42,27 +39,40 @@ class TypingRulesTest {
     @Test
     fun `no enter action flag sends the key`() {
         val options = EditorInfo.IME_ACTION_SEND or EditorInfo.IME_FLAG_NO_ENTER_ACTION
-        assertEquals(NO_ENTER_ACTION, enterAction(options, text, rawEnter = false))
+        assertEquals(NO_ENTER_ACTION, enterAction(options, rawEnter = false))
     }
 
     @Test
-    fun `a multi line field sends the key`() {
-        val multiLine = text or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+    fun `shift does not stop the enter action`() {
         assertEquals(
-            NO_ENTER_ACTION,
-            enterAction(EditorInfo.IME_ACTION_SEND, multiLine, rawEnter = false),
+            EditorInfo.IME_ACTION_SEARCH,
+            enterKeyAction(
+                KeyEvent.META_SHIFT_ON,
+                EditorInfo.IME_ACTION_SEARCH,
+                rawEnter = false,
+            ),
         )
+    }
+
+    @Test
+    fun `ctrl alt or meta enter stays a raw key`() {
+        listOf(KeyEvent.META_CTRL_ON, KeyEvent.META_ALT_ON, KeyEvent.META_META_ON).forEach { meta ->
+            assertEquals(
+                NO_ENTER_ACTION,
+                enterKeyAction(meta, EditorInfo.IME_ACTION_SEARCH, rawEnter = false),
+            )
+        }
     }
 
     @Test
     fun `an unspecified action sends the key`() {
         assertEquals(
             NO_ENTER_ACTION,
-            enterAction(EditorInfo.IME_ACTION_UNSPECIFIED, text, rawEnter = false),
+            enterAction(EditorInfo.IME_ACTION_UNSPECIFIED, rawEnter = false),
         )
         assertEquals(
             NO_ENTER_ACTION,
-            enterAction(EditorInfo.IME_ACTION_NONE, text, rawEnter = false),
+            enterAction(EditorInfo.IME_ACTION_NONE, rawEnter = false),
         )
     }
 
