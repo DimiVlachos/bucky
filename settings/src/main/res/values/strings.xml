@@ -28,7 +28,10 @@
     <string name="settings_version">Version %1$s</string>
     <string name="settings_source">Source code on GitHub</string>
     <string name="settings_extra_row_preview">Keys: %1$s</string>
-    <string name="settings_extra_row_unknown">Not a key: %1$s</string>
+    <plurals name="settings_extra_row_unknown">
+        <item quantity="one">Not a key: %1$s</item>
+        <item quantity="other">Not keys: %1$s</item>
+    </plurals>
     <string name="settings_extra_row_limit">Only the first %1$d keys are used.</string>
     <string name="settings_extra_row_termux_default">Use Termux\'s default keys</string>
     <string name="settings_apps">Apps</string>
@@ -39,4 +42,5 @@
     <string name="settings_outside_other_hint">To get Bucky back in Termux, use the keyboard switcher button.</string>
     <string name="settings_auto_capitalize">Capital at the start of a sentence</string>
     <string name="settings_double_space_period">Double space for a full stop</string>
+    <string name="settings_save_failed">Couldn\'t save the setting. Try again.</string>
 </resources>

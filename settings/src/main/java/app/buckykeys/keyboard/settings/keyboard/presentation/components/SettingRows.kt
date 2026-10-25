@@ -26,7 +26,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
@@ -41,6 +43,7 @@ internal fun SectionTitle(text: String) {
         text = text,
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.semantics { heading() },
     )
 }
 
@@ -145,7 +148,10 @@ internal fun SettingSlider(
     var dragValue by remember(value) { mutableFloatStateOf(value.toFloat()) }
     val valueText = stringResource(valueFormat, dragValue.roundToInt())
     Column {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(
+            modifier = Modifier.fillMaxWidth().clearAndSetSemantics {},
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodyLarge,

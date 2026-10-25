@@ -1,5 +1,6 @@
 package app.buckykeys.keyboard.di
 
+import app.buckykeys.keyboard.ime.layout.MAX_EXTRA_ROW_KEYS
 import app.buckykeys.keyboard.ime.layout.parseExtraRow
 import app.buckykeys.keyboard.settings.keyboard.domain.interpreter.ExtraRowInterpreter
 import app.buckykeys.keyboard.settings.keyboard.domain.model.ExtraRowPreview
@@ -19,6 +20,7 @@ object ExtraRowModule {
             labels = parsed.keys.map { it.label },
             unknown = parsed.unknown,
             overLimit = parsed.overLimit,
+            limit = MAX_EXTRA_ROW_KEYS,
         )
     }
 }
