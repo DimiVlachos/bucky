@@ -149,20 +149,24 @@ public class KeyboardView(
     init {
         engine.languageSwipe = pageSet.languageCount > 1
         buildLabels()
-        ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
-            val bars =
-                insets.getInsets(
-                    WindowInsetsCompat.Type.navigationBars() or
-                        WindowInsetsCompat.Type.tappableElement() or
-                        WindowInsetsCompat.Type.displayCutout(),
-                )
-            val gestures = insets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())
-            val bottom = maxOf(bars.bottom, gestures.bottom)
-            val sidesChanged = bars.left != view.paddingLeft || bars.right != view.paddingRight
-            view.setPadding(bars.left, 0, bars.right, bottom)
-            if (sidesChanged && width > 0) rebuildGeometryIfNeeded()
+        ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
+            applyInsets(insets)
             insets
         }
+    }
+
+    private fun applyInsets(insets: WindowInsetsCompat) {
+        val bars =
+            insets.getInsets(
+                WindowInsetsCompat.Type.navigationBars() or
+                    WindowInsetsCompat.Type.tappableElement() or
+                    WindowInsetsCompat.Type.displayCutout(),
+            )
+        val gestures = insets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())
+        val bottom = maxOf(bars.bottom, gestures.bottom)
+        val sidesChanged = bars.left != paddingLeft || bars.right != paddingRight
+        setPadding(bars.left, 0, bars.right, bottom)
+        if (sidesChanged && width > 0) rebuildGeometryIfNeeded()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -505,6 +509,8 @@ public class KeyboardView(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        // The first measure sizes the IME window, and the listener only runs after it.
+        ViewCompat.getRootWindowInsets(this)?.let(::applyInsets)
         ViewCompat.requestApplyInsets(this)
     }
 
