@@ -35,7 +35,7 @@ public object FallbackLayout {
             rows =
                 listOf(
                     Row(
-                        listOf(special(KeyCode.ESC, "Esc", 1.25f)) +
+                        chars("`~") +
                             numberRow(
                                 "1!",
                                 "2@",
@@ -50,10 +50,10 @@ public object FallbackLayout {
                                 "-_",
                                 "=+",
                             ) +
-                            special(KeyCode.BACKSPACE, "⌫", 1.75f),
+                            special(KeyCode.BACKSPACE, "⌫", 2f),
                     ),
                     Row(
-                        listOf(special(KeyCode.TAB, "Tab", 1.5f)) +
+                        listOf(special(KeyCode.TAB, "Tab", 2f)) +
                             chars(
                                 "qQ",
                                 "wW",
@@ -68,10 +68,10 @@ public object FallbackLayout {
                                 "[{",
                                 "]}",
                             ) +
-                            KeySpec(KeyDef.Char("\\", "|"), "\\", 1.5f),
+                            KeySpec(KeyDef.Char("\\", "|"), "\\"),
                     ),
                     Row(
-                        listOf(modifier(ModifierKind.CTRL, "Ctrl", 1.75f)) +
+                        listOf(modifier(ModifierKind.CTRL, "Ctrl", 2.25f)) +
                             chars(
                                 "aA",
                                 "sS",
@@ -85,10 +85,10 @@ public object FallbackLayout {
                                 ";:",
                                 "'\"",
                             ) +
-                            special(KeyCode.ENTER, "Enter", 2.25f),
+                            special(KeyCode.ENTER, "Enter", 1.75f),
                     ),
                     Row(
-                        listOf(modifier(ModifierKind.SHIFT, "Shift", 1.5f)) +
+                        listOf(modifier(ModifierKind.SHIFT, "Shift", 2.5f)) +
                             chars(
                                 "zZ",
                                 "xX",
@@ -100,17 +100,17 @@ public object FallbackLayout {
                                 ",<",
                                 ".>",
                                 "/?",
-                                "`~",
                             ) +
                             special(KeyCode.UP, "↑", 1.25f, KeyCode.PAGE_UP) +
                             special(KeyCode.FORWARD_DEL, "Del", 1.25f, KeyCode.INSERT),
                     ),
                     Row(
                         listOf(
+                            special(KeyCode.ESC, "Esc", 1.25f),
                             modifier(ModifierKind.ALT, "Alt", 1.25f),
                             special(KeyCode.HOME, "Home", 1.5f),
                             special(KeyCode.END, "End", 1.5f),
-                            KeySpec(KeyDef.Char(" ", " "), "", 5.75f),
+                            KeySpec(KeyDef.Char(" ", " "), "", 4.5f),
                             modifier(ModifierKind.FN, "Fn", 1.25f),
                             special(KeyCode.LEFT, "←", 1.25f, KeyCode.HOME),
                             special(KeyCode.DOWN, "↓", 1.25f, KeyCode.PAGE_DOWN),

@@ -12,7 +12,7 @@ It is a from-scratch successor to [Hacker's Keyboard](https://github.com/klausw/
 
 ## What works today
 
-- Full 5-row PC layout with `~`, `|` and `\` where you expect them
+- Full 5-row PC layout in Hacker's Keyboard positions: `` ` ``/~ top left, Esc bottom left, and the letters centred between your hands
 - Ctrl, Alt, Shift and Fn that send real `KeyEvent`s: tap once for the next key, twice to lock, or hold. Ctrl+C interrupts a command in Termux, Esc leaves vim's insert mode, and the arrows walk shell history
 - Esc, Tab, Home, End, Del and the arrow keys as real keys, with key repeat
 - An Fn key, as in Hacker's Keyboard: the number row becomes F1–F12, the arrows PgUp, PgDn, Home and End, and Del becomes Ins
