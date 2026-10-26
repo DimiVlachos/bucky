@@ -8,8 +8,10 @@ public object BuiltInLayouts {
 
     public const val PC_FULL_EN_US: String = "pc_full_en_us"
     public const val PC_FULL_EL: String = "pc_full_el"
+    public const val PC_FULL_ET: String = "pc_full_et"
     public const val COMPACT_EN_US: String = "compact_en_us"
     public const val COMPACT_EL: String = "compact_el"
+    public const val COMPACT_ET: String = "compact_et"
     public const val COMPACT_SYMBOLS: String = "compact_symbols"
     public const val COMPACT_SYMBOLS_MORE: String = "compact_symbols_more"
     public const val NEXT_LANGUAGE: String = "@language"

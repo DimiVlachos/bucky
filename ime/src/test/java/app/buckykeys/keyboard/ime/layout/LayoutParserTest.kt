@@ -332,6 +332,28 @@ class LayoutParserTest {
     }
 
     @Test
+    fun `a dead key can name its fn variant`() {
+        assertEquals(
+            KeySpec(KeyDef.Dead("´", "`", latin = "="), "´", fn = KeyDef.Special(KeyCode.F12)),
+            parseKeys("""{ "dead": ["´", "`"], "latin": "=", "fn": "F12" }""").single(),
+        )
+    }
+
+    @Test
+    fun `the caron dead key composes s and z into their estonian letters`() {
+        val keys =
+            parseKeys(
+                """{ "dead": ["ˇ", "~"] }""",
+                """{ "chars": ["s", "S"] }""",
+                """{ "chars": ["z", "Z"] }""",
+                """{ "chars": ["o", "O"] }""",
+            )
+        assertEquals(mapOf("ˇ" to "š"), (keys[1].def as KeyDef.Char).composed)
+        assertEquals(mapOf("ˇ" to "Ž"), (keys[2].def as KeyDef.Char).composedShifted)
+        assertEquals("õ", (keys[3].def as KeyDef.Char).composed["~"])
+    }
+
+    @Test
     fun `an unknown fn variant is rejected`() {
         val error = failureOf(layoutWithKeys("""{ "key": "UP", "fn": "PAGE_SIDEWAYS" }"""))
         assertEquals("$.rows[0].keys[0].fn", error.path)

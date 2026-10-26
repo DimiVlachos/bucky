@@ -4,7 +4,8 @@ import java.text.Normalizer
 
 internal object DeadKeys {
 
-    private val asciiMarks = mapOf("^" to "\u0302", "`" to "\u0300", "~" to "\u0303")
+    private val asciiMarks =
+        mapOf("^" to "\u0302", "`" to "\u0300", "~" to "\u0303", "ˇ" to "\u030C")
 
     fun composes(mark: String): Boolean = combining(mark).isNotEmpty()
 

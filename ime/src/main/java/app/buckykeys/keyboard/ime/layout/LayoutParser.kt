@@ -89,7 +89,9 @@ public object LayoutParser {
         if (def !is KeyDef.LayoutSwitch && "holdTo" in obj) fail("$path.holdTo", "needs switchTo")
         val types = def is KeyDef.Char || def is KeyDef.Special
         if (!types && "then" in obj) fail("$path.then", "needs chars or key")
-        if (!types && "fn" in obj) fail("$path.fn", "needs chars or key")
+        if (!types && def !is KeyDef.Dead && "fn" in obj) {
+            fail("$path.fn", "needs chars, dead or key")
+        }
         if (def !is KeyDef.Char && def !is KeyDef.Dead && "latin" in obj) {
             fail("$path.latin", "needs chars or dead")
         }
