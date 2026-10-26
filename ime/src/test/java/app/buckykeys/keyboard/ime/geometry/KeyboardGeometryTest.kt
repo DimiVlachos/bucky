@@ -20,8 +20,29 @@ class KeyboardGeometryTest {
     }
 
     @Test
-    fun `the top left corner is escape`() {
-        assertEquals(KeyDef.Special(KeyCode.ESC), geometry.spec(geometry.keyAt(1f, 1f)).def)
+    fun `the top left corner is the backtick, as in hacker's keyboard`() {
+        assertEquals("`", (geometry.spec(geometry.keyAt(1f, 1f)).def as KeyDef.Char).primary)
+    }
+
+    @Test
+    fun `the bottom left corner is escape`() {
+        assertEquals(KeyDef.Special(KeyCode.ESC), geometry.spec(geometry.keyAt(1f, 599f)).def)
+    }
+
+    @Test
+    fun `each letter row splits between the hands within half a unit of the centre`() {
+        val unit = 1080f / 15f
+        for (firstRightHandKey in listOf("y", "h", "n")) {
+            val index = indexOfChar(firstRightHandKey)
+            assertEquals(firstRightHandKey, 540f, geometry.rects[index * 4], unit / 2f)
+        }
+    }
+
+    @Test
+    fun `the space bar is within a quarter unit of the centre`() {
+        val space = indexOfChar(" ")
+        val centre = (geometry.rects[space * 4] + geometry.rects[space * 4 + 2]) / 2f
+        assertEquals(540f, centre, 1080f / 15f / 4f + 0.5f)
     }
 
     @Test
@@ -47,7 +68,7 @@ class KeyboardGeometryTest {
     fun `the second key of the third row starts after the wider control key`() {
         val firstOfRow3 = layout.rows[0].keys.size + layout.rows[1].keys.size
         val unit = 1080f / layout.rows[2].keys.sumOf { it.width.toDouble() }.toFloat()
-        assertEquals(1.75f * unit, geometry.rects[(firstOfRow3 + 1) * 4], 0.5f)
+        assertEquals(2.25f * unit, geometry.rects[(firstOfRow3 + 1) * 4], 0.5f)
     }
 
     @Test
@@ -75,6 +96,11 @@ class KeyboardGeometryTest {
 
     private fun indexOf(code: KeyCode): Int =
         (0 until geometry.keyCount).first { geometry.spec(it).def == KeyDef.Special(code) }
+
+    private fun indexOfChar(primary: String): Int =
+        (0 until geometry.keyCount).first {
+            (geometry.spec(it).def as? KeyDef.Char)?.primary == primary
+        }
 
     private fun centerX(code: KeyCode): Float {
         val index = indexOf(code)
