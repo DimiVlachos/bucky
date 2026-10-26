@@ -105,6 +105,61 @@ class BuiltInLayoutsTest {
         )
     }
 
+    @Test
+    fun `every estonian row spans fifteen units`() {
+        estonian().rows.forEachIndexed { index, row ->
+            assertEquals("row $index", 15.0, row.keys.sumOf { it.width.toDouble() }, 0.001)
+        }
+    }
+
+    @Test
+    fun `the estonian letters send their us key with ctrl`() {
+        val chars = estonianChars()
+        mapOf("ü" to "[", "õ" to "]", "ö" to ";", "ä" to "'").forEach { (letter, latin) ->
+            assertEquals(letter, latin, chars.getValue(letter).latin)
+        }
+    }
+
+    @Test
+    fun `every estonian altgr symbol is the first long press of its key`() {
+        val firstAlternates =
+            estonianChars().values.mapNotNull {
+                (it.alternates.firstOrNull() as? KeyDef.Char)?.primary
+            }
+        listOf("@", "£", "$", "€", "{", "[", "]", "}", "\\", "|", "š", "ž").forEach {
+            assertEquals(it, true, it in firstAlternates)
+        }
+    }
+
+    @Test
+    fun `the estonian caron and tilde dead keys compose the estonian letters`() {
+        val chars = estonianChars()
+        assertEquals("š", chars.getValue("s").composed["ˇ"])
+        assertEquals("Ž", chars.getValue("z").composedShifted["ˇ"])
+        assertEquals("õ", chars.getValue("o").composed["~"])
+    }
+
+    @Test
+    fun `the estonian number row keeps every f key on fn`() {
+        val numberRow = estonian().rows.first().keys
+        assertEquals(
+            (1..12).map { KeyDef.Special(KeyCode.valueOf("F$it")) },
+            numberRow.mapNotNull { it.fn },
+        )
+    }
+
+    private fun estonian(): Layout =
+        LayoutParser.parse(asset(BuiltInLayouts.PC_FULL_ET)).getOrThrow()
+
+    private fun estonianChars(): Map<String, KeyDef.Char> =
+        estonian()
+            .rows
+            .flatMap { it.keys }
+            .mapNotNull { it.def as? KeyDef.Char }
+            .associateBy {
+                it.primary
+            }
+
     private fun greekChars(): Map<String, KeyDef.Char> =
         LayoutParser.parse(asset(BuiltInLayouts.PC_FULL_EL))
             .getOrThrow()

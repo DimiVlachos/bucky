@@ -156,6 +156,7 @@ private fun KeyboardLanguage.labelRes(): Int =
     when (this) {
         KeyboardLanguage.EN_US -> R.string.settings_language_en_us
         KeyboardLanguage.EL -> R.string.settings_language_el
+        KeyboardLanguage.ET -> R.string.settings_language_et
     }
 
 @Preview

@@ -46,6 +46,14 @@ class KeyboardSettingsTest {
     }
 
     @Test
+    fun `an estonian system adds estonian to the default languages`() {
+        assertEquals(
+            listOf(KeyboardLanguage.EN_US, KeyboardLanguage.ET),
+            KeyboardSettings.defaults(systemLanguage = "et").languages,
+        )
+    }
+
+    @Test
     fun `a greek system adds greek to the default languages`() {
         assertEquals(
             listOf(KeyboardLanguage.EN_US, KeyboardLanguage.EL),

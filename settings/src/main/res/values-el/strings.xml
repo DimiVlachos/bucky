@@ -7,6 +7,7 @@
     <string name="settings_languages">Γλώσσες</string>
     <string name="settings_language_en_us">Αγγλικά (ΗΠΑ)</string>
     <string name="settings_language_el">Ελληνικά</string>
+    <string name="settings_language_et">Εσθονικά</string>
     <string name="settings_language_required">Απαιτείται τουλάχιστον μία γλώσσα</string>
     <string name="settings_languages_hint">Σύρετε το πλήκτρο διαστήματος αριστερά ή δεξιά για εναλλαγή. Τουλάχιστον μία μένει ενεργή.</string>
     <string name="settings_size">Μέγεθος</string>

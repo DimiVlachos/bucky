@@ -72,8 +72,11 @@ public data class KeyboardSettings(
         public fun defaults(systemLanguage: String): KeyboardSettings =
             KeyboardSettings(
                 languages =
-                    if (systemLanguage == "el") listOf(KeyboardLanguage.EN_US, KeyboardLanguage.EL)
-                    else listOf(KeyboardLanguage.EN_US),
+                    when (systemLanguage) {
+                        "el" -> listOf(KeyboardLanguage.EN_US, KeyboardLanguage.EL)
+                        "et" -> listOf(KeyboardLanguage.EN_US, KeyboardLanguage.ET)
+                        else -> listOf(KeyboardLanguage.EN_US)
+                    },
             )
     }
 }
