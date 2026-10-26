@@ -142,6 +142,7 @@ public class KeyboardView(
         guarded { pendingAction?.let { actions.onAction(it) } }
         pendingAction = null
     }
+    private val relayout = Runnable { requestLayout() }
     private val logLatency = Runnable {
         Timber.tag(LATENCY_TAG).d("touch-to-draw %d ms", lastLatencyMs)
     }
@@ -165,8 +166,15 @@ public class KeyboardView(
         val gestures = insets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())
         val bottom = maxOf(bars.bottom, gestures.bottom)
         val sidesChanged = bars.left != paddingLeft || bars.right != paddingRight
+        val bottomChanged = bottom != paddingBottom
         setPadding(bars.left, 0, bars.right, bottom)
         if (sidesChanged && width > 0) rebuildGeometryIfNeeded()
+        // Insets that arrive mid-traversal only remeasure inside the current IME window; a fresh
+        // layout pass lets the window grow to the new height.
+        if (bottomChanged && isAttachedToWindow) {
+            removeCallbacks(relayout)
+            post(relayout)
+        }
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -521,6 +529,7 @@ public class KeyboardView(
         removeCallbacks(pageSwitch)
         removeCallbacks(actionRequest)
         removeCallbacks(logLatency)
+        removeCallbacks(relayout)
         scheduledDeadline = KeyboardEngine.NO_DEADLINE
         super.onDetachedFromWindow()
     }
