@@ -58,7 +58,7 @@ public data class KeyboardSettings(
         public val ROW_HEIGHT_RANGE: IntRange = 36..64
         public val LANDSCAPE_ROW_HEIGHT_RANGE: IntRange = 26..56
         public const val DEFAULT_LABEL_SCALE_PERCENT: Int = 100
-        public val LABEL_SCALE_RANGE: IntRange = 80..140
+        public val LABEL_SCALE_RANGE: IntRange = 80..200
         public const val LABEL_SCALE_STEP: Int = 10
         public const val MAX_EXTRA_ROW_WORDS: Int = 64
         public const val TERMUX_DEFAULT_EXTRA_ROW: String =

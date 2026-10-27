@@ -94,4 +94,19 @@ class LabelFitTest {
         evenBigLabels(sizes, small)
         assertEquals(listOf(36f, 36f, 20f, 30f), sizes.toList())
     }
+
+    @Test
+    fun `a larger label size grows a fitted single character past its key`() {
+        assertEquals(60f, scaledLabelSize(fittedSize = 30f, scale = 2f, maxSize = 100f), 0.001f)
+    }
+
+    @Test
+    fun `a scaled label never grows past the row height cap`() {
+        assertEquals(50f, scaledLabelSize(fittedSize = 30f, scale = 2f, maxSize = 50f), 0.001f)
+    }
+
+    @Test
+    fun `a smaller label size shrinks the fitted size`() {
+        assertEquals(24f, scaledLabelSize(fittedSize = 30f, scale = 0.8f, maxSize = 100f), 0.001f)
+    }
 }
