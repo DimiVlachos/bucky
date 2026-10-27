@@ -37,6 +37,7 @@ public object LayoutParser {
             BuiltInLayouts.PAGE_SYMBOLS,
             BuiltInLayouts.PAGE_SYMBOLS_MORE,
             BuiltInLayouts.OTHER_KEYBOARD,
+            BuiltInLayouts.SETTINGS,
         )
 
     public fun parse(json: String): Result<Layout> =

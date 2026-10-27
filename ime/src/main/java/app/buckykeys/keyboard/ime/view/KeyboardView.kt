@@ -589,6 +589,7 @@ public class KeyboardView(
             BuiltInLayouts.NEXT_LANGUAGE,
             BuiltInLayouts.PREVIOUS_LANGUAGE -> switchLanguageLater(target)
             BuiltInLayouts.OTHER_KEYBOARD,
+            BuiltInLayouts.SETTINGS,
             BuiltInLayouts.FULL_LAYOUT -> {
                 pendingAction = target
                 post(actionRequest)

@@ -61,6 +61,11 @@ class ClassicLayoutsTest {
         assertEquals(2f, rows[3].startOf(char("z")), 0.001f)
         assertEquals(13f, rows[3].startOf(modifier(ModifierKind.SHIFT), occurrence = 1), 0.001f)
         assertEquals(0f, rows[4].startOf(special(KeyCode.ESC)), 0.001f)
+        assertEquals(
+            1.5f,
+            rows[4].startOf({ it == KeyDef.LayoutSwitch(BuiltInLayouts.SETTINGS) }),
+            0.001f,
+        )
         assertEquals(2.5f, rows[4].startOf(modifier(ModifierKind.ALT)), 0.001f)
         assertEquals(3.5f, rows[4].startOf(modifier(ModifierKind.META)), 0.001f)
         assertEquals(4.5f, rows[4].startOf(char(" ")), 0.001f)
@@ -148,5 +153,15 @@ class ClassicLayoutsTest {
         assertTrue(defs[1].any { it is KeyDef.Char && it.primary == "å" })
         assertTrue(defs[1].any { it is KeyDef.Char && it.primary == "~" && it.shifted == "^" })
         assertTrue(finnish.rows.flatMap { it.keys }.none { it.def is KeyDef.Dead })
+    }
+
+    @Test
+    fun `every classic bottom row has hacker's keyboard's esc and settings keys`() {
+        listOf(english, greek, estonian, finnish, fnPage).forEach { layout ->
+            val bottom = layout.rows.last().keys
+            assertEquals(layout.id, KeyDef.Special(KeyCode.ESC), bottom[0].def)
+            assertEquals(layout.id, 1.5f, bottom[0].width, 0.001f)
+            assertEquals(layout.id, KeyDef.LayoutSwitch(BuiltInLayouts.SETTINGS), bottom[1].def)
+        }
     }
 }

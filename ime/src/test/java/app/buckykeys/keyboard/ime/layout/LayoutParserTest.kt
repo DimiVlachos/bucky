@@ -324,6 +324,14 @@ class LayoutParserTest {
     }
 
     @Test
+    fun `the settings key parses with the gear label`() {
+        assertEquals(
+            KeySpec(KeyDef.LayoutSwitch(BuiltInLayouts.SETTINGS), "⚙"),
+            parseKeys("""{ "switchTo": "@settings" }""").single(),
+        )
+    }
+
+    @Test
     fun `meta and the new specials parse with their labels`() {
         assertEquals(
             listOf("❖", "○", "SysRq", "ScrLk", "Brk", "NumLk"),
