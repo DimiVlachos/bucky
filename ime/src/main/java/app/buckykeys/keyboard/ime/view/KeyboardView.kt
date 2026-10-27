@@ -39,7 +39,7 @@ public class KeyboardView(
     private val latencyLogging: Boolean,
     private val rowHeightPx: Int,
     private val haptics: Boolean,
-    labelScale: Float = 1f,
+    private val labelScale: Float = 1f,
     pages: Map<String, Layout> = emptyMap(),
     private val actions: KeyboardActions = KeyboardActions {},
 ) : View(context) {
@@ -48,11 +48,12 @@ public class KeyboardView(
     private val cornerPx = resources.getDimension(R.dimen.key_corner_radius)
     private val labelPaddingPx = resources.getDimension(R.dimen.key_label_padding)
     private val labelMinSizePx = resources.getDimension(R.dimen.key_label_min_size)
-    private val labelSizePx = resources.getDimension(R.dimen.key_label_size) * labelScale
+    private val unscaledLabelSizePx = resources.getDimension(R.dimen.key_label_size)
+    private val labelSizePx = unscaledLabelSizePx * labelScale
     private val smallLabelSizePx = resources.getDimension(R.dimen.key_label_small_size) * labelScale
     private val lockBarHeightPx = resources.getDimension(R.dimen.key_lock_bar_height)
     private val lockBarInsetPx = resources.getDimension(R.dimen.key_lock_bar_inset)
-    private val labelMaxSizePx = rowHeightPx * LABEL_HEIGHT_FRACTION
+    private val labelMaxSizePx = rowHeightPx * KEY_LABEL_HEIGHT_FRACTION
 
     public val keysTop: Int = rowHeightPx
 
@@ -246,15 +247,20 @@ public class KeyboardView(
                 }
             labelSmall[i] = isSmall(spec.label)
             val paint = if (labelSmall[i]) smallLabelPaint else labelPaint
+            val cellWidth = rects[i * 4 + 2] - rects[i * 4]
             labelSize[i] =
-                fitLabel(
-                    paint,
-                    if (labelSmall[i]) smallLabelSizePx else labelSizePx,
-                    spec.label,
-                    shiftedLabel,
-                    rects[i * 4 + 2] - rects[i * 4],
-                    labelMaxSizePx,
-                )
+                if (labelSmall[i]) {
+                    fitLabel(
+                        paint,
+                        smallLabelSizePx,
+                        spec.label,
+                        shiftedLabel,
+                        cellWidth,
+                        labelMaxSizePx,
+                    )
+                } else {
+                    bigLabelSize(paint, spec.label, shiftedLabel, cellWidth)
+                }
             paint.textSize = labelSize[i]
             labelX[i] = (rects[i * 4] + rects[i * 4 + 2]) / 2f
             labelY[i] =
@@ -264,7 +270,7 @@ public class KeyboardView(
             if (showsLanguage() && def is KeyDef.Char && def.primary == " ") spaceKey = i
             if (fnLabels[i].isNotEmpty()) buildFnLabel(i, rects)
         }
-        evenBigLabels(labelSize, labelSmall)
+        evenBigLabels(labelSize, BooleanArray(count) { labelSmall[it] || special[it] })
         recomputeY(labelSize, labelSmall, labelY, rects) { true }
         val fnExcluded = BooleanArray(count) { fnSmall[it] || fnLabels[it].isEmpty() }
         evenBigLabels(fnSize, fnExcluded)
@@ -292,15 +298,20 @@ public class KeyboardView(
 
     private fun buildFnLabel(i: Int, rects: FloatArray) {
         val paint = if (fnSmall[i]) smallLabelPaint else labelPaint
+        val cellWidth = rects[i * 4 + 2] - rects[i * 4]
         fnSize[i] =
-            fitLabel(
-                paint,
-                if (fnSmall[i]) smallLabelSizePx else labelSizePx,
-                fnLabels[i],
-                fnLabels[i],
-                rects[i * 4 + 2] - rects[i * 4],
-                labelMaxSizePx,
-            )
+            if (fnSmall[i]) {
+                fitLabel(
+                    paint,
+                    smallLabelSizePx,
+                    fnLabels[i],
+                    fnLabels[i],
+                    cellWidth,
+                    labelMaxSizePx,
+                )
+            } else {
+                bigLabelSize(paint, fnLabels[i], fnLabels[i], cellWidth)
+            }
         paint.textSize = fnSize[i]
         fnY[i] =
             (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f - (paint.ascent() + paint.descent()) / 2f
@@ -343,6 +354,18 @@ public class KeyboardView(
             maxSize,
         )
     }
+
+    private fun bigLabelSize(
+        paint: Paint,
+        label: String,
+        shiftedLabel: String,
+        cellWidth: Float,
+    ): Float =
+        scaledLabelSize(
+            fitLabel(paint, unscaledLabelSizePx, label, shiftedLabel, cellWidth, Float.MAX_VALUE),
+            labelScale,
+            labelMaxSizePx,
+        )
 
     private fun buildPopupLabels() {
         val popup = engine.popup

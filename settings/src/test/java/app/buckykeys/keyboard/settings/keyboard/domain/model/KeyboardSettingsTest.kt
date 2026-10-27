@@ -80,13 +80,14 @@ class KeyboardSettingsTest {
     @Test
     fun `the label size snaps to ten percent steps within its range`() {
         assertEquals(110, english.withLabelScale(113).labelScalePercent)
-        assertEquals(140, english.withLabelScale(500).labelScalePercent)
+        assertEquals(200, english.withLabelScale(500).labelScalePercent)
+        assertEquals(170, english.withLabelScale(168).labelScalePercent)
         assertEquals(80, english.withLabelScale(0).labelScalePercent)
     }
 
     @Test
     fun `sanitized clamps the label size`() {
-        assertEquals(140, english.copy(labelScalePercent = 999).sanitized().labelScalePercent)
+        assertEquals(200, english.copy(labelScalePercent = 999).sanitized().labelScalePercent)
     }
 
     @Test
@@ -117,7 +118,7 @@ class KeyboardSettingsTest {
 
     @Test
     fun `a huge label size clamps to the maximum`() {
-        assertEquals(140, english.withLabelScale(Int.MAX_VALUE).labelScalePercent)
+        assertEquals(200, english.withLabelScale(Int.MAX_VALUE).labelScalePercent)
     }
 
     @Test

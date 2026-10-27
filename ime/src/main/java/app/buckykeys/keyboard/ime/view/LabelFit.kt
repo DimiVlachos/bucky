@@ -1,6 +1,7 @@
 package app.buckykeys.keyboard.ime.view
 
 internal const val LABEL_HEIGHT_FRACTION = 0.55f
+internal const val KEY_LABEL_HEIGHT_FRACTION = 0.8f
 internal const val PREVIEW_LABEL_HEIGHT_FRACTION = 0.7f
 
 internal fun fittedTextSize(
@@ -18,6 +19,11 @@ internal fun fittedTextSize(
         }
     return minOf(widthFit, maxSize)
 }
+
+// Scaled after fitting, so above 100% a single character may spill past its key, as in Hacker's
+// Keyboard.
+internal fun scaledLabelSize(fittedSize: Float, scale: Float, maxSize: Float): Float =
+    minOf(fittedSize * scale, maxSize)
 
 internal fun visibleCharCount(label: String): Int {
     var count = 0
