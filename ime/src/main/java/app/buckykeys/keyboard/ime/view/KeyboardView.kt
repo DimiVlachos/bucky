@@ -141,6 +141,7 @@ public class KeyboardView(
     private val nextLanguage = Runnable { guarded { switchLanguage(1) } }
     private val previousLanguage = Runnable { guarded { switchLanguage(-1) } }
     private val pageSwitch = Runnable { guarded { switchPage(pendingPage) } }
+    private val fnPageSync = Runnable { guarded { syncFnPage() } }
     private val actionRequest = Runnable {
         guarded { pendingAction?.let { actions.onAction(it) } }
         pendingAction = null
@@ -503,7 +504,7 @@ public class KeyboardView(
                     for (i in 0 until event.pointerCount) dispatch(event, i, PointerAction.CANCEL)
             }
             handleSwitchRequest()
-            syncFnPage()
+            requestFnPageSync()
         } catch (e: RuntimeException) {
             Timber.e(e, "onTouchEvent: engine failed, resetting")
             engine.reset()
@@ -531,6 +532,7 @@ public class KeyboardView(
     public fun resetState() {
         engine.reset()
         removeCallbacks(pageSwitch)
+        removeCallbacks(fnPageSync)
         removeCallbacks(actionRequest)
         removeCallbacks(nextLanguage)
         removeCallbacks(previousLanguage)
@@ -539,10 +541,21 @@ public class KeyboardView(
         invalidate()
     }
 
+    // Swapping builds a new geometry, so touch and timer paths post it instead of allocating there.
+    private fun requestFnPageSync() {
+        if (fnTarget() == page) return
+        removeCallbacks(fnPageSync)
+        post(fnPageSync)
+    }
+
     private fun syncFnPage() {
-        val fnActive = engine.modifierMask and (1 shl ModifierKind.FN.ordinal) != 0
-        val target = fnPageTarget(page, fnActive, pageSet.isPage(BuiltInLayouts.PAGE_FN))
+        val target = fnTarget()
         if (target != page) switchPage(target)
+    }
+
+    private fun fnTarget(): String {
+        val fnActive = engine.modifierMask and (1 shl ModifierKind.FN.ordinal) != 0
+        return fnPageTarget(page, fnActive, pageSet.isPage(BuiltInLayouts.PAGE_FN))
     }
 
     public fun showPage(target: String) {
@@ -562,6 +575,7 @@ public class KeyboardView(
         removeCallbacks(nextLanguage)
         removeCallbacks(previousLanguage)
         removeCallbacks(pageSwitch)
+        removeCallbacks(fnPageSync)
         removeCallbacks(actionRequest)
         removeCallbacks(logLatency)
         removeCallbacks(relayout)
@@ -625,7 +639,7 @@ public class KeyboardView(
                 if (haptics) performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             }
             handleSwitchRequest()
-            syncFnPage()
+            requestFnPageSync()
         } catch (e: RuntimeException) {
             Timber.e(e, "onTimer: engine failed, resetting")
             engine.reset()

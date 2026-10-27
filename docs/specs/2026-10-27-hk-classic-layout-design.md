@@ -1,6 +1,6 @@
 # Hacker's Keyboard (classic) layout: design
 
-Date: 2026-10-27. Status: draft for Dimitris. Decisions move into `PLAN.md` (§3.2, §4.3, §4.6) in the same PR that implements them.
+Date: 2026-10-27. Status: approved by Dimitris on 2026-10-27 and built on feat/hk-classic-layout. Decisions move into `PLAN.md` (§3.2, §4.3, §4.6) in the same PR that implements them.
 
 ## Why
 

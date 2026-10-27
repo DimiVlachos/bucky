@@ -22,6 +22,17 @@ internal fun fullLayoutFor(
     return classic ?: loaded(language.layoutId)
 }
 
+// These have their own fallback, so a failed load must stay missing instead of becoming English.
+internal fun optionalLayoutIds(
+    languages: List<KeyboardLanguage>,
+    style: FullLayoutStyle,
+): Set<String> =
+    if (style == FullLayoutStyle.HK_CLASSIC) {
+        (languages.map { it.classicLayoutId } + fullPageIds(style)).toSet()
+    } else {
+        emptySet()
+    }
+
 internal fun fullPageIds(style: FullLayoutStyle): List<String> =
     if (style == FullLayoutStyle.HK_CLASSIC) listOf(BuiltInLayouts.PC_HK_FN) else emptyList()
 

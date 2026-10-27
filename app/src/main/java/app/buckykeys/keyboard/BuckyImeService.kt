@@ -26,6 +26,7 @@ import app.buckykeys.keyboard.profile.fullLayoutFor
 import app.buckykeys.keyboard.profile.fullLayoutIds
 import app.buckykeys.keyboard.profile.fullPageIds
 import app.buckykeys.keyboard.profile.fullPagesFor
+import app.buckykeys.keyboard.profile.optionalLayoutIds
 import app.buckykeys.keyboard.profile.profileFor
 import app.buckykeys.keyboard.profile.startPageFor
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
@@ -233,9 +234,15 @@ class BuckyImeService : InputMethodService() {
                 BuiltInLayouts.COMPACT_SYMBOLS_MORE
         val missing = wanted.distinct().filter { it !in layouts }
         if (missing.isEmpty()) return
+        val optional = optionalLayoutIds(target.languages, target.fullLayoutStyle)
         val loaded =
             withContext(Dispatchers.Default) {
-                missing.associateWith { BuiltInLayouts.load(assets, it) }
+                missing.mapNotNull { id ->
+                    val layout =
+                        if (id in optional) BuiltInLayouts.loadOrNull(assets, id)
+                        else BuiltInLayouts.load(assets, id)
+                    layout?.let { id to it }
+                }
             }
         layouts.putAll(loaded)
     }

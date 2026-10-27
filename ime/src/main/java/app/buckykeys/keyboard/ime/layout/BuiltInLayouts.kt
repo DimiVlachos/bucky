@@ -27,11 +27,17 @@ public object BuiltInLayouts {
     public const val OTHER_KEYBOARD: String = "@keyboard"
     public const val FULL_LAYOUT: String = "@full"
 
-    public fun load(assets: AssetManager, id: String): Layout = loadOrFallback {
-        assets.open("layouts/$id.json").bufferedReader().use { it.readText() }
+    public fun load(assets: AssetManager, id: String): Layout = loadOrFallback { read(assets, id) }
+
+    // For layouts with their own fallback (the classic ones and the Fn page): null, not English.
+    public fun loadOrNull(assets: AssetManager, id: String): Layout? = loadOrNull {
+        read(assets, id)
     }
 
-    internal fun loadOrFallback(read: () -> String): Layout {
+    internal fun loadOrFallback(read: () -> String): Layout =
+        loadOrNull(read) ?: FallbackLayout.pcFullEnUs
+
+    internal fun loadOrNull(read: () -> String): Layout? {
         val result =
             try {
                 LayoutParser.parse(read())
@@ -39,8 +45,11 @@ public object BuiltInLayouts {
                 Result.failure(e)
             }
         return result.getOrElse { error ->
-            Timber.e(error, "built-in layout failed to load, using the fallback")
-            FallbackLayout.pcFullEnUs
+            Timber.e(error, "built-in layout failed to load")
+            null
         }
     }
+
+    private fun read(assets: AssetManager, id: String): String =
+        assets.open("layouts/$id.json").bufferedReader().use { it.readText() }
 }
