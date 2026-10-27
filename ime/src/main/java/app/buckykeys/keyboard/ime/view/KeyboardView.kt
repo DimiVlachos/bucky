@@ -78,6 +78,7 @@ public class KeyboardView(
         }
 
     private val keyPaint = fillPaint(R.color.key_background)
+    private val specialKeyPaint = fillPaint(R.color.key_special_background)
     private val pressedPaint = fillPaint(R.color.key_pressed)
     private val activePaint = fillPaint(R.color.key_modifier_active)
     private val lockedPaint = fillPaint(R.color.key_modifier_locked)
@@ -117,6 +118,7 @@ public class KeyboardView(
     private var labelSize = FloatArray(0)
     private var labelSmall = BooleanArray(0)
     private var modifierBits = IntArray(0)
+    private var special = BooleanArray(0)
     private var hintLabels = emptyArray<String>()
     private var fnLabels = emptyArray<String>()
     private var fnSmall = BooleanArray(0)
@@ -222,6 +224,7 @@ public class KeyboardView(
         labelSize = FloatArray(count)
         labelSmall = BooleanArray(count)
         modifierBits = IntArray(count)
+        special = BooleanArray(count)
         spaceKey = NO_SPACE_KEY
         val rects = geometry.rects
         hintLabels = Array(count) { hintFor(geometry.spec(it).def) }
@@ -257,6 +260,7 @@ public class KeyboardView(
             labelY[i] =
                 (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f - (paint.ascent() + paint.descent()) / 2f
             modifierBits[i] = if (def is KeyDef.Modifier) 1 shl def.kind.ordinal else 0
+            special[i] = isSpecialKey(def)
             if (showsLanguage() && def is KeyDef.Char && def.primary == " ") spaceKey = i
             if (fnLabels[i].isNotEmpty()) buildFnLabel(i, rects)
         }
@@ -387,6 +391,7 @@ public class KeyboardView(
                     i == engine.pendingDeadKey -> activePaint
                     modifierBits[i] and locked != 0 -> lockedPaint
                     modifierBits[i] and mask != 0 -> activePaint
+                    special[i] -> specialKeyPaint
                     else -> keyPaint
                 }
             canvas.drawRoundRect(
