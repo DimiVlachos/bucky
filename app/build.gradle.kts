@@ -25,8 +25,8 @@ android {
         applicationId = "app.buckykeys.keyboard"
         minSdk = 26
         targetSdk = 37
-        versionCode = 5
-        versionName = "0.1.0-alpha5"
+        versionCode = 6
+        versionName = "0.1.0-alpha6"
     }
 
     signingConfigs {
