@@ -35,12 +35,15 @@ Gate 0 check due: 2026-11-02 (a cloud routine posts a summary at 17:07 Athens ti
 | 2026-10-19 (≈ half a day in) | 23 upvotes, 9 comments, 3.9K views | 0 replies, 1 🚀 | 5 stars (KaiRo-at, ShevT, Holton181, pfmiller0, litao91), 0 issues | not read yet (`ZCARD waitlist`, needs 2FA) |
 | 2026-10-20 | 25 comments (16 not by Dimitris); upvotes and views not re-read | 1 reply (netllama), 1 🚀 | 6 stars (+gsmitheidw), 0 issues | 6 signups, all on 2026-10-19 (07:04–21:19 Athens), none since |
 | 2026-10-24 | not re-read (Reddit blocks the browser extension and unauthenticated requests) | 3 replies (+ketas, +netllama's second), 1 🚀 | 9 stars (+deep12323, ctrlaltkills, JoseArdilla12), 0 issues | 9 signups: 6 on 10-19, 1 on 10-20/21, 2 since 10-22 |
+| 2026-10-28 | not re-read | quiet since 10-26; the thread moved to Bucky's Discussions #57 (ketas: about 15 comments across alpha4–6) | 20 stars (+11 since 10-24, incl. netllama), 2 issues by netllama, both fixed and closed | not read (needs 2FA) |
 
 Engaged people so far (concrete request, answer or interest, excluding Dimitris): EDGE223x, ExplanationNo5955, pfmiller0, AdImmediate2565, d333d, BillGossAU, netllama (#875), gsmitheidw1, Easy-Nothing-6735, ketas (#875, 2026-10-19 23:06 UTC, missed in earlier logs) (10). Under the strict Gate 0 wording (a concrete feature request or a beta-test offer) pfmiller0 and Easy-Nothing-6735 only show interest, which leaves 8 of the 8 needed. Objections or competitor use: vanshisnotgay, Different-Injury-884, rpheuts (built keyfold for the Samsung Fold). Counterpoint to the objection: Optimal-Savings-4505.
 
 Landing page (Vercel Web Analytics, through 2026-10-19 23:00 UTC): 28 visitors and 40 pageviews, all on 2026-10-19 and peaking 02:00–05:00 UTC, right after the posts. Referrers: none 23 (Reddit's app and GitHub often strip it), github.com 3, reddit 2, bing 1. Devices: 14 desktop, 13 mobile, 1 tablet. One visitor from GR is probably Dimitris. About 6 of 27 visitors signed up (≈ 22%), so the page converts; the limit is traffic: the r/termux post's 3.9K views produced at most about 28 visits.
 
 Landing page, by day (Vercel Web Analytics, UTC, read 2026-10-23 about 23:20 UTC): 10-19 29 visitors, 10-20 17, 10-21 9, 10-22 8, 10-23 3 (66 in total). Signups follow the same decay: 3 in the four days after the posts' first day. The 9 signups are not checked against Dimitris's own test signups.
+
+Where Gate 0 stands on 2026-10-28: stars are 20 of 25, close enough that the alpha releases may carry them over by 2026-11-02. The people condition is still met. Signups are the unknown: read `ZCARD waitlist` before the decision.
 
 Where Gate 0 stands on 2026-10-24: the people condition is met (8 of 8). Stars are 9 of 25 and signups 9 of 40, both well short. With one of the three conditions met and signups under 25, the outcome is still heading for the judgement-call case unless traffic rises before 2026-11-02.
 

@@ -2,6 +2,7 @@ package app.buckykeys.keyboard.ime.view
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.os.SystemClock
@@ -147,6 +148,10 @@ public class KeyboardView(
         pendingAction = null
     }
     private val relayout = Runnable { requestLayout() }
+    private val reapplyInsets = Runnable {
+        ViewCompat.getRootWindowInsets(this)?.let(::applyInsets)
+    }
+    private var reservedBelowPx = 0
     private val logLatency = Runnable {
         Timber.tag(LATENCY_TAG).d("touch-to-draw %d ms", lastLatencyMs)
     }
@@ -168,7 +173,7 @@ public class KeyboardView(
                     WindowInsetsCompat.Type.displayCutout(),
             )
         val gestures = insets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())
-        val bottom = maxOf(bars.bottom, gestures.bottom)
+        val bottom = keysBottomPadding(bars.bottom, gestures.bottom, reservedBelowPx)
         val sidesChanged = bars.left != paddingLeft || bars.right != paddingRight
         val bottomChanged = bottom != paddingBottom
         setPadding(bars.left, 0, bars.right, bottom)
@@ -189,6 +194,29 @@ public class KeyboardView(
                 layout.rows.size * rowHeightPx +
                 maxOf(paddingBottom, keysEdgeGapPx),
         )
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        val reserved = rootView.height - bottomInRoot()
+        if (reserved != reservedBelowPx) {
+            reservedBelowPx = reserved
+            requestReapplyInsets()
+        }
+    }
+
+    private fun bottomInRoot(): Int {
+        var y = bottom
+        var p = parent
+        while (p is View && p !== rootView) {
+            y += p.top
+            p = p.parent
+        }
+        return y
+    }
+
+    private fun requestReapplyInsets() {
+        removeCallbacks(reapplyInsets)
+        post(reapplyInsets)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -569,6 +597,13 @@ public class KeyboardView(
         ViewCompat.requestApplyInsets(this)
     }
 
+    // After a rotation the new view can attach with the old orientation's insets, and no dispatch
+    // follows once they settle.
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        requestReapplyInsets()
+    }
+
     override fun onDetachedFromWindow() {
         removeCallbacks(timerTick)
         removeCallbacks(nextLanguage)
@@ -578,6 +613,7 @@ public class KeyboardView(
         removeCallbacks(actionRequest)
         removeCallbacks(logLatency)
         removeCallbacks(relayout)
+        removeCallbacks(reapplyInsets)
         scheduledDeadline = KeyboardEngine.NO_DEADLINE
         super.onDetachedFromWindow()
     }
