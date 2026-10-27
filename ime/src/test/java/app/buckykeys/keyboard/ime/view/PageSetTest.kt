@@ -50,4 +50,44 @@ class PageSetTest {
     fun `no letters falls back to the built-in layout`() {
         assertEquals(1, PageSet(emptyList(), emptyMap()).languageCount)
     }
+
+    @Test
+    fun `an active fn shows the fn page when the layout has one`() {
+        assertEquals(
+            BuiltInLayouts.PAGE_FN,
+            fnPageTarget(BuiltInLayouts.PAGE_LETTERS, fnActive = true, hasFnPage = true),
+        )
+    }
+
+    @Test
+    fun `fn clearing returns from the fn page to the letters`() {
+        assertEquals(
+            BuiltInLayouts.PAGE_LETTERS,
+            fnPageTarget(BuiltInLayouts.PAGE_FN, fnActive = false, hasFnPage = true),
+        )
+    }
+
+    @Test
+    fun `fn does nothing without an fn page`() {
+        assertEquals(
+            BuiltInLayouts.PAGE_LETTERS,
+            fnPageTarget(BuiltInLayouts.PAGE_LETTERS, fnActive = true, hasFnPage = false),
+        )
+    }
+
+    @Test
+    fun `a locked fn keeps the fn page after a language switch`() {
+        assertEquals(
+            BuiltInLayouts.PAGE_FN,
+            fnPageTarget(BuiltInLayouts.PAGE_LETTERS, fnActive = true, hasFnPage = true),
+        )
+    }
+
+    @Test
+    fun `another page stays when fn is off`() {
+        assertEquals(
+            BuiltInLayouts.PAGE_SYMBOLS,
+            fnPageTarget(BuiltInLayouts.PAGE_SYMBOLS, fnActive = false, hasFnPage = true),
+        )
+    }
 }

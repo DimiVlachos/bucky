@@ -503,6 +503,7 @@ public class KeyboardView(
                     for (i in 0 until event.pointerCount) dispatch(event, i, PointerAction.CANCEL)
             }
             handleSwitchRequest()
+            syncFnPage()
         } catch (e: RuntimeException) {
             Timber.e(e, "onTouchEvent: engine failed, resetting")
             engine.reset()
@@ -536,6 +537,12 @@ public class KeyboardView(
         showPage(BuiltInLayouts.PAGE_LETTERS)
         scheduleTimer()
         invalidate()
+    }
+
+    private fun syncFnPage() {
+        val fnActive = engine.modifierMask and (1 shl ModifierKind.FN.ordinal) != 0
+        val target = fnPageTarget(page, fnActive, pageSet.isPage(BuiltInLayouts.PAGE_FN))
+        if (target != page) switchPage(target)
     }
 
     public fun showPage(target: String) {
@@ -602,6 +609,7 @@ public class KeyboardView(
         languageIndex = (languageIndex + step).mod(pageSet.languageCount)
         page = BuiltInLayouts.PAGE_LETTERS
         rebuildGeometryIfNeeded()
+        syncFnPage()
         languageChangeListener.onLanguageChanged(languageIndex)
         requestLayout()
         invalidate()
@@ -617,6 +625,7 @@ public class KeyboardView(
                 if (haptics) performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             }
             handleSwitchRequest()
+            syncFnPage()
         } catch (e: RuntimeException) {
             Timber.e(e, "onTimer: engine failed, resetting")
             engine.reset()
