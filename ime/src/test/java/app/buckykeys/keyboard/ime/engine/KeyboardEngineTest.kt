@@ -64,7 +64,7 @@ class KeyboardEngineTest {
 
     @Test
     fun `shift then a commits an uppercase a`() {
-        tap("Shift")
+        tap("⇧")
         tap("a")
         assertEquals(listOf(Text("A")), sink.emitted)
     }
@@ -72,7 +72,7 @@ class KeyboardEngineTest {
     @Test
     fun `ctrl and shift then up combine both metas`() {
         tap("Ctrl")
-        tap("Shift")
+        tap("⇧")
         tap("↑")
         assertEquals(listOf(Key(KeyEvent.KEYCODE_DPAD_UP, ctrl or shift)), sink.emitted)
     }
@@ -119,7 +119,7 @@ class KeyboardEngineTest {
     fun `a locked modifier and a one-shot one combine, and only the one-shot one clears`() {
         tap("Ctrl")
         tap("Ctrl")
-        tap("Shift")
+        tap("⇧")
         tap("↑")
         tap("↑")
         assertEquals(
@@ -151,10 +151,10 @@ class KeyboardEngineTest {
 
     @Test
     fun `a held modifier applies to every key tapped while it is down`() {
-        down("Shift", pointer = 0)
+        down("⇧", pointer = 0)
         tap("a", pointer = 1)
         tap("b", pointer = 1)
-        up("Shift", pointer = 0)
+        up("⇧", pointer = 0)
         assertEquals(listOf(Text("A"), Text("B")), sink.emitted)
     }
 
@@ -398,7 +398,7 @@ class KeyboardEngineTest {
         down("←", pointer = 0)
         tick(400)
         now = 420
-        down("Shift", pointer = 1)
+        down("⇧", pointer = 1)
         tick(450)
         val left = KeyEvent.KEYCODE_DPAD_LEFT
         assertEquals(listOf(Key(left, 0), Key(left, shift)), sink.emitted)
@@ -652,7 +652,7 @@ class KeyboardEngineTest {
     @Test
     fun `shift then the tonos key gives dialytika for the next letter only`() {
         useGreek()
-        tap("Shift")
+        tap("⇧")
         tap("΄")
         tap("ι")
         assertEquals(listOf(Text("ϊ")), sink.emitted)
@@ -662,7 +662,7 @@ class KeyboardEngineTest {
     fun `shift after the tonos gives the accented capital`() {
         useGreek()
         tap("΄")
-        tap("Shift")
+        tap("⇧")
         tap("α")
         assertEquals(listOf(Text("Ά")), sink.emitted)
     }
@@ -758,7 +758,7 @@ class KeyboardEngineTest {
     fun `locked and one-shot modifiers survive a geometry change`() {
         tap("Ctrl")
         tap("Ctrl")
-        tap("Shift")
+        tap("⇧")
         swapGeometry(KeyboardGeometry(FallbackLayout.pcFullEnUs, 720, 100))
         tap("↑")
         assertEquals(listOf(Key(KeyEvent.KEYCODE_DPAD_UP, ctrl or shift)), sink.emitted)
@@ -873,8 +873,8 @@ class KeyboardEngineTest {
     @Test
     fun `with shift locked the tonos still gives the accented capital`() {
         useGreek()
-        tap("Shift")
-        tap("Shift")
+        tap("⇧")
+        tap("⇧")
         tap("΄")
         tap("α")
         assertEquals(listOf(Text("Ά")), sink.emitted)
@@ -883,9 +883,9 @@ class KeyboardEngineTest {
     @Test
     fun `holding shift on the tonos key gives dialytika`() {
         useGreek()
-        down("Shift", pointer = 1)
+        down("⇧", pointer = 1)
         tap("΄", pointer = 0)
-        up("Shift", pointer = 1)
+        up("⇧", pointer = 1)
         tap("ι")
         assertEquals(listOf(Text("ϊ")), sink.emitted)
     }
@@ -894,9 +894,9 @@ class KeyboardEngineTest {
     fun `the dead key shows its shifted mark for one-shot shift but not locked shift`() {
         useGreek()
         assertFalse(engine.deadKeyShifted)
-        tap("Shift")
+        tap("⇧")
         assertTrue(engine.deadKeyShifted)
-        tap("Shift")
+        tap("⇧")
         assertFalse(engine.deadKeyShifted)
     }
 
@@ -1000,7 +1000,7 @@ class KeyboardEngineTest {
     @Test
     fun `a swipe keeps a one-shot shift for the next key`() {
         engine.languageSwipe = true
-        tap("Shift")
+        tap("⇧")
         swipeSpace(by = 100f)
         tap("c")
         assertEquals(listOf(Text("C")), sink.emitted)
@@ -1116,7 +1116,7 @@ class KeyboardEngineTest {
     @Test
     fun `tapping shift while auto shift is on turns it off`() {
         engine.setAutoShift(true)
-        tap("Shift")
+        tap("⇧")
         tap("c")
         assertEquals(listOf(Text("c")), sink.emitted)
         assertEquals(0, engine.lockedMask)
@@ -1285,7 +1285,7 @@ class KeyboardEngineTest {
             KeySpec(KeyDef.Char(" ", " "), ""),
             KeySpec(KeyDef.Special(KeyCode.BACKSPACE), "⌫"),
             KeySpec(KeyDef.Special(KeyCode.ENTER), "Enter"),
-            KeySpec(KeyDef.Modifier(ModifierKind.SHIFT), "Shift"),
+            KeySpec(KeyDef.Modifier(ModifierKind.SHIFT), "⇧"),
             KeySpec(KeyDef.Modifier(ModifierKind.CTRL), "Ctrl"),
             KeySpec(KeyDef.LayoutSwitch("@language"), "🌐"),
         )

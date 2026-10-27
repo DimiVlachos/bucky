@@ -316,6 +316,14 @@ class LayoutParserTest {
     }
 
     @Test
+    fun `shift and tab default to their symbols`() {
+        assertEquals(
+            listOf("⇧", "⇥"),
+            parseKeys("""{ "key": "SHIFT" }""", """{ "key": "TAB" }""").map { it.label },
+        )
+    }
+
+    @Test
     fun `the fn modifier parses`() {
         assertEquals(
             KeySpec(KeyDef.Modifier(ModifierKind.FN), "Fn"),
