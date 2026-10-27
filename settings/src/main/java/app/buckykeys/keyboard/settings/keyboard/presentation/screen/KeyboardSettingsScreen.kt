@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import app.buckykeys.keyboard.settings.R
 import app.buckykeys.keyboard.settings.core.presentation.theme.BuckyTheme
 import app.buckykeys.keyboard.settings.keyboard.domain.model.ExtraRowPreview
+import app.buckykeys.keyboard.settings.keyboard.domain.model.FullLayoutStyle
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardLanguage
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
 import app.buckykeys.keyboard.settings.keyboard.domain.model.OutsideTerminals
@@ -40,6 +41,7 @@ internal fun KeyboardSettingsScreen(
     extraRowDraft: ExtraRowDraftState,
     extraRowPreview: ExtraRowPreview,
     onExtraRowSave: () -> Unit,
+    onFullLayoutStyleChange: (FullLayoutStyle) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(BuckyTheme.spacing.medium)) {
         SectionTitle(stringResource(R.string.settings_languages))
@@ -62,6 +64,17 @@ internal fun KeyboardSettingsScreen(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        SectionTitle(stringResource(R.string.settings_full_style))
+        Column(modifier = Modifier.selectableGroup()) {
+            FullLayoutStyle.entries.forEach { style ->
+                RadioRow(
+                    text = stringResource(style.labelRes()),
+                    description = null,
+                    selected = settings.fullLayoutStyle == style,
+                    onClick = { onFullLayoutStyleChange(style) },
+                )
+            }
+        }
         SectionTitle(stringResource(R.string.settings_size))
         SettingSlider(
             text = stringResource(R.string.settings_row_height),
@@ -152,6 +165,12 @@ private fun OutsideTerminals.labelRes(): Int =
         OutsideTerminals.OTHER_KEYBOARD -> R.string.settings_outside_other
     }
 
+private fun FullLayoutStyle.labelRes(): Int =
+    when (this) {
+        FullLayoutStyle.CENTRED -> R.string.settings_full_style_centred
+        FullLayoutStyle.HK_CLASSIC -> R.string.settings_full_style_classic
+    }
+
 private fun KeyboardLanguage.labelRes(): Int =
     when (this) {
         KeyboardLanguage.EN_US -> R.string.settings_language_en_us
@@ -177,6 +196,7 @@ private fun KeyboardSettingsScreenPreview() {
             {},
             ExtraRowDraftState(TextFieldState()),
             ExtraRowPreview(emptyList(), emptyList(), overLimit = false, limit = 15),
+            {},
             {},
         )
     }

@@ -1,6 +1,7 @@
 package app.buckykeys.keyboard.settings.keyboard.data.serializer
 
 import androidx.datastore.core.CorruptionException
+import app.buckykeys.keyboard.settings.keyboard.domain.model.FullLayoutStyle
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardLanguage
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
 import app.buckykeys.keyboard.settings.keyboard.domain.model.OutsideTerminals
@@ -152,5 +153,26 @@ class KeyboardSettingsSerializerTest {
     @Test
     fun `the default value is the one it was given`() {
         assertEquals(defaults, serializer.defaultValue)
+    }
+
+    @Test
+    fun `settings saved before the layout style load as centred`() {
+        assertEquals(FullLayoutStyle.CENTRED, read("""{ "rowHeightDp": 40 }""").fullLayoutStyle)
+    }
+
+    @Test
+    fun `an unknown layout style loads as centred`() {
+        assertEquals(
+            FullLayoutStyle.CENTRED,
+            read("""{ "fullLayoutStyle": "WHATEVER" }""").fullLayoutStyle,
+        )
+    }
+
+    @Test
+    fun `the classic style round trips`() {
+        val settings = defaults.copy(fullLayoutStyle = FullLayoutStyle.HK_CLASSIC)
+        val out = ByteArrayOutputStream()
+        runBlocking { serializer.writeTo(settings, out) }
+        assertEquals(settings, read(out.toByteArray().decodeToString()))
     }
 }

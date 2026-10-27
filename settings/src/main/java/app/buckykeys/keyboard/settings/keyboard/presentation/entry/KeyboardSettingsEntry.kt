@@ -48,6 +48,7 @@ internal fun KeyboardSettingsEntry(
             onExtraRowSave = {
                 if (extraRowPreview.valid) saveExtraRow(viewModel, extraRowDraft, focusManager)
             },
+            onFullLayoutStyleChange = viewModel::onFullLayoutStyleChange,
         )
     }
 }

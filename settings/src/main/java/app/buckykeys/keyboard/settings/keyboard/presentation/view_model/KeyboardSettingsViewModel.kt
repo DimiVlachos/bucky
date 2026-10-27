@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.buckykeys.keyboard.settings.keyboard.domain.interpreter.ExtraRowInterpreter
 import app.buckykeys.keyboard.settings.keyboard.domain.model.ExtraRowPreview
+import app.buckykeys.keyboard.settings.keyboard.domain.model.FullLayoutStyle
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardLanguage
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
 import app.buckykeys.keyboard.settings.keyboard.domain.model.OutsideTerminals
@@ -69,6 +70,10 @@ constructor(
 
     fun onOutsideTerminalsChange(choice: OutsideTerminals) {
         update { it.copy(outsideTerminals = choice) }
+    }
+
+    fun onFullLayoutStyleChange(style: FullLayoutStyle) {
+        update { it.copy(fullLayoutStyle = style) }
     }
 
     fun onAutoCapitalizeChange(enabled: Boolean) {
