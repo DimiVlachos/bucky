@@ -1,6 +1,7 @@
 <resources>
     <color name="keyboard_background">#FFECEFF1</color>
     <color name="key_background">#FFFFFFFF</color>
+    <color name="key_special_background">#FFCFD6DB</color>
     <color name="key_pressed">#FFB0BEC5</color>
     <color name="key_modifier_active">#FF90CAF9</color>
     <color name="key_modifier_locked">#FF42A5F5</color>
