@@ -21,6 +21,7 @@ import org.junit.Test
 class KeyboardEngineTest {
 
     private val ctrl = KeyEvent.META_CTRL_ON or KeyEvent.META_CTRL_LEFT_ON
+    private val fnBit = 1 shl ModifierKind.FN.ordinal
     private val shift = KeyEvent.META_SHIFT_ON or KeyEvent.META_SHIFT_LEFT_ON
     private val ctrlBit = 1 shl ModifierKind.CTRL.ordinal
 
@@ -1271,6 +1272,52 @@ class KeyboardEngineTest {
         assertEquals(KeyEvent.KEYCODE_BREAK, KeyCodes.forSpecial(KeyCode.BREAK))
         assertEquals(KeyEvent.KEYCODE_NUM_LOCK, KeyCodes.forSpecial(KeyCode.NUM_LOCK))
         assertEquals(KeyEvent.KEYCODE_DPAD_CENTER, KeyCodes.forSpecial(KeyCode.DPAD_CENTER))
+    }
+
+    @Test
+    fun `a held fn stays held across a swap and clears after a chord on the new page`() {
+        useRow(KeySpec(KeyDef.Modifier(ModifierKind.FN), "Fn"), char("a"))
+        down("Fn", pointer = 0)
+        val fnPage =
+            KeyboardGeometry(
+                Layout(
+                    "fn",
+                    "fn",
+                    listOf(Row(listOf(KeySpec(KeyDef.Modifier(ModifierKind.FN), "Fn"), char("7")))),
+                ),
+                400,
+                120,
+            )
+        engine.setGeometry(fnPage, keepPointers = true)
+        geometry = fnPage
+        assertEquals(fnBit, engine.modifierMask and fnBit)
+        tap("7", pointer = 1)
+        up("Fn", pointer = 0)
+        assertEquals(listOf(Text("7")), sink.emitted)
+        assertEquals(0, engine.modifierMask and fnBit)
+    }
+
+    @Test
+    fun `a held fn is dropped when the new geometry has something else under the finger`() {
+        useRow(KeySpec(KeyDef.Modifier(ModifierKind.FN), "Fn"), char("a"))
+        down("Fn", pointer = 0)
+        val other =
+            KeyboardGeometry(Layout("o", "o", listOf(Row(listOf(char("q"), char("a"))))), 400, 120)
+        engine.setGeometry(other, keepPointers = true)
+        geometry = other
+        assertEquals(0, engine.modifierMask and fnBit)
+    }
+
+    @Test
+    fun `a pending dead mark is dropped when the new geometry has no dead key`() {
+        useRow(KeySpec(KeyDef.Dead("ˇ", "~"), "ˇ"), char("a"))
+        tap("ˇ")
+        val plain =
+            KeyboardGeometry(Layout("p", "p", listOf(Row(listOf(char("q"), char("a"))))), 400, 120)
+        engine.setGeometry(plain, keepPointers = true)
+        geometry = plain
+        tap("a")
+        assertEquals(listOf(Text("a")), sink.emitted)
     }
 
     private fun swapGeometry(next: KeyboardGeometry) {

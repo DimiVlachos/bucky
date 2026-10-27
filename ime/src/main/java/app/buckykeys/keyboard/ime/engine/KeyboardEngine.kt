@@ -22,6 +22,7 @@ internal class KeyboardEngine(
     private val pointerX = FloatArray(MAX_POINTERS)
     private val pointerY = FloatArray(MAX_POINTERS)
     private val keptKeys = IntArray(MAX_POINTERS)
+    private val keptHolds = BooleanArray(MAX_POINTERS)
     private var timerPointer = NO_POINTER
     private var timerAt = NO_DEADLINE
     private var timerRepeats = false
@@ -75,16 +76,27 @@ internal class KeyboardEngine(
         val previous = this.geometry
         for (p in 0 until MAX_POINTERS) {
             val key = pointerKeys[p]
-            val keep =
-                keepPointers &&
-                    key != NO_KEY &&
-                    !pointerConsumed[p] &&
-                    previous.spec(key).def !is KeyDef.Modifier
-            keptKeys[p] = if (keep) geometry.keyAt(pointerX[p], pointerY[p]) else NO_KEY
+            val target =
+                if (keepPointers && key != NO_KEY && !pointerConsumed[p]) {
+                    geometry.keyAt(pointerX[p], pointerY[p])
+                } else {
+                    NO_KEY
+                }
+            val def = if (key == NO_KEY) null else previous.spec(key).def
+            keptHolds[p] =
+                def is KeyDef.Modifier && target != NO_KEY && geometry.spec(target).def == def
+            keptKeys[p] = if (def is KeyDef.Modifier && !keptHolds[p]) NO_KEY else target
         }
+        val chorded = chordedMask
         this.geometry = geometry
         releaseAllPointers()
-        for (p in 0 until MAX_POINTERS) pointerKeys[p] = keptKeys[p]
+        for (p in 0 until MAX_POINTERS) {
+            pointerKeys[p] = keptKeys[p]
+            if (!keptHolds[p]) continue
+            val held = geometry.spec(keptKeys[p]).def
+            if (held is KeyDef.Modifier) startHold(held.kind)
+        }
+        chordedMask = chorded and heldMask
         deadKey = findDeadKey(deadMark)
         if (deadKey == NO_DEAD_KEY) deadMark = null
     }
