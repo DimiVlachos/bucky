@@ -67,7 +67,8 @@
     },
     {
       "keys": [
-        { "key": "ESC", "width": 2.5 },
+        { "key": "ESC", "width": 1.5 },
+        { "switchTo": "@settings" },
         { "key": "ALT" },
         { "key": "META" },
         { "chars": [" ", " "], "width": 4.5 },

@@ -28,6 +28,7 @@ public object BuiltInLayouts {
     public const val PAGE_SYMBOLS_MORE: String = "@page:symbols-more"
     public const val PAGE_FN: String = "@page:fn"
     public const val OTHER_KEYBOARD: String = "@keyboard"
+    public const val SETTINGS: String = "@settings"
     public const val FULL_LAYOUT: String = "@full"
 
     public fun load(assets: AssetManager, id: String): Layout = loadOrFallback { read(assets, id) }

@@ -19,7 +19,7 @@ HK's real layout is not centred: its letters sit about one key left of the middl
 
 ## Non-goals
 
-- HK's options key (`key_f1`, -103, the gear-like key right of Esc and top-left on the Fn page). Left out (my call, already announced to ketas in #57).
+- HK's options key on the Fn page's top-left slot (`key_f1`, -103). It is `` ` ``~ there instead. The main-layer options key came back as ⚙ (see Grid).
 - Any change to the compact layout, its pages or the per-app profiles.
 - A per-language style choice. One switch covers all languages.
 - The layout editor (PLAN v1.1).
@@ -42,10 +42,10 @@ HK's real layout is not centred: its letters sit about one key left of the middl
 | A | Ctrl 1.5, a–', Enter 1.5 |
 | Shift (EN, EL) | Shift 2, z–/, ↑, Shift |
 | Shift (ET) | Shift, `<>`, z–m, `,` `.` `-`, ↑, Shift |
-| Bottom | Esc 2.5, Alt, ❖, space 4.5, Fn, ○, ← ↓ → |
+| Bottom | Esc 1.5, ⚙, Alt, ❖, space 4.5, Fn, ○, ← ↓ → |
 
 - HK shows the ISO `<>` key only for languages that have one (its Finnish keymap does, US and Greek don't). When the key is empty, Shift takes its width. Estonian follows the Finnish case.
-- The bottom row loses HK's 1u options key. Esc grows from 1.5 to 2.5, so Alt, ❖, space, Fn, ○ and the arrows keep their exact HK positions (my call).
+- HK's 1u options key comes back as ⚙ (`switchTo: "@settings"`), which opens Bucky's settings, so Esc keeps HK's 1.5 width. The first build left it out and widened Esc to 2.5; ketas found that Esc "massive" (Dimitris, 2026-10-27).
 - No Home, End or Del on the main layer. They're on the Fn page, as in HK.
 - The right Shift behaves exactly like the left one.
 

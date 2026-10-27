@@ -1,5 +1,6 @@
 package app.buckykeys.keyboard
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.inputmethodservice.InputMethodService
 import android.inputmethodservice.InputMethodService.Insets
@@ -29,6 +30,7 @@ import app.buckykeys.keyboard.profile.fullPagesFor
 import app.buckykeys.keyboard.profile.optionalLayoutIds
 import app.buckykeys.keyboard.profile.profileFor
 import app.buckykeys.keyboard.profile.startPageFor
+import app.buckykeys.keyboard.settings.SettingsActivity
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
 import app.buckykeys.keyboard.settings.keyboard.domain.model.OutsideTerminals
 import app.buckykeys.keyboard.settings.keyboard.domain.repository.KeyboardSettingsRepository
@@ -90,6 +92,7 @@ class BuckyImeService : InputMethodService() {
     private val actions = KeyboardActions { target ->
         when (target) {
             BuiltInLayouts.OTHER_KEYBOARD -> handOff()
+            BuiltInLayouts.SETTINGS -> openSettings()
             BuiltInLayouts.FULL_LAYOUT -> {
                 forcedFull = true
                 applyProfile(Profile.FULL)
@@ -188,6 +191,13 @@ class BuckyImeService : InputMethodService() {
         serviceScope.cancel()
         keyboardView = null
         super.onDestroy()
+    }
+
+    private fun openSettings() {
+        requestHideSelf(0)
+        startActivity(
+            Intent(this, SettingsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
     }
 
     private fun applyProfile(next: Profile) {
