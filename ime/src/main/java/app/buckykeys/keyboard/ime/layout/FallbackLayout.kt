@@ -130,8 +130,13 @@ public object FallbackLayout {
 
     private fun numberRow(vararg pairs: String): List<KeySpec> = pairs.mapIndexed { index, pair ->
         val fKey = KeyDef.Special(KeyCode.entries[KeyCode.F1.ordinal + index])
+        val shifted = pair.substring(1, 2)
         KeySpec(
-            KeyDef.Char(pair.substring(0, 1), pair.substring(1, 2), listOf(fKey)),
+            KeyDef.Char(
+                pair.substring(0, 1),
+                shifted,
+                listOf(KeyDef.Char(shifted, shifted.uppercase()), fKey),
+            ),
             pair.substring(0, 1),
             fn = fKey,
         )

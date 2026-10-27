@@ -453,16 +453,24 @@ class KeyboardEngineTest {
     }
 
     @Test
-    fun `holding 1 opens its alternates and lifting picks f1`() {
+    fun `holding 1 opens its alternates and lifting picks the shifted symbol`() {
         down("1", pointer = 0)
         tick(300)
         assertTrue(sink.emitted.isEmpty())
         assertEquals(indexOf("1"), engine.popup.keyIndex)
-        assertEquals(1, engine.popup.count)
+        assertEquals(2, engine.popup.count)
         assertEquals(0, engine.popup.selected)
         up("1", pointer = 0)
-        assertEquals(listOf(Key(KeyEvent.KEYCODE_F1, 0)), sink.emitted)
+        assertEquals(listOf(Text("!")), sink.emitted)
         assertFalse(engine.popup.isOpen)
+    }
+
+    @Test
+    fun `holding 1 and sliding to the next cell picks f1`() {
+        down("1", pointer = 0)
+        tick(300)
+        slideToAlternate(1)
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_F1, 0)), sink.emitted)
     }
 
     @Test
@@ -573,7 +581,7 @@ class KeyboardEngineTest {
         tap("Ctrl")
         down("1", pointer = 0)
         tick(300)
-        up("1", pointer = 0)
+        slideToAlternate(1)
         assertEquals(listOf(Key(KeyEvent.KEYCODE_F1, ctrl)), sink.emitted)
         assertEquals(0, engine.modifierMask)
     }
@@ -1422,6 +1430,15 @@ class KeyboardEngineTest {
     private fun move(label: String, pointer: Int) {
         val (x, y) = centre(label)
         engine.onPointer(pointer, x, y, PointerAction.MOVE, now, sink)
+    }
+
+    private fun slideToAlternate(alternate: Int) {
+        val popup = engine.popup
+        val cell = (0 until popup.count).first { popup.alternateAt(it) == alternate }
+        val x = popup.left + (cell + 0.5f) * popup.cellWidth
+        val y = popup.top + popup.cellHeight / 2f
+        engine.onPointer(0, x, y, PointerAction.MOVE, now, sink)
+        engine.onPointer(0, x, y, PointerAction.UP, now, sink)
     }
 
     private fun tick(time: Long) {

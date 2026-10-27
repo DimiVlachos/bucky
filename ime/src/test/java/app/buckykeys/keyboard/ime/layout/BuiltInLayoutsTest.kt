@@ -136,10 +136,13 @@ class BuiltInLayoutsTest {
     }
 
     @Test
-    fun `every estonian altgr symbol is the first long press of its key`() {
+    fun `every estonian altgr symbol is the first long press after the shifted symbol`() {
         val firstAlternates =
-            estonianChars().values.mapNotNull {
-                (it.alternates.firstOrNull() as? KeyDef.Char)?.primary
+            estonianChars().values.mapNotNull { key ->
+                key.alternates
+                    .filterIsInstance<KeyDef.Char>()
+                    .firstOrNull { it.primary != key.shifted }
+                    ?.primary
             }
         listOf("@", "£", "$", "€", "{", "[", "]", "}", "\\", "|", "š", "ž").forEach {
             assertEquals(it, true, it in firstAlternates)
@@ -179,10 +182,13 @@ class BuiltInLayoutsTest {
     }
 
     @Test
-    fun `every finnish altgr symbol is the first long press of its key`() {
+    fun `every finnish altgr symbol is the first long press after the shifted symbol`() {
         val firstAlternates =
-            finnishChars().values.mapNotNull {
-                (it.alternates.firstOrNull() as? KeyDef.Char)?.primary
+            finnishChars().values.mapNotNull { key ->
+                key.alternates
+                    .filterIsInstance<KeyDef.Char>()
+                    .firstOrNull { it.primary != key.shifted }
+                    ?.primary
             }
         listOf("@", "£", "$", "€", "{", "[", "]", "}", "\\", "|", "~").forEach {
             assertEquals(it, true, it in firstAlternates)
