@@ -415,7 +415,7 @@ internal class KeyboardEngine(
 
     private fun pressDead(key: Int, def: KeyDef.Dead, sink: InputSink) {
         val latin = def.latin
-        if (!latin.isNullOrEmpty() && (isActive(ModifierKind.CTRL) || isActive(ModifierKind.ALT))) {
+        if (!latin.isNullOrEmpty() && sendsKeyChord()) {
             val keyCode = KeyCodes.forChar(latin[0])
             if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
                 clearDead()
@@ -441,7 +441,7 @@ internal class KeyboardEngine(
 
     private fun emitChar(def: KeyDef.Char, sink: InputSink, forceShift: Boolean) {
         val shifted = forceShift || userShift() || (autoShift && isLetter(def.primary))
-        if (isActive(ModifierKind.CTRL) || isActive(ModifierKind.ALT)) {
+        if (sendsKeyChord()) {
             val keyCode = KeyCodes.forChar((def.latin ?: def.primary)[0])
             if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
                 clearDead()
@@ -469,12 +469,17 @@ internal class KeyboardEngine(
             meta = meta or KeyEvent.META_CTRL_ON or KeyEvent.META_CTRL_LEFT_ON
         if (isActive(ModifierKind.ALT))
             meta = meta or KeyEvent.META_ALT_ON or KeyEvent.META_ALT_LEFT_ON
+        if (isActive(ModifierKind.META))
+            meta = meta or KeyEvent.META_META_ON or KeyEvent.META_META_LEFT_ON
         if (forceShift || userShift())
             meta = meta or KeyEvent.META_SHIFT_ON or KeyEvent.META_SHIFT_LEFT_ON
         return meta
     }
 
     private fun isActive(kind: ModifierKind): Boolean = modifierMask and bit(kind) != 0
+
+    private fun sendsKeyChord(): Boolean =
+        isActive(ModifierKind.CTRL) || isActive(ModifierKind.ALT) || isActive(ModifierKind.META)
 
     private fun isLetter(text: String): Boolean =
         text.isNotEmpty() && Character.isLetter(text.codePointAt(0))

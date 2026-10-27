@@ -53,5 +53,10 @@ internal object KeyCodes {
             KeyCode.F10,
             KeyCode.F11,
             KeyCode.F12 -> KeyEvent.KEYCODE_F1 + (code.ordinal - KeyCode.F1.ordinal)
+            KeyCode.SYSRQ -> KeyEvent.KEYCODE_SYSRQ
+            KeyCode.SCROLL_LOCK -> KeyEvent.KEYCODE_SCROLL_LOCK
+            KeyCode.BREAK -> KeyEvent.KEYCODE_BREAK
+            KeyCode.NUM_LOCK -> KeyEvent.KEYCODE_NUM_LOCK
+            KeyCode.DPAD_CENTER -> KeyEvent.KEYCODE_DPAD_CENTER
         }
 }

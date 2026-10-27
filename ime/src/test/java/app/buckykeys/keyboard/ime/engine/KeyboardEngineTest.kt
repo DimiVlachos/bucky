@@ -1245,6 +1245,34 @@ class KeyboardEngineTest {
         engine.onPointer(0, x + by, y, PointerAction.UP, now, sink)
     }
 
+    @Test
+    fun `meta then a sends a with the meta state`() {
+        useRow(KeySpec(KeyDef.Modifier(ModifierKind.META), "❖"), char("a"))
+        tap("❖")
+        tap("a")
+        assertEquals(
+            listOf(Key(KeyEvent.KEYCODE_A, KeyEvent.META_META_ON or KeyEvent.META_META_LEFT_ON)),
+            sink.emitted,
+        )
+    }
+
+    @Test
+    fun `meta locks with a double tap like ctrl`() {
+        useRow(KeySpec(KeyDef.Modifier(ModifierKind.META), "❖"), char("a"))
+        tap("❖")
+        tap("❖")
+        assertEquals(1 shl ModifierKind.META.ordinal, engine.lockedMask)
+    }
+
+    @Test
+    fun `the new specials send their android key codes`() {
+        assertEquals(KeyEvent.KEYCODE_SYSRQ, KeyCodes.forSpecial(KeyCode.SYSRQ))
+        assertEquals(KeyEvent.KEYCODE_SCROLL_LOCK, KeyCodes.forSpecial(KeyCode.SCROLL_LOCK))
+        assertEquals(KeyEvent.KEYCODE_BREAK, KeyCodes.forSpecial(KeyCode.BREAK))
+        assertEquals(KeyEvent.KEYCODE_NUM_LOCK, KeyCodes.forSpecial(KeyCode.NUM_LOCK))
+        assertEquals(KeyEvent.KEYCODE_DPAD_CENTER, KeyCodes.forSpecial(KeyCode.DPAD_CENTER))
+    }
+
     private fun swapGeometry(next: KeyboardGeometry) {
         geometry = next
         engine.setGeometry(next)

@@ -259,4 +259,21 @@ class ExtraRowsTest {
         assertEquals(listOf("Esc", "/", "-", "⇥", "Ctrl"), parsed.keys.map { it.label })
         assertEquals(emptyList<String>(), parsed.unknown)
     }
+
+    @Test
+    fun `the user row takes meta and the new specials by name`() {
+        val parsed = parseExtraRow(listOf("META SYSRQ SCROLL_LOCK BREAK NUM_LOCK DPAD_CENTER"))
+        assertEquals(emptyList<String>(), parsed.unknown)
+        assertEquals(
+            listOf(
+                KeyDef.Modifier(ModifierKind.META),
+                KeyDef.Special(KeyCode.SYSRQ),
+                KeyDef.Special(KeyCode.SCROLL_LOCK),
+                KeyDef.Special(KeyCode.BREAK),
+                KeyDef.Special(KeyCode.NUM_LOCK),
+                KeyDef.Special(KeyCode.DPAD_CENTER),
+            ),
+            parsed.keys.map { it.def },
+        )
+    }
 }

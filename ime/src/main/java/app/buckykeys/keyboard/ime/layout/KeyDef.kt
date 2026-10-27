@@ -47,6 +47,11 @@ public enum class KeyCode {
     F10,
     F11,
     F12,
+    SYSRQ,
+    SCROLL_LOCK,
+    BREAK,
+    NUM_LOCK,
+    DPAD_CENTER,
 }
 
 public enum class ModifierKind {
@@ -54,4 +59,5 @@ public enum class ModifierKind {
     ALT,
     SHIFT,
     FN,
+    META,
 }
