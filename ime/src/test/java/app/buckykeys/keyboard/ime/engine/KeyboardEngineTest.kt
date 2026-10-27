@@ -221,11 +221,31 @@ class KeyboardEngineTest {
     fun `lifting on a different key than the one pressed emits nothing`() {
         tap("Ctrl")
         val (ax, ay) = centre("a")
-        val (sx, sy) = centre("s")
+        val (dx, dy) = centre("d")
         engine.onPointer(0, ax, ay, PointerAction.DOWN, now, sink)
-        engine.onPointer(0, sx, sy, PointerAction.UP, now, sink)
+        engine.onPointer(0, dx, dy, PointerAction.UP, now, sink)
         assertTrue(sink.emitted.isEmpty())
         assertEquals(1 shl ModifierKind.CTRL.ordinal, engine.modifierMask)
+    }
+
+    @Test
+    fun `a tap that slides a little onto the next key still types the pressed key`() {
+        val i = indexOf("g") * 4
+        val r = geometry.rects
+        val y = (r[i + 1] + r[i + 3]) / 2f
+        val slip = (r[i + 2] - r[i]) / 4f
+        engine.onPointer(0, r[i + 2] - 1f, y, PointerAction.DOWN, now, sink)
+        engine.onPointer(0, r[i + 2] + slip, y, PointerAction.MOVE, now, sink)
+        engine.onPointer(0, r[i + 2] + slip, y, PointerAction.UP, now, sink)
+        assertEquals(listOf(Text("g")), sink.emitted)
+    }
+
+    @Test
+    fun `a slide to the middle of the next key types nothing`() {
+        down("g", pointer = 0)
+        move("h", pointer = 0)
+        up("h", pointer = 0)
+        assertTrue(sink.emitted.isEmpty())
     }
 
     @Test
