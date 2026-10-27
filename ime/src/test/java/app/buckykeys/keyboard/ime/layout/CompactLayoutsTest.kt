@@ -15,6 +15,7 @@ class CompactLayoutsTest {
                 BuiltInLayouts.COMPACT_EN_US,
                 BuiltInLayouts.COMPACT_EL,
                 BuiltInLayouts.COMPACT_ET,
+                BuiltInLayouts.COMPACT_FI,
                 BuiltInLayouts.COMPACT_SYMBOLS,
                 BuiltInLayouts.COMPACT_SYMBOLS_MORE,
             )
@@ -30,7 +31,7 @@ class CompactLayoutsTest {
 
     @Test
     fun `every compact page parses`() {
-        assertEquals(5, pages.size)
+        assertEquals(6, pages.size)
     }
 
     @Test
