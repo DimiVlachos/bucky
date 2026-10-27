@@ -6,17 +6,17 @@
     {
       "keys": [
         { "dead": ["ˇ", "~"], "latin": "`", "width": 0.64 },
-        { "chars": ["1", "!"], "longPress": ["F1"] },
-        { "chars": ["2", "\""], "longPress": ["@", "F2"] },
-        { "chars": ["3", "#"], "longPress": ["£", "F3"] },
-        { "chars": ["4", "¤"], "longPress": ["$", "F4"] },
-        { "chars": ["5", "%"], "longPress": ["€", "F5"] },
-        { "chars": ["6", "&"], "longPress": ["F6"] },
-        { "chars": ["7", "/"], "longPress": ["{", "F7"] },
-        { "chars": ["8", "("], "longPress": ["[", "F8"] },
-        { "chars": ["9", ")"], "longPress": ["]", "F9"] },
-        { "chars": ["0", "="], "longPress": ["}", "F10"] },
-        { "chars": ["+", "?"], "longPress": ["\\", "F11"] },
+        { "chars": ["1", "!"], "longPress": ["!", "F1"] },
+        { "chars": ["2", "\""], "longPress": ["\"", "@", "F2"] },
+        { "chars": ["3", "#"], "longPress": ["#", "£", "F3"] },
+        { "chars": ["4", "¤"], "longPress": ["¤", "$", "F4"] },
+        { "chars": ["5", "%"], "longPress": ["%", "€", "F5"] },
+        { "chars": ["6", "&"], "longPress": ["&", "F6"] },
+        { "chars": ["7", "/"], "longPress": ["/", "{", "F7"] },
+        { "chars": ["8", "("], "longPress": ["(", "[", "F8"] },
+        { "chars": ["9", ")"], "longPress": [")", "]", "F9"] },
+        { "chars": ["0", "="], "longPress": ["=", "}", "F10"] },
+        { "chars": ["+", "?"], "longPress": ["?", "\\", "F11"] },
         { "dead": ["´", "`"], "latin": "=" },
         { "key": "BACKSPACE", "width": 1.36 }
       ]
@@ -36,7 +36,7 @@
         { "chars": ["p", "P"] },
         { "chars": ["ü", "Ü"], "latin": "[" },
         { "chars": ["õ", "Õ"], "latin": "]", "longPress": ["§"] },
-        { "chars": ["'", "*"], "longPress": ["½"] }
+        { "chars": ["'", "*"], "longPress": ["*", "½"] }
       ]
     },
     {
@@ -59,7 +59,7 @@
     {
       "keys": [
         { "key": "SHIFT" },
-        { "chars": ["<", ">"], "longPress": ["|", ">"] },
+        { "chars": ["<", ">"], "longPress": [">", "|"] },
         { "chars": ["z", "Z"], "longPress": ["ž", "Z", "ź", "ż"] },
         { "chars": ["x", "X"] },
         { "chars": ["c", "C"], "longPress": ["C", "ç", "ć", "č"] },

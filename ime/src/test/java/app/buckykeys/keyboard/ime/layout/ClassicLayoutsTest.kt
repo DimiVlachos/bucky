@@ -35,6 +35,9 @@ class ClassicLayoutsTest {
         it is KeyDef.Char && it.primary == primary
     }
 
+    private fun KeyDef.isShiftedOf(key: KeyDef.Char): Boolean =
+        this is KeyDef.Char && primary == key.shifted && key.shifted != key.primary
+
     private fun special(code: KeyCode): (KeyDef) -> Boolean = { it == KeyDef.Special(code) }
 
     private fun modifier(kind: ModifierKind): (KeyDef) -> Boolean = { it == KeyDef.Modifier(kind) }
@@ -131,10 +134,37 @@ class ClassicLayoutsTest {
                     .mapNotNull { it.def as? KeyDef.Char }
                     .filter { it.primary in centred }
                     .forEach { key ->
+                        val centredKey = centred.getValue(key.primary)
                         assertEquals(
                             "${classic.id} ${key.primary}",
-                            centred.getValue(key.primary).alternates,
-                            key.alternates,
+                            centredKey.alternates.filterNot { it.isShiftedOf(centredKey) },
+                            key.alternates.filterNot { it.isShiftedOf(key) },
+                        )
+                    }
+            }
+    }
+
+    @Test
+    fun `every full layout's symbol popups start with the shifted symbol`() {
+        listOf(
+                BuiltInLayouts.PC_FULL_EN_US,
+                BuiltInLayouts.PC_FULL_EL,
+                BuiltInLayouts.PC_FULL_ET,
+                BuiltInLayouts.PC_FULL_FI,
+            )
+            .map(::load)
+            .plus(listOf(english, greek, estonian, finnish))
+            .forEach { layout ->
+                layout.rows
+                    .flatMap { it.keys }
+                    .mapNotNull { it.def as? KeyDef.Char }
+                    .filter { it.alternates.isNotEmpty() && it.shifted != it.primary }
+                    .filter { it.primary.uppercase() == it.primary }
+                    .forEach { key ->
+                        assertEquals(
+                            "${layout.id} ${key.primary}",
+                            KeyDef.Char(key.shifted, key.shifted.uppercase()),
+                            key.alternates.first(),
                         )
                     }
             }

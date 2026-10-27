@@ -6,17 +6,17 @@
     {
       "keys": [
         { "dead": ["ˇ", "~"], "latin": "`" },
-        { "chars": ["1", "!"], "longPress": ["F1"], "fn": "F1" },
-        { "chars": ["2", "\""], "longPress": ["@", "F2"], "fn": "F2" },
-        { "chars": ["3", "#"], "longPress": ["£", "F3"], "fn": "F3" },
-        { "chars": ["4", "¤"], "longPress": ["$", "F4"], "fn": "F4" },
-        { "chars": ["5", "%"], "longPress": ["€", "F5"], "fn": "F5" },
-        { "chars": ["6", "&"], "longPress": ["F6"], "fn": "F6" },
-        { "chars": ["7", "/"], "longPress": ["{", "F7"], "fn": "F7" },
-        { "chars": ["8", "("], "longPress": ["[", "F8"], "fn": "F8" },
-        { "chars": ["9", ")"], "longPress": ["]", "F9"], "fn": "F9" },
-        { "chars": ["0", "="], "longPress": ["}", "F10"], "fn": "F10" },
-        { "chars": ["+", "?"], "longPress": ["\\", "F11"], "fn": "F11" },
+        { "chars": ["1", "!"], "longPress": ["!", "F1"], "fn": "F1" },
+        { "chars": ["2", "\""], "longPress": ["\"", "@", "F2"], "fn": "F2" },
+        { "chars": ["3", "#"], "longPress": ["#", "£", "F3"], "fn": "F3" },
+        { "chars": ["4", "¤"], "longPress": ["¤", "$", "F4"], "fn": "F4" },
+        { "chars": ["5", "%"], "longPress": ["%", "€", "F5"], "fn": "F5" },
+        { "chars": ["6", "&"], "longPress": ["&", "F6"], "fn": "F6" },
+        { "chars": ["7", "/"], "longPress": ["/", "{", "F7"], "fn": "F7" },
+        { "chars": ["8", "("], "longPress": ["(", "[", "F8"], "fn": "F8" },
+        { "chars": ["9", ")"], "longPress": [")", "]", "F9"], "fn": "F9" },
+        { "chars": ["0", "="], "longPress": ["=", "}", "F10"], "fn": "F10" },
+        { "chars": ["+", "?"], "longPress": ["?", "\\", "F11"], "fn": "F11" },
         { "dead": ["´", "`"], "latin": "=", "fn": "F12" },
         { "key": "BACKSPACE", "width": 2 }
       ]
@@ -36,7 +36,7 @@
         { "chars": ["p", "P"] },
         { "chars": ["ü", "Ü"], "latin": "[" },
         { "chars": ["õ", "Õ"], "latin": "]", "longPress": ["§"] },
-        { "chars": ["'", "*"], "longPress": ["½"] }
+        { "chars": ["'", "*"], "longPress": ["*", "½"] }
       ]
     },
     {
@@ -59,7 +59,7 @@
     {
       "keys": [
         { "key": "SHIFT", "width": 1.5 },
-        { "chars": ["<", ">"], "longPress": ["|", ">"] },
+        { "chars": ["<", ">"], "longPress": [">", "|"] },
         { "chars": ["z", "Z"], "longPress": ["ž", "Z", "ź", "ż"] },
         { "chars": ["x", "X"] },
         { "chars": ["c", "C"], "longPress": ["C", "ç", "ć", "č"] },
