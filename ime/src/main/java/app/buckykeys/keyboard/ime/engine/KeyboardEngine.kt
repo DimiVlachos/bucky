@@ -7,6 +7,7 @@ import app.buckykeys.keyboard.ime.layout.KeyCode
 import app.buckykeys.keyboard.ime.layout.KeyDef
 import app.buckykeys.keyboard.ime.layout.ModifierKind
 import kotlin.math.abs
+import kotlin.math.min
 
 internal class KeyboardEngine(
     geometry: KeyboardGeometry,
@@ -210,12 +211,12 @@ internal class KeyboardEngine(
             swipeLanguage(pointerId, forward = x > pointerDownX[pointerId])
             return
         }
-        if (pointerId == previewPointer && geometry.keyAt(x, y) != pointerKeys[pointerId]) {
+        if (pointerId == previewPointer && !staysOn(pointerKeys[pointerId], x, y)) {
             previewPointer = NO_POINTER
         }
         when (pointerId) {
             popupPointer -> popup.select(x, y)
-            timerPointer -> if (geometry.keyAt(x, y) != pointerKeys[pointerId]) stopTimer()
+            timerPointer -> if (!staysOn(pointerKeys[pointerId], x, y)) stopTimer()
         }
     }
 
@@ -262,7 +263,16 @@ internal class KeyboardEngine(
         }
         if (key == NO_KEY) return
         val chorded = endHold(key)
-        if (!consumed && geometry.keyAt(x, y) == key) release(key, chorded, usesFn, sink)
+        if (!consumed && staysOn(key, x, y)) release(key, chorded, usesFn, sink)
+    }
+
+    private fun staysOn(key: Int, x: Float, y: Float): Boolean {
+        if (key == NO_KEY) return false
+        if (geometry.keyAt(x, y) == key) return true
+        val r = geometry.rects
+        val i = key * 4
+        val slop = min(r[i + 2] - r[i], r[i + 3] - r[i + 1]) * SLIP_FRACTION
+        return x > r[i] - slop && x < r[i + 2] + slop && y > r[i + 1] - slop && y < r[i + 3] + slop
     }
 
     private fun startTimer(pointerId: Int, at: Long, repeats: Boolean) {
@@ -513,5 +523,6 @@ internal class KeyboardEngine(
         private const val REPEAT_DELAY_MS = 400L
         private const val REPEAT_INTERVAL_MS = 50L
         private const val LANGUAGE_SWIPE_FRACTION = 0.08f
+        private const val SLIP_FRACTION = 0.4f
     }
 }
