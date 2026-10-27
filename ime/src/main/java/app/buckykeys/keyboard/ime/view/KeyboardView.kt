@@ -318,8 +318,7 @@ public class KeyboardView(
             (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f - (paint.ascent() + paint.descent()) / 2f
     }
 
-    private fun showsLanguage(): Boolean =
-        engine.languageSwipe && page == BuiltInLayouts.PAGE_LETTERS
+    private fun showsLanguage(): Boolean = page == BuiltInLayouts.PAGE_LETTERS
 
     private fun buildSpaceLabel(rects: FloatArray) {
         val i = spaceKey
