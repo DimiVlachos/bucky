@@ -163,6 +163,51 @@ class BuiltInLayoutsTest {
         )
     }
 
+    @Test
+    fun `every finnish row spans fifteen units`() {
+        finnish().rows.forEachIndexed { index, row ->
+            assertEquals("row $index", 15.0, row.keys.sumOf { it.width.toDouble() }, 0.001)
+        }
+    }
+
+    @Test
+    fun `the finnish letters send their us key with ctrl`() {
+        val chars = finnishChars()
+        mapOf("å" to "[", "ö" to ";", "ä" to "'").forEach { (letter, latin) ->
+            assertEquals(letter, latin, chars.getValue(letter).latin)
+        }
+    }
+
+    @Test
+    fun `every finnish altgr symbol is the first long press of its key`() {
+        val firstAlternates =
+            finnishChars().values.mapNotNull {
+                (it.alternates.firstOrNull() as? KeyDef.Char)?.primary
+            }
+        listOf("@", "£", "$", "€", "{", "[", "]", "}", "\\", "|", "~").forEach {
+            assertEquals(it, true, it in firstAlternates)
+        }
+    }
+
+    @Test
+    fun `the finnish diaeresis and circumflex dead key composes`() {
+        val chars = finnishChars()
+        assertEquals("ü", chars.getValue("u").composed["¨"])
+        assertEquals("Ê", chars.getValue("e").composedShifted["^"])
+    }
+
+    private fun finnish(): Layout =
+        LayoutParser.parse(asset(BuiltInLayouts.PC_FULL_FI)).getOrThrow()
+
+    private fun finnishChars(): Map<String, KeyDef.Char> =
+        finnish()
+            .rows
+            .flatMap { it.keys }
+            .mapNotNull { it.def as? KeyDef.Char }
+            .associateBy {
+                it.primary
+            }
+
     private fun estonian(): Layout =
         LayoutParser.parse(asset(BuiltInLayouts.PC_FULL_ET)).getOrThrow()
 

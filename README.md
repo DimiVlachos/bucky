@@ -19,7 +19,7 @@ It is a from-scratch successor to [Hacker's Keyboard](https://github.com/klausw/
 - An Fn key, as in Hacker's Keyboard: the number row becomes F1–F12, the arrows PgUp, PgDn, Home and End, and Del becomes Ins
 - Long-press alternates with hints on the keys: accented letters (é, ñ, ß, õ, š and more), typographic punctuation (… « » ’), and F1–F12 on the number row
 - An optional F1–F12 row and an extra row you define yourself, using Termux extra-keys names
-- US English, Greek and Estonian layouts from JSON, with dead keys (Greek tonos, Estonian ˇ ~ ´ `). On Estonian, the AltGr symbols (@ $ { [ ] } \ |) are a long-press away. Swipe the space bar to switch language
+- US English, Greek, Estonian and Finnish layouts from JSON, with dead keys (Greek tonos, Estonian ˇ ~ ´ `, Finnish ´ ` ¨ ^). On Estonian and Finnish, the AltGr symbols (@ $ { [ ] } \ |) are a long-press away. The classic Finnish layout matches Hacker's Keyboard's Finnish Swipe the space bar to switch language
 - Settings for key height (portrait and landscape), label size, key preview and vibration
 - Per-app profiles: the full layout in Termux, ConnectBot, JuiceSSH and Termius; elsewhere a phone-style compact layout (with ?123 pages, a capital at the start of a sentence and double space for a full stop), the full layout, or a switch to your other keyboard. Long-press ⌨ for the full layout in any app (a tap does it when there's no other keyboard to switch to)
 - About 13 ms from touch to drawing the key (median, debug build on a Galaxy S23 Ultra, before the screen's own frame); see the [spike report](docs/spike-report.md)

@@ -13,6 +13,7 @@ class ClassicLayoutsTest {
     private val english = load(BuiltInLayouts.PC_HK_EN_US)
     private val greek = load(BuiltInLayouts.PC_HK_EL)
     private val estonian = load(BuiltInLayouts.PC_HK_ET)
+    private val finnish = load(BuiltInLayouts.PC_HK_FI)
     private val fnPage = load(BuiltInLayouts.PC_HK_FN)
 
     private fun Layout.widths(): List<List<Float>> = rows.map { row -> row.keys.map { it.width } }
@@ -40,7 +41,7 @@ class ClassicLayoutsTest {
 
     @Test
     fun `every classic row spans fourteen units`() {
-        listOf(english, greek, estonian, fnPage).forEach { layout ->
+        listOf(english, greek, estonian, finnish, fnPage).forEach { layout ->
             layout.rows.forEachIndexed { index, row ->
                 assertEquals(
                     "${layout.id} row $index",
@@ -87,7 +88,7 @@ class ClassicLayoutsTest {
 
     @Test
     fun `the classic main layers have no fn variants`() {
-        listOf(english, greek, estonian).forEach { layout ->
+        listOf(english, greek, estonian, finnish).forEach { layout ->
             assertTrue(layout.id, layout.rows.flatMap { it.keys }.none { it.fn != null })
         }
     }
@@ -111,6 +112,7 @@ class ClassicLayoutsTest {
                 english to BuiltInLayouts.PC_FULL_EN_US,
                 greek to BuiltInLayouts.PC_FULL_EL,
                 estonian to BuiltInLayouts.PC_FULL_ET,
+                finnish to BuiltInLayouts.PC_FULL_FI,
             )
             .forEach { (classic, centredId) ->
                 val centred =
@@ -131,5 +133,20 @@ class ClassicLayoutsTest {
                         )
                     }
             }
+    }
+
+    @Test
+    fun `finnish classic follows hacker's keyboard's finnish keys`() {
+        assertEquals(estonian.widths(), finnish.widths())
+        val defs = finnish.rows.map { row -> row.keys.map { it.def } }
+        assertEquals(
+            KeyDef.Char("§", "½"),
+            (defs[0][0] as KeyDef.Char).copy(alternates = emptyList()),
+        )
+        assertTrue(defs[0].any { it is KeyDef.Char && it.primary == "?" && it.shifted == "+" })
+        assertTrue(defs[0].any { it is KeyDef.Char && it.primary == "'" && it.shifted == "`" })
+        assertTrue(defs[1].any { it is KeyDef.Char && it.primary == "å" })
+        assertTrue(defs[1].any { it is KeyDef.Char && it.primary == "~" && it.shifted == "^" })
+        assertTrue(finnish.rows.flatMap { it.keys }.none { it.def is KeyDef.Dead })
     }
 }

@@ -1,0 +1,60 @@
+{
+  "id": "compact_fi",
+  "name": "Compact (Suomi)",
+  "language": "Suomi",
+  "rows": [
+    {
+      "keys": [
+        { "chars": ["q", "Q"], "width": 0.9091, "longPress": ["1"] },
+        { "chars": ["w", "W"], "width": 0.9091, "longPress": ["2"] },
+        { "chars": ["e", "E"], "width": 0.9091, "longPress": ["3", "E", "€", "è", "é", "ê", "ë", "ē", "ę", "ě"] },
+        { "chars": ["r", "R"], "width": 0.9091, "longPress": ["4", "R", "ř"] },
+        { "chars": ["t", "T"], "width": 0.9091, "longPress": ["5", "T", "ť", "þ"] },
+        { "chars": ["y", "Y"], "width": 0.9091, "longPress": ["6", "Y", "ý", "ÿ"] },
+        { "chars": ["u", "U"], "width": 0.9091, "longPress": ["7", "U", "ù", "ú", "û", "ū", "ů"] },
+        { "chars": ["i", "I"], "width": 0.9091, "longPress": ["8", "I", "ì", "í", "î", "ï", "ī", "ı"] },
+        { "chars": ["o", "O"], "width": 0.9091, "longPress": ["9", "O", "ò", "ó", "ô", "ø", "œ", "ō"] },
+        { "chars": ["p", "P"], "width": 0.9091, "longPress": ["0"] },
+        { "chars": ["å", "Å"], "width": 0.9091 }
+      ]
+    },
+    {
+      "keys": [
+        { "chars": ["a", "A"], "width": 0.9091, "longPress": ["A", "à", "á", "â", "ã", "å", "æ", "ā"] },
+        { "chars": ["s", "S"], "width": 0.9091, "longPress": ["š", "S", "ś", "ş", "ß"] },
+        { "chars": ["d", "D"], "width": 0.9091, "longPress": ["D", "ď", "ð"] },
+        { "chars": ["f", "F"], "width": 0.9091 },
+        { "chars": ["g", "G"], "width": 0.9091, "longPress": ["G", "ğ"] },
+        { "chars": ["h", "H"], "width": 0.9091 },
+        { "chars": ["j", "J"], "width": 0.9091 },
+        { "chars": ["k", "K"], "width": 0.9091 },
+        { "chars": ["l", "L"], "width": 0.9091, "longPress": ["L", "ł"] },
+        { "chars": ["ö", "Ö"], "width": 0.9091 },
+        { "chars": ["ä", "Ä"], "width": 0.9091 }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "SHIFT", "width": 1.5 },
+        { "chars": ["z", "Z"], "longPress": ["ž", "Z", "ź", "ż"] },
+        { "chars": ["x", "X"] },
+        { "chars": ["c", "C"], "longPress": ["C", "ç", "ć", "č"] },
+        { "chars": ["v", "V"] },
+        { "chars": ["b", "B"] },
+        { "chars": ["n", "N"], "longPress": ["N", "ñ", "ń", "ň"] },
+        { "chars": ["m", "M"] },
+        { "key": "BACKSPACE", "width": 1.5 }
+      ]
+    },
+    {
+      "keys": [
+        { "switchTo": "@page:symbols", "width": 1.5 },
+        { "chars": [","], "longPress": ["!"] },
+        { "switchTo": "@keyboard", "holdTo": "@full" },
+        { "chars": [" ", " "], "width": 4 },
+        { "chars": ["."], "longPress": ["?"] },
+        { "key": "ENTER", "width": 1.5 }
+      ]
+    }
+  ]
+}

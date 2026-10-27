@@ -76,6 +76,7 @@ public data class KeyboardSettings(
                     when (systemLanguage) {
                         "el" -> listOf(KeyboardLanguage.EN_US, KeyboardLanguage.EL)
                         "et" -> listOf(KeyboardLanguage.EN_US, KeyboardLanguage.ET)
+                        "fi" -> listOf(KeyboardLanguage.EN_US, KeyboardLanguage.FI)
                         else -> listOf(KeyboardLanguage.EN_US)
                     },
             )
