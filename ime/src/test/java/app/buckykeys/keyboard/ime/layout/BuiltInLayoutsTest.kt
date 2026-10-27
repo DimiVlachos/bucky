@@ -25,6 +25,21 @@ class BuiltInLayoutsTest {
     }
 
     @Test
+    fun `an optional layout that fails to parse is missing, not the english fallback`() {
+        assertEquals(null, BuiltInLayouts.loadOrNull { """{ "id": """ })
+    }
+
+    @Test
+    fun `an optional layout that cannot be read is missing`() {
+        assertEquals(null, BuiltInLayouts.loadOrNull { throw IOException("layouts/pc_hk_el.json") })
+    }
+
+    @Test
+    fun `an optional layout that parses is used as it is`() {
+        assertEquals("pc_hk_el", BuiltInLayouts.loadOrNull { asset(BuiltInLayouts.PC_HK_EL) }?.id)
+    }
+
+    @Test
     fun `a layout that fails to parse falls back to the built-in layout`() {
         assertEquals(FallbackLayout.pcFullEnUs, BuiltInLayouts.loadOrFallback { """{ "id": """ })
     }

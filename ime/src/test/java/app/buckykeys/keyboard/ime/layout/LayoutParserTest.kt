@@ -324,6 +324,22 @@ class LayoutParserTest {
     }
 
     @Test
+    fun `meta and the new specials parse with their labels`() {
+        assertEquals(
+            listOf("❖", "○", "SysRq", "ScrLk", "Brk", "NumLk"),
+            parseKeys(
+                    """{ "key": "META" }""",
+                    """{ "key": "DPAD_CENTER" }""",
+                    """{ "key": "SYSRQ" }""",
+                    """{ "key": "SCROLL_LOCK" }""",
+                    """{ "key": "BREAK" }""",
+                    """{ "key": "NUM_LOCK" }""",
+                )
+                .map { it.label },
+        )
+    }
+
+    @Test
     fun `the fn modifier parses`() {
         assertEquals(
             KeySpec(KeyDef.Modifier(ModifierKind.FN), "Fn"),

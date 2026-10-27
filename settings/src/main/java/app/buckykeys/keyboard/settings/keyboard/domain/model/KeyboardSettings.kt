@@ -17,6 +17,7 @@ public data class KeyboardSettings(
     val outsideTerminals: OutsideTerminals = OutsideTerminals.COMPACT,
     val autoCapitalize: Boolean = true,
     val doubleSpacePeriod: Boolean = true,
+    val fullLayoutStyle: FullLayoutStyle = FullLayoutStyle.CENTRED,
 ) {
 
     public fun withExtraRow(text: String): KeyboardSettings =

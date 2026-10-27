@@ -10,6 +10,9 @@
     <string name="settings_language_et">Estonian</string>
     <string name="settings_language_required">Required: at least one language</string>
     <string name="settings_languages_hint">Swipe the space bar left or right to switch between them. At least one stays on.</string>
+    <string name="settings_full_style">Full layout style</string>
+    <string name="settings_full_style_centred">Centred</string>
+    <string name="settings_full_style_classic">Hacker\'s Keyboard (classic)</string>
     <string name="settings_size">Size</string>
     <string name="settings_row_height">Key height</string>
     <string name="settings_landscape_row_height">Key height in landscape</string>

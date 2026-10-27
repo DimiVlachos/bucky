@@ -19,3 +19,10 @@ internal class PageSet(letters: List<Layout>, private val pages: Map<String, Lay
     public fun isPage(target: String): Boolean =
         target == BuiltInLayouts.PAGE_LETTERS || target in pages
 }
+
+internal fun fnPageTarget(current: String, fnActive: Boolean, hasFnPage: Boolean): String =
+    when {
+        fnActive && hasFnPage -> BuiltInLayouts.PAGE_FN
+        !fnActive && current == BuiltInLayouts.PAGE_FN -> BuiltInLayouts.PAGE_LETTERS
+        else -> current
+    }

@@ -10,6 +10,9 @@
     <string name="settings_language_et">Εσθονικά</string>
     <string name="settings_language_required">Απαιτείται τουλάχιστον μία γλώσσα</string>
     <string name="settings_languages_hint">Σύρετε το πλήκτρο διαστήματος αριστερά ή δεξιά για εναλλαγή. Τουλάχιστον μία μένει ενεργή.</string>
+    <string name="settings_full_style">Στυλ πλήρους διάταξης</string>
+    <string name="settings_full_style_centred">Κεντραρισμένη</string>
+    <string name="settings_full_style_classic">Hacker\'s Keyboard (κλασική)</string>
     <string name="settings_size">Μέγεθος</string>
     <string name="settings_row_height">Ύψος πλήκτρων</string>
     <string name="settings_landscape_row_height">Ύψος πλήκτρων σε οριζόντιο προσανατολισμό</string>

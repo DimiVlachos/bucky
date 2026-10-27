@@ -22,6 +22,11 @@ import app.buckykeys.keyboard.ime.view.LanguageChangeListener
 import app.buckykeys.keyboard.ime.view.isPasswordInput
 import app.buckykeys.keyboard.profile.Profile
 import app.buckykeys.keyboard.profile.fieldFlags
+import app.buckykeys.keyboard.profile.fullLayoutFor
+import app.buckykeys.keyboard.profile.fullLayoutIds
+import app.buckykeys.keyboard.profile.fullPageIds
+import app.buckykeys.keyboard.profile.fullPagesFor
+import app.buckykeys.keyboard.profile.optionalLayoutIds
 import app.buckykeys.keyboard.profile.profileFor
 import app.buckykeys.keyboard.profile.startPageFor
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
@@ -223,13 +228,21 @@ class BuckyImeService : InputMethodService() {
     private suspend fun preload(target: KeyboardSettings) {
         val wanted =
             target.languages.flatMap { listOf(it.layoutId, it.compactLayoutId) } +
+                fullLayoutIds(target.languages, target.fullLayoutStyle) +
+                fullPageIds(target.fullLayoutStyle) +
                 BuiltInLayouts.COMPACT_SYMBOLS +
                 BuiltInLayouts.COMPACT_SYMBOLS_MORE
         val missing = wanted.distinct().filter { it !in layouts }
         if (missing.isEmpty()) return
+        val optional = optionalLayoutIds(target.languages, target.fullLayoutStyle)
         val loaded =
             withContext(Dispatchers.Default) {
-                missing.associateWith { BuiltInLayouts.load(assets, it) }
+                missing.mapNotNull { id ->
+                    val layout =
+                        if (id in optional) BuiltInLayouts.loadOrNull(assets, id)
+                        else BuiltInLayouts.load(assets, id)
+                    layout?.let { id to it }
+                }
             }
         layouts.putAll(loaded)
     }
@@ -289,15 +302,28 @@ class BuckyImeService : InputMethodService() {
                 else rowHeightPx(rows),
             haptics = settings.haptics,
             labelScale = settings.labelScalePercent / PERCENT,
-            pages = if (compact && !fallback) compactPages() else emptyMap(),
+            pages =
+                when {
+                    fallback -> emptyMap()
+                    compact -> compactPages()
+                    else -> fullPages()
+                },
             actions = actions,
         )
     }
 
     private fun fullLanguages(): List<Layout> {
-        val switchable = switchable(settings.languages.map { layouts[it.layoutId] })
+        val style = settings.fullLayoutStyle
+        val switchable =
+            switchable(settings.languages.map { fullLayoutFor(it, style, layouts::get) })
         return switchable.map { it.withExtraRows(settings.fKeyRow, settings.extraRow) }
     }
+
+    // The Fn page gets the same extra rows, so the keyboard keeps its height when Fn toggles.
+    private fun fullPages(): Map<String, Layout> =
+        fullPagesFor(settings.fullLayoutStyle, layouts::get).mapValues { (_, page) ->
+            page.withExtraRows(settings.fKeyRow, settings.extraRow)
+        }
 
     private fun compactLanguages(): List<Layout> {
         val switchable = switchable(settings.languages.map { layouts[it.compactLayoutId] })

@@ -47,6 +47,11 @@ internal object DefaultLabels {
             KeyCode.F10,
             KeyCode.F11,
             KeyCode.F12 -> code.name
+            KeyCode.SYSRQ -> "SysRq"
+            KeyCode.SCROLL_LOCK -> "ScrLk"
+            KeyCode.BREAK -> "Brk"
+            KeyCode.NUM_LOCK -> "NumLk"
+            KeyCode.DPAD_CENTER -> "○"
         }
 
     private fun modifier(kind: ModifierKind): String =
@@ -55,5 +60,6 @@ internal object DefaultLabels {
             ModifierKind.ALT -> "Alt"
             ModifierKind.SHIFT -> "⇧"
             ModifierKind.FN -> "Fn"
+            ModifierKind.META -> "❖"
         }
 }
