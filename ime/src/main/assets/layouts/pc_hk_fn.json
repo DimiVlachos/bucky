@@ -1,0 +1,82 @@
+{
+  "id": "pc_hk_fn",
+  "name": "Hacker's Keyboard Fn",
+  "language": "English (US)",
+  "rows": [
+    {
+      "keys": [
+        { "chars": ["`", "~"], "width": 1.5 },
+        { "key": "F1", "width": 1.125 },
+        { "key": "F2", "width": 1.125 },
+        { "key": "F3", "width": 1.125 },
+        { "key": "F4", "width": 1.125 },
+        { "chars": ["7", "7"], "width": 1.125 },
+        { "chars": ["8", "8"], "width": 1.125 },
+        { "chars": ["9", "9"], "width": 1.125 },
+        { "chars": ["/", "/"], "width": 1.125 },
+        { "key": "HOME", "width": 1.5 },
+        { "key": "BACKSPACE", "width": 2 }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "TAB", "width": 1.5 },
+        { "key": "F5", "width": 1.125 },
+        { "key": "F6", "width": 1.125 },
+        { "key": "F7", "width": 1.125 },
+        { "key": "F8", "width": 1.125 },
+        { "chars": ["4", "4"], "width": 1.125 },
+        { "chars": ["5", "5"], "width": 1.125 },
+        { "chars": ["6", "6"], "width": 1.125 },
+        { "chars": ["*", "*"], "width": 1.125 },
+        { "key": "END", "width": 1.5 },
+        { "key": "INSERT" },
+        { "key": "FORWARD_DEL" }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "CTRL", "width": 1.5 },
+        { "key": "F9", "width": 1.125 },
+        { "key": "F10", "width": 1.125 },
+        { "key": "F11", "width": 1.125 },
+        { "key": "F12", "width": 1.125 },
+        { "chars": ["1", "1"], "width": 1.125 },
+        { "chars": ["2", "2"], "width": 1.125 },
+        { "chars": ["3", "3"], "width": 1.125 },
+        { "chars": ["-", "-"], "width": 1.125 },
+        { "key": "PAGE_UP", "width": 1.5 },
+        { "key": "ENTER", "width": 2 }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "SHIFT", "width": 1.5 },
+        { "key": "SYSRQ", "width": 1.125 },
+        { "key": "SCROLL_LOCK", "width": 1.125 },
+        { "key": "BREAK", "width": 1.125 },
+        { "key": "NUM_LOCK", "width": 1.125 },
+        { "chars": ["0", "0"], "width": 1.125 },
+        { "chars": [",", ","], "width": 1.125 },
+        { "chars": [".", "."], "width": 1.125 },
+        { "chars": ["+", "+"], "width": 1.125 },
+        { "key": "PAGE_DOWN", "width": 1.5 },
+        { "key": "UP" },
+        { "key": "SHIFT" }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "ESC", "width": 2.5 },
+        { "key": "ALT" },
+        { "key": "META" },
+        { "chars": [" ", " "], "width": 4.5 },
+        { "key": "FN" },
+        { "key": "DPAD_CENTER" },
+        { "key": "LEFT" },
+        { "key": "DOWN" },
+        { "key": "RIGHT" }
+      ]
+    }
+  ]
+}

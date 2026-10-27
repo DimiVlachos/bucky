@@ -1,0 +1,90 @@
+{
+  "id": "pc_hk_el",
+  "name": "Hacker's Keyboard (Ελληνικά)",
+  "language": "Ελληνικά",
+  "rows": [
+    {
+      "keys": [
+        { "chars": ["`", "~"], "width": 0.64 },
+        { "chars": ["1", "!"], "longPress": ["F1"] },
+        { "chars": ["2", "@"], "longPress": ["F2"] },
+        { "chars": ["3", "#"], "longPress": ["F3"] },
+        { "chars": ["4", "$"], "longPress": ["F4"] },
+        { "chars": ["5", "%"], "longPress": ["F5"] },
+        { "chars": ["6", "^"], "longPress": ["F6"] },
+        { "chars": ["7", "&"], "longPress": ["F7"] },
+        { "chars": ["8", "*"], "longPress": ["F8"] },
+        { "chars": ["9", "("], "longPress": ["F9"] },
+        { "chars": ["0", ")"], "longPress": ["F10"] },
+        { "chars": ["-", "_"], "longPress": ["F11"] },
+        { "chars": ["=", "+"], "longPress": ["F12"] },
+        { "key": "BACKSPACE", "width": 1.36 }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "TAB" },
+        { "chars": [";", ":"], "latin": "q" },
+        { "chars": ["ς", "Σ"], "latin": "w" },
+        { "chars": ["ε"], "latin": "e", "longPress": ["έ", "€"] },
+        { "chars": ["ρ"], "latin": "r" },
+        { "chars": ["τ"], "latin": "t" },
+        { "chars": ["υ"], "latin": "y", "longPress": ["ύ", "ϋ", "ΰ"] },
+        { "chars": ["θ"], "latin": "u" },
+        { "chars": ["ι"], "latin": "i", "longPress": ["ί", "ϊ", "ΐ"] },
+        { "chars": ["ο"], "latin": "o", "longPress": ["ό"] },
+        { "chars": ["π"], "latin": "p" },
+        { "chars": ["[", "{"], "longPress": ["{", "«", "‹"] },
+        { "chars": ["]", "}"], "longPress": ["}", "»", "›"] },
+        { "chars": ["\\", "|"] }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "CTRL", "width": 1.5 },
+        { "chars": ["α"], "latin": "a", "longPress": ["ά"] },
+        { "chars": ["σ"], "latin": "s" },
+        { "chars": ["δ"], "latin": "d" },
+        { "chars": ["φ"], "latin": "f" },
+        { "chars": ["γ"], "latin": "g" },
+        { "chars": ["η"], "latin": "h", "longPress": ["ή"] },
+        { "chars": ["ξ"], "latin": "j" },
+        { "chars": ["κ"], "latin": "k" },
+        { "chars": ["λ"], "latin": "l" },
+        { "dead": ["΄", "¨"], "latin": ";" },
+        { "chars": ["'", "\""], "longPress": ["\"", "’", "‘", "´"] },
+        { "key": "ENTER", "width": 1.5 }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "SHIFT", "width": 2 },
+        { "chars": ["ζ"], "latin": "z" },
+        { "chars": ["χ"], "latin": "x" },
+        { "chars": ["ψ"], "latin": "c" },
+        { "chars": ["ω"], "latin": "v", "longPress": ["ώ"] },
+        { "chars": ["β"], "latin": "b" },
+        { "chars": ["ν"], "latin": "n" },
+        { "chars": ["μ"], "latin": "m" },
+        { "chars": [",", "<"], "longPress": ["<", "„", "‚"] },
+        { "chars": [".", ">"], "longPress": [">", "…", "·"] },
+        { "chars": ["/", "?"], "longPress": ["?", "÷", "¿"] },
+        { "key": "UP" },
+        { "key": "SHIFT" }
+      ]
+    },
+    {
+      "keys": [
+        { "key": "ESC", "width": 2.5 },
+        { "key": "ALT" },
+        { "key": "META" },
+        { "chars": [" ", " "], "width": 4.5 },
+        { "key": "FN" },
+        { "key": "DPAD_CENTER" },
+        { "key": "LEFT" },
+        { "key": "DOWN" },
+        { "key": "RIGHT" }
+      ]
+    }
+  ]
+}
