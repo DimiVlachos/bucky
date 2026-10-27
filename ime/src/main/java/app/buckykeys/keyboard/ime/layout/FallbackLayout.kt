@@ -53,7 +53,7 @@ public object FallbackLayout {
                             special(KeyCode.BACKSPACE, "⌫", 2f),
                     ),
                     Row(
-                        listOf(special(KeyCode.TAB, "Tab", 2f)) +
+                        listOf(special(KeyCode.TAB, "⇥", 2f)) +
                             chars(
                                 "qQ",
                                 "wW",
@@ -88,7 +88,7 @@ public object FallbackLayout {
                             special(KeyCode.ENTER, "Enter", 1.75f),
                     ),
                     Row(
-                        listOf(modifier(ModifierKind.SHIFT, "Shift", 2.5f)) +
+                        listOf(modifier(ModifierKind.SHIFT, "⇧", 2.5f)) +
                             chars(
                                 "zZ",
                                 "xX",

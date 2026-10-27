@@ -48,7 +48,7 @@ class ExtraRowsTest {
             row.map { it.def },
         )
         assertEquals(
-            listOf("Esc", "Tab", "Ctrl", "~", "|", "PgUp", "⌫", "Del"),
+            listOf("Esc", "⇥", "Ctrl", "~", "|", "PgUp", "⌫", "Del"),
             row.map { it.label },
         )
     }
@@ -256,7 +256,7 @@ class ExtraRowsTest {
     @Test
     fun `parsing reads a pasted termux line`() {
         val parsed = parseExtraRow(listOf("[['ESC','/','-'],['TAB','CTRL']]"))
-        assertEquals(listOf("Esc", "/", "-", "Tab", "Ctrl"), parsed.keys.map { it.label })
+        assertEquals(listOf("Esc", "/", "-", "⇥", "Ctrl"), parsed.keys.map { it.label })
         assertEquals(emptyList<String>(), parsed.unknown)
     }
 }

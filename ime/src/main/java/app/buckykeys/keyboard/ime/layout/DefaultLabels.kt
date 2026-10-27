@@ -22,7 +22,7 @@ internal object DefaultLabels {
     private fun special(code: KeyCode): String =
         when (code) {
             KeyCode.ESC -> "Esc"
-            KeyCode.TAB -> "Tab"
+            KeyCode.TAB -> "⇥"
             KeyCode.ENTER -> "Enter"
             KeyCode.BACKSPACE -> "⌫"
             KeyCode.FORWARD_DEL -> "Del"
@@ -53,7 +53,7 @@ internal object DefaultLabels {
         when (kind) {
             ModifierKind.CTRL -> "Ctrl"
             ModifierKind.ALT -> "Alt"
-            ModifierKind.SHIFT -> "Shift"
+            ModifierKind.SHIFT -> "⇧"
             ModifierKind.FN -> "Fn"
         }
 }
