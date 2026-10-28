@@ -23,6 +23,7 @@ import app.buckykeys.keyboard.ime.layout.DefaultLabels
 import app.buckykeys.keyboard.ime.layout.KeyDef
 import app.buckykeys.keyboard.ime.layout.Layout
 import app.buckykeys.keyboard.ime.layout.ModifierKind
+import app.buckykeys.keyboard.ime.layout.longPressAlternates
 import kotlin.math.roundToInt
 import timber.log.Timber
 
@@ -131,6 +132,7 @@ public class KeyboardView(
     private var spaceKey = NO_SPACE_KEY
     private var spaceLabelSize = 0f
     private var spaceLabelY = 0f
+    private var languageLabel = ""
     private var popupLabels = emptyArray<String>()
     private var popupShiftedLabels = emptyArray<String>()
     private var popupSmall = BooleanArray(0)
@@ -299,10 +301,11 @@ public class KeyboardView(
             if (showsLanguage() && def is KeyDef.Char && def.primary == " ") spaceKey = i
             if (fnLabels[i].isNotEmpty()) buildFnLabel(i, rects)
         }
-        evenBigLabels(labelSize, BooleanArray(count) { labelSmall[it] || special[it] })
+        val narrow = BooleanArray(count) { geometry.spec(it).width < 1f }
+        evenBigLabels(labelSize, BooleanArray(count) { labelSmall[it] || special[it] }, narrow)
         recomputeY(labelSize, labelSmall, labelY, rects) { true }
         val fnExcluded = BooleanArray(count) { fnSmall[it] || fnLabels[it].isEmpty() }
-        evenBigLabels(fnSize, fnExcluded)
+        evenBigLabels(fnSize, fnExcluded, narrow)
         recomputeY(fnSize, fnSmall, fnY, rects) { fnLabels[it].isNotEmpty() }
         if (spaceKey != NO_SPACE_KEY) buildSpaceLabel(rects)
     }
@@ -346,16 +349,19 @@ public class KeyboardView(
             (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f - (paint.ascent() + paint.descent()) / 2f
     }
 
-    private fun showsLanguage(): Boolean = page == BuiltInLayouts.PAGE_LETTERS
+    // The Fn page stays up after a space-bar swipe, so it shows the language too.
+    private fun showsLanguage(): Boolean =
+        page == BuiltInLayouts.PAGE_LETTERS || page == BuiltInLayouts.PAGE_FN
 
     private fun buildSpaceLabel(rects: FloatArray) {
         val i = spaceKey
+        languageLabel = pageSet.language(languageIndex)
         spaceLabelSize =
             fitLabel(
                 spaceLabelPaint,
                 smallLabelSizePx,
-                layout.language,
-                layout.language,
+                languageLabel,
+                languageLabel,
                 rects[i * 4 + 2] - rects[i * 4],
                 labelMaxSizePx,
             )
@@ -397,12 +403,13 @@ public class KeyboardView(
 
     private fun buildPopupLabels() {
         val popup = engine.popup
-        val def = geometry.spec(popup.keyIndex).def as? KeyDef.Char ?: return
+        val alternates = geometry.spec(popup.keyIndex).def.longPressAlternates
+        if (alternates.isEmpty()) return
         val count = popup.count
-        popupLabels = Array(count) { DefaultLabels.of(def.alternates[it]) }
+        popupLabels = Array(count) { DefaultLabels.of(alternates[it]) }
         popupShiftedLabels =
             Array(count) {
-                when (val alternate = def.alternates[it]) {
+                when (val alternate = alternates[it]) {
                     is KeyDef.Char -> alternate.shifted
                     else -> popupLabels[it]
                 }
@@ -482,7 +489,7 @@ public class KeyboardView(
         }
         if (i == spaceKey) {
             spaceLabelPaint.textSize = spaceLabelSize
-            canvas.drawText(layout.language, labelX[i], spaceLabelY, spaceLabelPaint)
+            canvas.drawText(languageLabel, labelX[i], spaceLabelY, spaceLabelPaint)
             return
         }
         val spec = geometry.spec(i)

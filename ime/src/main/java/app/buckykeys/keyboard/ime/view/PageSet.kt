@@ -12,9 +12,14 @@ internal class PageSet(letters: List<Layout>, private val pages: Map<String, Lay
         get() = letters.size
 
     public fun current(languageIndex: Int, page: String): Layout {
-        val language = letters[languageIndex.coerceIn(0, letters.lastIndex)]
+        val language = letters(languageIndex)
         return if (page == BuiltInLayouts.PAGE_LETTERS) language else pages[page] ?: language
     }
+
+    public fun language(languageIndex: Int): String = letters(languageIndex).language
+
+    private fun letters(languageIndex: Int): Layout =
+        letters[languageIndex.coerceIn(0, letters.lastIndex)]
 
     public fun isPage(target: String): Boolean =
         target == BuiltInLayouts.PAGE_LETTERS || target in pages

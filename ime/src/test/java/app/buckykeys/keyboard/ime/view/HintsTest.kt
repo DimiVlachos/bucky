@@ -13,6 +13,12 @@ class HintsTest {
     }
 
     @Test
+    fun `a dead key that holds for its shifted mark shows the next alternate`() {
+        val alternates = listOf(KeyDef.Char("`", "`"), KeyDef.Special(KeyCode.F12))
+        assertEquals("F12", hintFor(KeyDef.Dead("´", "`", alternates = alternates)))
+    }
+
+    @Test
     fun `a letter that holds for its capital shows nothing`() {
         assertEquals(
             "",

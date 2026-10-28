@@ -17,7 +17,7 @@
         { "chars": ["9", ")"], "longPress": [")", "]", "F9"], "fn": "F9" },
         { "chars": ["0", "="], "longPress": ["=", "}", "F10"], "fn": "F10" },
         { "chars": ["+", "?"], "longPress": ["?", "\\", "F11"], "fn": "F11" },
-        { "dead": ["´", "`"], "latin": "=", "fn": "F12" },
+        { "dead": ["´", "`"], "latin": "=", "longPress": ["`", "F12", "´"], "fn": "F12" },
         { "key": "BACKSPACE", "width": 2 }
       ]
     },
@@ -35,7 +35,7 @@
         { "chars": ["o", "O"], "longPress": ["O", "ò", "ó", "ô", "ø", "œ", "ō"] },
         { "chars": ["p", "P"] },
         { "chars": ["å", "Å"], "latin": "[" },
-        { "dead": ["¨", "^"], "latin": "]" },
+        { "dead": ["¨", "^"], "latin": "]", "longPress": ["^", "~", "¨"] },
         { "chars": ["'", "*"], "longPress": ["*", "~"] }
       ]
     },

@@ -22,6 +22,16 @@ class PageSetTest {
         PageSet(listOf(english, greek), mapOf(BuiltInLayouts.PAGE_SYMBOLS to symbols))
 
     @Test
+    fun `the language name comes from the letters even on a shared page`() {
+        val named =
+            PageSet(
+                listOf(english.copy(language = "English"), greek.copy(language = "Ελληνικά")),
+                mapOf(BuiltInLayouts.PAGE_FN to symbols),
+            )
+        assertEquals("Ελληνικά", named.language(1))
+    }
+
+    @Test
     fun `letters follow the language`() {
         assertEquals(english, pages.current(0, BuiltInLayouts.PAGE_LETTERS))
         assertEquals(greek, pages.current(1, BuiltInLayouts.PAGE_LETTERS))

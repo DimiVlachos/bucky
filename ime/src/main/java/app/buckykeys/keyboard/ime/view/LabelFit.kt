@@ -46,8 +46,11 @@ private fun isAttached(codePoint: Int): Boolean =
     }
 
 // Single characters share one size so 5 and % don't shrink alone; word labels keep their own fit.
-internal fun evenBigLabels(sizes: FloatArray, small: BooleanArray) {
+// Keys narrower than one unit (Finnish § ½) fit on their own so they don't shrink every label.
+internal fun evenBigLabels(sizes: FloatArray, small: BooleanArray, narrow: BooleanArray) {
     var min = Float.MAX_VALUE
-    for (i in sizes.indices) if (!small[i]) min = minOf(min, sizes[i])
-    for (i in sizes.indices) if (!small[i]) sizes[i] = min
+    for (i in sizes.indices) if (!small[i] && !narrow[i]) min = minOf(min, sizes[i])
+    for (i in sizes.indices) {
+        if (!small[i]) sizes[i] = if (narrow[i]) minOf(sizes[i], min) else min
+    }
 }

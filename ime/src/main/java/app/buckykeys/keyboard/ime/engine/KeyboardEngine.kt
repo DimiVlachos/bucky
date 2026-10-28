@@ -6,6 +6,7 @@ import app.buckykeys.keyboard.ime.layout.BuiltInLayouts
 import app.buckykeys.keyboard.ime.layout.KeyCode
 import app.buckykeys.keyboard.ime.layout.KeyDef
 import app.buckykeys.keyboard.ime.layout.ModifierKind
+import app.buckykeys.keyboard.ime.layout.longPressAlternates
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -137,7 +138,8 @@ internal class KeyboardEngine(
         } else {
             timerPointer = NO_POINTER
             when (def) {
-                is KeyDef.Char -> longPress(pointerId, def, sink)
+                is KeyDef.Char,
+                is KeyDef.Dead -> longPress(pointerId, def, sink)
                 is KeyDef.LayoutSwitch -> holdSwitch(pointerId, def)
                 else -> Unit
             }
@@ -263,8 +265,17 @@ internal class KeyboardEngine(
         }
         if (key == NO_KEY) return
         val chorded = endHold(key)
-        if (!consumed && staysOn(key, x, y)) release(key, chorded, usesFn, sink)
+        if (consumed) return
+        if (staysOn(key, x, y)) {
+            release(key, chorded, usesFn, sink)
+            return
+        }
+        val target = geometry.keyAt(x, y)
+        if (target == NO_KEY || isModifier(key) || isModifier(target)) return
+        release(target, false, geometry.spec(target).fn != null && isActive(ModifierKind.FN), sink)
     }
+
+    private fun isModifier(key: Int): Boolean = geometry.spec(key).def is KeyDef.Modifier
 
     private fun staysOn(key: Int, x: Float, y: Float): Boolean {
         if (key == NO_KEY) return false
@@ -287,17 +298,18 @@ internal class KeyboardEngine(
         timerPointer = NO_POINTER
     }
 
-    private fun longPress(pointerId: Int, def: KeyDef.Char, sink: InputSink) {
+    private fun longPress(pointerId: Int, def: KeyDef, sink: InputSink) {
         pointerConsumed[pointerId] = true
         longPressCount++
         if (pointerId == previewPointer) previewPointer = NO_POINTER
-        if (def.alternates.isEmpty()) {
-            emitChar(def, sink, forceShift = true)
+        val alternates = def.longPressAlternates
+        if (alternates.isEmpty()) {
+            if (def is KeyDef.Char) emitChar(def, sink, forceShift = true)
             afterKey()
         } else {
             popup.open(
                 pointerKeys[pointerId],
-                def.alternates.size,
+                alternates.size,
                 geometry.rects,
                 geometry.widthPx.toFloat(),
             )
@@ -315,9 +327,10 @@ internal class KeyboardEngine(
     private fun commitPopup(key: Int, sink: InputSink) {
         val selected = popup.selected
         closePopup()
-        val def = if (key == NO_KEY) null else geometry.spec(key).def
-        if (selected == AlternatesPopup.NONE || def !is KeyDef.Char) return
-        emit(def.alternates[selected], sink)
+        val alternates =
+            if (key == NO_KEY) emptyList() else geometry.spec(key).def.longPressAlternates
+        if (selected == AlternatesPopup.NONE || selected !in alternates.indices) return
+        emit(alternates[selected], sink)
         afterKey()
     }
 
@@ -349,6 +362,7 @@ internal class KeyboardEngine(
     private fun longPresses(def: KeyDef): Boolean =
         when (def) {
             is KeyDef.Char -> def.alternates.isNotEmpty() || def.shifted != def.primary
+            is KeyDef.Dead -> def.alternates.isNotEmpty()
             is KeyDef.LayoutSwitch -> def.holdTargetId != null
             else -> false
         }

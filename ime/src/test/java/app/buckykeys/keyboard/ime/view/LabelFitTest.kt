@@ -91,8 +91,23 @@ class LabelFitTest {
     fun `single character labels share the smallest size and word labels keep their own`() {
         val sizes = floatArrayOf(40f, 36f, 20f, 30f)
         val small = booleanArrayOf(false, false, true, true)
-        evenBigLabels(sizes, small)
+        evenBigLabels(sizes, small, BooleanArray(4))
         assertEquals(listOf(36f, 36f, 20f, 30f), sizes.toList())
+    }
+
+    @Test
+    fun `a narrow key keeps its own smaller fit without shrinking the other single characters`() {
+        val sizes = floatArrayOf(40f, 36f, 24f)
+        val narrow = booleanArrayOf(false, false, true)
+        evenBigLabels(sizes, BooleanArray(3), narrow)
+        assertEquals(listOf(36f, 36f, 24f), sizes.toList())
+    }
+
+    @Test
+    fun `a narrow key never grows past the shared size`() {
+        val sizes = floatArrayOf(36f, 40f)
+        evenBigLabels(sizes, BooleanArray(2), booleanArrayOf(false, true))
+        assertEquals(listOf(36f, 36f), sizes.toList())
     }
 
     @Test

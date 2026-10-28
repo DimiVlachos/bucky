@@ -218,14 +218,35 @@ class KeyboardEngineTest {
     }
 
     @Test
-    fun `lifting on a different key than the one pressed emits nothing`() {
+    fun `lifting on a different key types the key under the finger as in Hacker's Keyboard`() {
         tap("Ctrl")
+        down("a", pointer = 0)
+        up("d", pointer = 0)
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_D, ctrl)), sink.emitted)
+        assertEquals(0, engine.modifierMask)
+    }
+
+    @Test
+    fun `lifting above the keyboard types nothing`() {
         val (ax, ay) = centre("a")
-        val (dx, dy) = centre("d")
         engine.onPointer(0, ax, ay, PointerAction.DOWN, now, sink)
-        engine.onPointer(0, dx, dy, PointerAction.UP, now, sink)
+        engine.onPointer(0, ax, -50f, PointerAction.UP, now, sink)
         assertTrue(sink.emitted.isEmpty())
-        assertEquals(1 shl ModifierKind.CTRL.ordinal, engine.modifierMask)
+    }
+
+    @Test
+    fun `sliding from a letter onto a modifier types nothing`() {
+        down("a", pointer = 0)
+        up("Ctrl", pointer = 0)
+        assertTrue(sink.emitted.isEmpty())
+        assertEquals(0, engine.modifierMask)
+    }
+
+    @Test
+    fun `sliding from a modifier onto a letter types nothing`() {
+        down("Ctrl", pointer = 0)
+        up("a", pointer = 0)
+        assertTrue(sink.emitted.isEmpty())
     }
 
     @Test
@@ -241,11 +262,11 @@ class KeyboardEngineTest {
     }
 
     @Test
-    fun `a slide to the middle of the next key types nothing`() {
+    fun `a slide to the middle of the next key types that key`() {
         down("g", pointer = 0)
         move("h", pointer = 0)
         up("h", pointer = 0)
-        assertTrue(sink.emitted.isEmpty())
+        assertEquals(listOf(Text("h")), sink.emitted)
     }
 
     @Test
@@ -737,6 +758,25 @@ class KeyboardEngineTest {
         tap("Enter")
         tap("α")
         assertEquals(listOf(Key(KeyEvent.KEYCODE_ENTER, 0), Text("α")), sink.emitted)
+    }
+
+    @Test
+    fun `holding a dead key types its plain mark from the popup`() {
+        useDeadTilde()
+        down("ˇ", pointer = 0)
+        tick(300)
+        assertEquals(3, engine.popup.count)
+        slideToAlternate(0)
+        assertEquals(listOf(Text("~")), sink.emitted)
+        assertEquals(KeyboardEngine.NO_DEAD_KEY, engine.pendingDeadKey)
+    }
+
+    @Test
+    fun `tapping a dead key with alternates still waits for the letter`() {
+        useDeadTilde()
+        tap("ˇ")
+        assertEquals(indexOf("ˇ"), engine.pendingDeadKey)
+        assertTrue(sink.emitted.isEmpty())
     }
 
     @Test
@@ -1439,6 +1479,14 @@ class KeyboardEngineTest {
         val y = popup.top + popup.cellHeight / 2f
         engine.onPointer(0, x, y, PointerAction.MOVE, now, sink)
         engine.onPointer(0, x, y, PointerAction.UP, now, sink)
+    }
+
+    private fun useDeadTilde() {
+        val alternates = listOf(KeyDef.Char("~", "~"), KeyDef.Char("`", "`"), KeyDef.Char("ˇ", "ˇ"))
+        val dead = KeySpec(KeyDef.Dead("ˇ", "~", latin = "`", alternates = alternates), "ˇ")
+        val row = Row(listOf(dead, KeySpec(KeyDef.Char("a", "A"), "a")))
+        geometry = KeyboardGeometry(Layout("test", "test", listOf(row, row)), 1080, 120)
+        engine = KeyboardEngine(geometry, LONG_PRESS_MS)
     }
 
     private fun tick(time: Long) {

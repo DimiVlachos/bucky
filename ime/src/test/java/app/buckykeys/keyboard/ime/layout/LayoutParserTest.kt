@@ -127,6 +127,21 @@ class LayoutParserTest {
     }
 
     @Test
+    fun `a dead key takes long-press alternates`() {
+        assertEquals(
+            KeySpec(
+                KeyDef.Dead(
+                    "´",
+                    "`",
+                    alternates = listOf(KeyDef.Char("`", "`"), KeyDef.Special(KeyCode.F12)),
+                ),
+                "´",
+            ),
+            parseKeys("""{ "dead": ["´", "`"], "longPress": ["`", "F12"] }""").single(),
+        )
+    }
+
+    @Test
     fun `a dead key needs one or two marks`() {
         assertEquals("$.rows[0].keys[0].dead", failureOf(layoutWithKeys("""{ "dead": [] }""")).path)
     }
