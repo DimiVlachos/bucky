@@ -10,8 +10,12 @@ public sealed interface KeyDef {
         val composedShifted: Map<String, String> = emptyMap(),
     ) : KeyDef
 
-    public data class Dead(val primary: String, val shifted: String, val latin: String? = null) :
-        KeyDef
+    public data class Dead(
+        val primary: String,
+        val shifted: String,
+        val latin: String? = null,
+        val alternates: List<KeyDef> = emptyList(),
+    ) : KeyDef
 
     public data class Special(val code: KeyCode) : KeyDef
 
@@ -61,3 +65,11 @@ public enum class ModifierKind {
     FN,
     META,
 }
+
+internal val KeyDef.longPressAlternates: List<KeyDef>
+    get() =
+        when (this) {
+            is KeyDef.Char -> alternates
+            is KeyDef.Dead -> alternates
+            else -> emptyList()
+        }

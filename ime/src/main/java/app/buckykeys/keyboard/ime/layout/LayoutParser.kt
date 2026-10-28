@@ -86,7 +86,9 @@ public object LayoutParser {
                 "switchTo" -> switchTo(obj, path)
                 else -> fail(path, "needs exactly one of chars, dead, key or switchTo")
             }
-        if (def !is KeyDef.Char && "longPress" in obj) fail("$path.longPress", "needs chars")
+        if (def !is KeyDef.Char && def !is KeyDef.Dead && "longPress" in obj) {
+            fail("$path.longPress", "needs chars or dead")
+        }
         if (def !is KeyDef.LayoutSwitch && "holdTo" in obj) fail("$path.holdTo", "needs switchTo")
         val types = def is KeyDef.Char || def is KeyDef.Special
         if (!types && "then" in obj) fail("$path.then", "needs chars or key")
@@ -108,21 +110,22 @@ public object LayoutParser {
         if (chars.size !in 1..2) fail("$path.chars", "needs one or two strings")
         if (chars[0] == " " && "longPress" in obj)
             fail("$path.longPress", "not allowed on the space bar")
-        val alternates =
-            if ("longPress" in obj) {
-                obj.strings("longPress", path).mapIndexed { index, name ->
-                    alternate(name, "$path.longPress[$index]")
-                }
-            } else {
-                emptyList()
-            }
         return KeyDef.Char(
             chars[0],
             chars.getOrElse(1) { chars[0].uppercase() },
-            alternates,
+            alternates(obj, path),
             latin(obj, path),
         )
     }
+
+    private fun alternates(obj: JsonObject, path: String): List<KeyDef> =
+        if ("longPress" in obj) {
+            obj.strings("longPress", path).mapIndexed { index, name ->
+                alternate(name, "$path.longPress[$index]")
+            }
+        } else {
+            emptyList()
+        }
 
     private fun dead(obj: JsonObject, path: String): KeyDef.Dead {
         val marks = obj.strings("dead", path)
@@ -131,7 +134,12 @@ public object LayoutParser {
             if (!DeadKeys.composes(mark))
                 fail("$path.dead[$index]", "dead mark has no combining form")
         }
-        return KeyDef.Dead(marks[0], marks.getOrElse(1) { marks[0] }, latin(obj, path))
+        return KeyDef.Dead(
+            marks[0],
+            marks.getOrElse(1) { marks[0] },
+            latin(obj, path),
+            alternates(obj, path),
+        )
     }
 
     private fun latin(obj: JsonObject, path: String): String? {

@@ -5,7 +5,7 @@
   "rows": [
     {
       "keys": [
-        { "dead": ["ˇ", "~"], "latin": "`", "width": 0.64 },
+        { "dead": ["ˇ", "~"], "latin": "`", "longPress": ["~", "`", "ˇ"], "width": 0.64 },
         { "chars": ["1", "!"], "longPress": ["!", "F1"] },
         { "chars": ["2", "\""], "longPress": ["\"", "@", "F2"] },
         { "chars": ["3", "#"], "longPress": ["#", "£", "F3"] },
@@ -17,7 +17,7 @@
         { "chars": ["9", ")"], "longPress": [")", "]", "F9"] },
         { "chars": ["0", "="], "longPress": ["=", "}", "F10"] },
         { "chars": ["+", "?"], "longPress": ["?", "\\", "F11"] },
-        { "dead": ["´", "`"], "latin": "=" },
+        { "dead": ["´", "`"], "latin": "=", "longPress": ["`", "F12", "´"] },
         { "key": "BACKSPACE", "width": 1.36 }
       ]
     },
