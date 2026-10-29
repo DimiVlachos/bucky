@@ -66,13 +66,18 @@ public class KeyboardView(
     private val longPressMs = ViewConfiguration.getLongPressTimeout().toLong()
 
     private val backgroundPaint = fillPaint(R.color.keyboard_background)
-    private val previewLabelPaint =
-        labelPaint(
-            minOf(
-                resources.getDimension(R.dimen.key_preview_label_size),
-                rowHeightPx * PREVIEW_LABEL_HEIGHT_FRACTION,
-            ),
+    private val previewLabelSizePx =
+        minOf(
+            resources.getDimension(R.dimen.key_preview_label_size),
+            rowHeightPx * PREVIEW_LABEL_HEIGHT_FRACTION,
         )
+    private val previewLabelPaint = labelPaint(previewLabelSizePx)
+    private val popupPanelPaint = fillPaint(R.color.popup_background)
+    private val popupBorderPaint =
+        strokePaint(R.color.popup_border, resources.getDimension(R.dimen.popup_border_width))
+    private val popupSelectedPaint =
+        strokePaint(R.color.popup_selected, resources.getDimension(R.dimen.popup_selected_width))
+    private val popupAccentPaint = fillPaint(R.color.popup_selected)
 
     public var previewEnabled: Boolean = true
         set(value) {
@@ -122,6 +127,8 @@ public class KeyboardView(
     private var labelSmall = BooleanArray(0)
     private var modifierBits = IntArray(0)
     private var special = BooleanArray(0)
+    private var previewSize = FloatArray(0)
+    private var previewFnSize = FloatArray(0)
     private var hintLabels = emptyArray<String>()
     private var fnLabels = emptyArray<String>()
     private var fnSmall = BooleanArray(0)
@@ -132,6 +139,7 @@ public class KeyboardView(
     private var spaceKey = NO_SPACE_KEY
     private var spaceLabelSize = 0f
     private var spaceLabelY = 0f
+    private var spaceMarkY = 0f
     private var languageLabel = ""
     private var popupLabels = emptyArray<String>()
     private var popupShiftedLabels = emptyArray<String>()
@@ -257,6 +265,8 @@ public class KeyboardView(
         labelSmall = BooleanArray(count)
         modifierBits = IntArray(count)
         special = BooleanArray(count)
+        previewSize = FloatArray(count)
+        previewFnSize = FloatArray(count)
         spaceKey = NO_SPACE_KEY
         val rects = geometry.rects
         hintLabels = Array(count) { hintFor(geometry.spec(it).def) }
@@ -298,8 +308,9 @@ public class KeyboardView(
                 (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f - (paint.ascent() + paint.descent()) / 2f
             modifierBits[i] = if (def is KeyDef.Modifier) 1 shl def.kind.ordinal else 0
             special[i] = isSpecialKey(def)
-            if (showsLanguage() && def is KeyDef.Char && def.primary == " ") spaceKey = i
+            if (showsLanguage() && isSpaceBar(def)) spaceKey = i
             if (fnLabels[i].isNotEmpty()) buildFnLabel(i, rects)
+            buildPreviewSizes(i, def, spec.label, shiftedLabel, cellWidth)
         }
         val narrow = BooleanArray(count) { geometry.spec(it).width < 1f }
         evenBigLabels(labelSize, BooleanArray(count) { labelSmall[it] || special[it] }, narrow)
@@ -349,13 +360,50 @@ public class KeyboardView(
             (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f - (paint.ascent() + paint.descent()) / 2f
     }
 
+    private fun buildPreviewSizes(
+        i: Int,
+        def: KeyDef,
+        label: String,
+        shiftedLabel: String,
+        cellWidth: Float,
+    ) {
+        val width = previewWidth(cellWidth)
+        val shown = if (isSpaceBar(def)) SPACE_MARK else label
+        val shiftedShown = if (isSpaceBar(def)) SPACE_MARK else shiftedLabel
+        previewSize[i] =
+            fitLabel(
+                previewLabelPaint,
+                previewLabelSizePx,
+                shown,
+                shiftedShown,
+                width,
+                previewLabelSizePx,
+            )
+        if (fnLabels[i].isNotEmpty()) {
+            previewFnSize[i] =
+                fitLabel(
+                    previewLabelPaint,
+                    previewLabelSizePx,
+                    fnLabels[i],
+                    fnLabels[i],
+                    width,
+                    previewLabelSizePx,
+                )
+        }
+    }
+
+    private fun previewWidth(keyWidth: Float): Float =
+        keyWidth.coerceIn(rowHeightPx.toFloat(), rowHeightPx * MAX_PREVIEW_WIDTH_ROWS)
+
     // The Fn page stays up after a space-bar swipe, so it shows the language too.
     private fun showsLanguage(): Boolean =
         page == BuiltInLayouts.PAGE_LETTERS || page == BuiltInLayouts.PAGE_FN
 
+    // The language and a ␣ under it, as in Hacker's Keyboard.
     private fun buildSpaceLabel(rects: FloatArray) {
         val i = spaceKey
         languageLabel = pageSet.language(languageIndex)
+        val keyHeight = rects[i * 4 + 3] - rects[i * 4 + 1]
         spaceLabelSize =
             fitLabel(
                 spaceLabelPaint,
@@ -363,12 +411,13 @@ public class KeyboardView(
                 languageLabel,
                 languageLabel,
                 rects[i * 4 + 2] - rects[i * 4],
-                labelMaxSizePx,
+                keyHeight * SPACE_LINE_HEIGHT_FRACTION,
             )
         spaceLabelPaint.textSize = spaceLabelSize
-        spaceLabelY =
-            (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f -
-                (spaceLabelPaint.ascent() + spaceLabelPaint.descent()) / 2f
+        val lineHeight = spaceLabelPaint.descent() - spaceLabelPaint.ascent()
+        val centre = (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f
+        spaceLabelY = centre - spaceLabelPaint.descent()
+        spaceMarkY = spaceLabelY + lineHeight * SPACE_MARK_LINE_FRACTION
     }
 
     private fun fitLabel(
@@ -464,7 +513,7 @@ public class KeyboardView(
             drawLabel(canvas, i, shifted, deadShifted, fnActive)
             if (modifierBits[i] and locked != 0) drawLockBar(canvas, i)
         }
-        drawPreview(canvas, shifted)
+        drawPreview(canvas, shifted, deadShifted, fnActive)
         drawPopup(canvas, shifted)
         canvas.restore()
         if (pendingDownTime != NO_PENDING) {
@@ -490,6 +539,7 @@ public class KeyboardView(
         if (i == spaceKey) {
             spaceLabelPaint.textSize = spaceLabelSize
             canvas.drawText(languageLabel, labelX[i], spaceLabelY, spaceLabelPaint)
+            canvas.drawText(SPACE_MARK, labelX[i], spaceMarkY, spaceLabelPaint)
             return
         }
         val spec = geometry.spec(i)
@@ -701,17 +751,31 @@ public class KeyboardView(
         }
     }
 
-    private fun drawPreview(canvas: Canvas, shifted: Boolean) {
+    private fun drawPreview(
+        canvas: Canvas,
+        shifted: Boolean,
+        deadShifted: Boolean,
+        fnActive: Boolean,
+    ) {
         val key = engine.previewKey
         if (!previewEnabled || key == KeyboardEngine.NO_PREVIEW) return
         val spec = geometry.spec(key)
-        val def = spec.def as? KeyDef.Char ?: return
-        val label = if (shifted) def.shifted else spec.label
+        val usesFn = fnActive && fnLabels[key].isNotEmpty()
+        val def = spec.def
+        val label =
+            when {
+                usesFn -> fnLabels[key]
+                isSpaceBar(def) -> SPACE_MARK
+                def is KeyDef.Char -> if (shifted) def.shifted else spec.label
+                def is KeyDef.Dead -> if (deadShifted) def.shifted else spec.label
+                else -> spec.label
+            }
         if (label.isBlank()) return
+        previewLabelPaint.textSize = if (usesFn) previewFnSize[key] else previewSize[key]
         val rects = geometry.rects
         val keyLeft = rects[key * 4]
         val keyRight = rects[key * 4 + 2]
-        val previewWidth = maxOf(keyRight - keyLeft, rowHeightPx.toFloat())
+        val previewWidth = previewWidth(keyRight - keyLeft)
         val left =
             ((keyLeft + keyRight - previewWidth) / 2f)
                 .coerceAtMost(geometry.widthPx - previewWidth)
@@ -741,28 +805,47 @@ public class KeyboardView(
         if (popupLabels.size != popup.count) return
         val top = popup.top
         val bottom = top + popup.cellHeight
+        val panelRight = popup.left + popup.count * popup.cellWidth
         canvas.drawRoundRect(
             popup.left,
             top,
-            popup.left + popup.count * popup.cellWidth,
+            panelRight,
             bottom,
             cornerPx,
             cornerPx,
-            backgroundPaint,
+            popupPanelPaint,
+        )
+        canvas.drawRoundRect(
+            popup.left,
+            top,
+            panelRight,
+            bottom,
+            cornerPx,
+            cornerPx,
+            popupBorderPaint,
+        )
+        canvas.drawRect(
+            popup.left + cornerPx,
+            bottom - lockBarHeightPx - gapPx,
+            panelRight - cornerPx,
+            bottom - gapPx,
+            popupAccentPaint,
         )
         for (cell in 0 until popup.count) {
             val i = popup.alternateAt(cell)
             val left = popup.left + cell * popup.cellWidth
             val right = left + popup.cellWidth
-            canvas.drawRoundRect(
-                left + gapPx,
-                top + gapPx,
-                right - gapPx,
-                bottom - gapPx,
-                cornerPx,
-                cornerPx,
-                if (i == popup.selected) activePaint else keyPaint,
-            )
+            if (i == popup.selected) {
+                canvas.drawRoundRect(
+                    left + 2 * gapPx,
+                    top + 2 * gapPx,
+                    right - 2 * gapPx,
+                    bottom - lockBarHeightPx - 2 * gapPx,
+                    cornerPx,
+                    cornerPx,
+                    popupSelectedPaint,
+                )
+            }
             val label = if (shifted) popupShiftedLabels[i] else popupLabels[i]
             val paint = if (popupSmall[i]) smallLabelPaint else labelPaint
             paint.textSize = popupSize[i]
@@ -791,6 +874,12 @@ public class KeyboardView(
     private fun fillPaint(colorRes: Int): Paint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply { color = ContextCompat.getColor(context, colorRes) }
 
+    private fun strokePaint(colorRes: Int, widthPx: Float): Paint =
+        fillPaint(colorRes).apply {
+            style = Paint.Style.STROKE
+            strokeWidth = widthPx
+        }
+
     private fun labelPaint(sizePx: Float): Paint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = ContextCompat.getColor(context, R.color.key_label)
@@ -804,5 +893,9 @@ public class KeyboardView(
         const val HINT_HEIGHT_FRACTION = 0.2f
         const val LATENCY_TAG = "PCK-LAT"
         const val LOCK_BAR_WIDTH_FRACTION = 0.3f
+        const val SPACE_MARK = "␣"
+        const val MAX_PREVIEW_WIDTH_ROWS = 2f
+        const val SPACE_LINE_HEIGHT_FRACTION = 0.4f
+        const val SPACE_MARK_LINE_FRACTION = 0.9f
     }
 }

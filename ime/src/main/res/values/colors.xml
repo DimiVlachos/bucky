@@ -1,10 +1,13 @@
 <resources>
     <color name="keyboard_background">#FFECEFF1</color>
     <color name="key_background">#FFFFFFFF</color>
-    <color name="key_special_background">#FFCFD6DB</color>
+    <color name="key_special_background">#FFC2CBD1</color>
     <color name="key_pressed">#FFB0BEC5</color>
     <color name="key_modifier_active">#FF90CAF9</color>
     <color name="key_modifier_locked">#FF42A5F5</color>
     <color name="key_label">#FF212121</color>
     <color name="key_label_secondary">#FF6B7177</color>
+    <color name="popup_background">#FFFFFFFF</color>
+    <color name="popup_border">#FF9AA0A6</color>
+    <color name="popup_selected">#FF1E88E5</color>
 </resources>

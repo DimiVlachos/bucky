@@ -643,12 +643,18 @@ class KeyboardEngineTest {
     }
 
     @Test
-    fun `modifiers and special keys are not previewed`() {
+    fun `modifiers are not previewed`() {
         down("Ctrl", pointer = 0)
         assertEquals(KeyboardEngine.NO_PREVIEW, engine.previewKey)
-        up("Ctrl", pointer = 0)
+    }
+
+    @Test
+    fun `special keys and the space bar are previewed`() {
         down("⌫", pointer = 0)
-        assertEquals(KeyboardEngine.NO_PREVIEW, engine.previewKey)
+        assertEquals(indexOf("⌫"), engine.previewKey)
+        up("⌫", pointer = 0)
+        down("", pointer = 0)
+        assertEquals(indexOf(""), engine.previewKey)
     }
 
     @Test
@@ -1025,6 +1031,15 @@ class KeyboardEngineTest {
         swipeSpace(by = -100f)
         assertEquals(BuiltInLayouts.PREVIOUS_LANGUAGE, engine.takeSwitchRequest())
         assertTrue(sink.emitted.isEmpty())
+    }
+
+    @Test
+    fun `a language swipe hides the space bar preview`() {
+        engine.languageSwipe = true
+        val (x, y) = centre("")
+        engine.onPointer(0, x, y, PointerAction.DOWN, now, sink)
+        engine.onPointer(0, x + 100f, y, PointerAction.MOVE, now, sink)
+        assertEquals(KeyboardEngine.NO_PREVIEW, engine.previewKey)
     }
 
     @Test

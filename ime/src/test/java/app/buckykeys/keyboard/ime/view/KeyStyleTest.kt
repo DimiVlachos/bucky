@@ -10,16 +10,16 @@ import org.junit.Test
 class KeyStyleTest {
 
     @Test
-    fun `special keys, modifiers and layout switches draw darker`() {
+    fun `special keys, modifiers, layout switches and the space bar draw darker`() {
         assertEquals(true, isSpecialKey(KeyDef.Special(KeyCode.ESC)))
         assertEquals(true, isSpecialKey(KeyDef.Modifier(ModifierKind.CTRL)))
         assertEquals(true, isSpecialKey(KeyDef.LayoutSwitch(BuiltInLayouts.PAGE_SYMBOLS)))
+        assertEquals(true, isSpecialKey(KeyDef.Char(" ", " ")))
     }
 
     @Test
-    fun `characters, the space bar and dead keys keep the normal colour`() {
+    fun `characters and dead keys keep the normal colour`() {
         assertEquals(false, isSpecialKey(KeyDef.Char("a", "A")))
-        assertEquals(false, isSpecialKey(KeyDef.Char(" ", " ")))
         assertEquals(false, isSpecialKey(KeyDef.Dead("΄", "¨")))
     }
 }
