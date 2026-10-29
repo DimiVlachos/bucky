@@ -195,9 +195,9 @@ internal class KeyboardEngine(
         if (def is KeyDef.Modifier) startHold(def.kind)
         val acting = if (key == NO_KEY) null else acting(key, pointerFn[pointerId])
         when (acting) {
-            is KeyDef.Char -> previewPointer = pointerId
             is KeyDef.Modifier -> Unit
-            else -> previewPointer = NO_POINTER
+            null -> previewPointer = NO_POINTER
+            else -> previewPointer = pointerId
         }
         when {
             acting == null -> Unit

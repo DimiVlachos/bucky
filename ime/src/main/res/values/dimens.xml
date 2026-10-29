@@ -9,4 +9,6 @@
     <dimen name="key_preview_label_size">30sp</dimen>
     <dimen name="key_lock_bar_height">2dp</dimen>
     <dimen name="key_lock_bar_inset">3dp</dimen>
+    <dimen name="popup_border_width">1dp</dimen>
+    <dimen name="popup_selected_width">2dp</dimen>
 </resources>

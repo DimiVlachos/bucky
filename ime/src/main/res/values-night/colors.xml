@@ -1,10 +1,13 @@
 <resources>
-    <color name="keyboard_background">#FF1E1F22</color>
-    <color name="key_background">#FF2E3135</color>
-    <color name="key_special_background">#FF26282C</color>
-    <color name="key_pressed">#FF4A4F55</color>
+    <color name="keyboard_background">#FF16171A</color>
+    <color name="key_background">#FF3C4046</color>
+    <color name="key_special_background">#FF25272B</color>
+    <color name="key_pressed">#FF5A6068</color>
     <color name="key_modifier_active">#FF3D5A80</color>
     <color name="key_modifier_locked">#FF3062AE</color>
     <color name="key_label">#FFE8EAED</color>
     <color name="key_label_secondary">#FF9AA0A6</color>
+    <color name="popup_background">#FF0E0F11</color>
+    <color name="popup_border">#FF5F6368</color>
+    <color name="popup_selected">#FF5B9BF5</color>
 </resources>
