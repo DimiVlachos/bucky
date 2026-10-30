@@ -23,6 +23,7 @@
     <string name="settings_feedback">Feedback</string>
     <string name="settings_key_preview">Show the pressed key above your finger</string>
     <string name="settings_haptics">Vibrate on key press</string>
+    <string name="settings_fn_toggles">Fn stays on until tapped again</string>
     <string name="settings_extra_rows">Extra rows</string>
     <string name="settings_f_key_row">F1–F12 row</string>
     <string name="settings_extra_row">Your own row</string>

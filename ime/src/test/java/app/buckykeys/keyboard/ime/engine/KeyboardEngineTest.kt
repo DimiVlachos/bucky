@@ -1118,6 +1118,30 @@ class KeyboardEngineTest {
     }
 
     @Test
+    fun `with fn toggling one tap keeps fn on until the next tap`() {
+        engine.fnToggles = true
+        tap("Fn")
+        tap("1")
+        tap("2")
+        tap("Fn")
+        tap("1")
+        assertEquals(
+            listOf(Key(KeyEvent.KEYCODE_F1, 0), Key(KeyEvent.KEYCODE_F2, 0), Text("1")),
+            sink.emitted,
+        )
+        assertEquals(0, engine.modifierMask)
+    }
+
+    @Test
+    fun `fn toggling leaves ctrl one-shot`() {
+        engine.fnToggles = true
+        tap("Ctrl")
+        tap("c")
+        tap("c")
+        assertEquals(listOf(Key(KeyEvent.KEYCODE_C, ctrl), Text("c")), sink.emitted)
+    }
+
+    @Test
     fun `holding fn while pressing up sends page up`() {
         down("Fn", pointer = 0)
         tap("↑", pointer = 1)

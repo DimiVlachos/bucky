@@ -64,6 +64,10 @@ constructor(
         update { it.copy(haptics = enabled) }
     }
 
+    fun onFnTogglesChange(enabled: Boolean) {
+        update { it.copy(fnToggles = enabled) }
+    }
+
     fun onFKeyRowChange(enabled: Boolean) {
         update { it.copy(fKeyRow = enabled) }
     }

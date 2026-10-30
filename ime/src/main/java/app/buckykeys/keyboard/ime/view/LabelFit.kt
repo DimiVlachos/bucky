@@ -3,6 +3,8 @@ package app.buckykeys.keyboard.ime.view
 internal const val LABEL_HEIGHT_FRACTION = 0.55f
 internal const val KEY_LABEL_HEIGHT_FRACTION = 0.8f
 internal const val PREVIEW_LABEL_HEIGHT_FRACTION = 0.7f
+internal const val MAX_PREVIEW_WIDTH_ROWS = 2f
+internal const val MAX_WORD_PREVIEW_WIDTH_ROWS = 3f
 
 internal fun fittedTextSize(
     baseSize: Float,
@@ -18,6 +20,18 @@ internal fun fittedTextSize(
             else -> maxOf(minSize, baseSize * availableWidth / labelWidth)
         }
     return minOf(widthFit, maxSize)
+}
+
+// Word labels (Enter, PgUp) widen the bubble instead of shrinking, as ketas asked in #57.
+internal fun previewBubbleWidth(
+    keyWidth: Float,
+    rowHeight: Float,
+    paddedLabelWidth: Float,
+    keyboardWidth: Float,
+): Float {
+    val keyFit = keyWidth.coerceIn(rowHeight, rowHeight * MAX_PREVIEW_WIDTH_ROWS)
+    val labelFit = minOf(paddedLabelWidth, rowHeight * MAX_WORD_PREVIEW_WIDTH_ROWS)
+    return minOf(maxOf(keyFit, labelFit), keyboardWidth)
 }
 
 // Scaled after fitting, so above 100% a single character may spill past its key, as in Hacker's

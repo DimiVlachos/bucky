@@ -39,6 +39,7 @@ internal fun KeyboardSettingsEntry(
             onLabelScaleChange = viewModel::onLabelScaleChange,
             onKeyPreviewChange = viewModel::onKeyPreviewChange,
             onHapticsChange = viewModel::onHapticsChange,
+            onFnTogglesChange = viewModel::onFnTogglesChange,
             onFKeyRowChange = viewModel::onFKeyRowChange,
             onOutsideTerminalsChange = viewModel::onOutsideTerminalsChange,
             onAutoCapitalizeChange = viewModel::onAutoCapitalizeChange,

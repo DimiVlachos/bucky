@@ -23,6 +23,7 @@
     <string name="settings_feedback">Απόκριση πλήκτρων</string>
     <string name="settings_key_preview">Εμφάνιση του πλήκτρου πάνω από το δάχτυλο</string>
     <string name="settings_haptics">Δόνηση κατά το πάτημα πλήκτρων</string>
+    <string name="settings_fn_toggles">Το Fn μένει ενεργό ως το επόμενο πάτημά του</string>
     <string name="settings_extra_rows">Επιπλέον σειρές</string>
     <string name="settings_f_key_row">Σειρά F1–F12</string>
     <string name="settings_extra_row">Δική σας σειρά</string>

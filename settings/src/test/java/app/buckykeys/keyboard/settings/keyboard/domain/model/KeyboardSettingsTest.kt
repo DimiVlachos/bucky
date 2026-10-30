@@ -99,6 +99,11 @@ class KeyboardSettingsTest {
     }
 
     @Test
+    fun `fn is one-shot by default`() {
+        assertEquals(false, KeyboardSettings.defaults(systemLanguage = "en").fnToggles)
+    }
+
+    @Test
     fun `apps default to compact with both helpers on`() {
         val defaults = KeyboardSettings.defaults(systemLanguage = "en")
         assertEquals(OutsideTerminals.COMPACT, defaults.outsideTerminals)
