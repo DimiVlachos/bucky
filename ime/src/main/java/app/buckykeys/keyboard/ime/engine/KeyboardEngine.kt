@@ -353,7 +353,7 @@ internal class KeyboardEngine(
                     KeyCode.PAGE_DOWN -> true
                     else -> false
                 }
-            is KeyDef.Char -> isSpace(def)
+            is KeyDef.Char,
             is KeyDef.Dead,
             is KeyDef.Modifier,
             is KeyDef.LayoutSwitch -> false
