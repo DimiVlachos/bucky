@@ -363,12 +363,22 @@ class KeyboardEngineTest {
     }
 
     @Test
-    fun `space delete and the arrows repeat`() {
-        listOf("", "Del", "←", "↑", "↓", "→").forEach { label ->
+    fun `delete and the arrows repeat`() {
+        listOf("Del", "←", "↑", "↓", "→").forEach { label ->
             down(label, pointer = 0)
             assertEquals(label, now + 400, engine.nextDeadline)
             up(label, pointer = 0)
         }
+    }
+
+    @Test
+    fun `holding space types one space on release`() {
+        down("", pointer = 0)
+        assertEquals(KeyboardEngine.NO_DEADLINE, engine.nextDeadline)
+        tick(2000)
+        now = 2000
+        up("", pointer = 0)
+        assertEquals(listOf(Text(" ")), sink.emitted)
     }
 
     @Test
@@ -1071,14 +1081,14 @@ class KeyboardEngineTest {
     }
 
     @Test
-    fun `a swipe after the space bar started repeating does not switch`() {
+    fun `a swipe on a long-held space bar still switches`() {
         engine.languageSwipe = true
         val (x, y) = centre("")
         engine.onPointer(0, x, y, PointerAction.DOWN, now, sink)
-        tick(400L)
+        tick(2000L)
         engine.onPointer(0, x + 100f, y, PointerAction.MOVE, now, sink)
-        assertEquals(null, engine.takeSwitchRequest())
-        assertEquals(listOf(Text(" ")), sink.emitted)
+        assertEquals(BuiltInLayouts.NEXT_LANGUAGE, engine.takeSwitchRequest())
+        assertTrue(sink.emitted.isEmpty())
     }
 
     @Test

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Rect
 import android.os.SystemClock
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
@@ -140,6 +141,7 @@ public class KeyboardView(
     private var spaceLabelSize = 0f
     private var spaceLabelY = 0f
     private var spaceMarkY = 0f
+    private val textBounds = Rect()
     private var languageLabel = ""
     private var popupLabels = emptyArray<String>()
     private var popupShiftedLabels = emptyArray<String>()
@@ -414,10 +416,15 @@ public class KeyboardView(
                 keyHeight * SPACE_LINE_HEIGHT_FRACTION,
             )
         spaceLabelPaint.textSize = spaceLabelSize
-        val lineHeight = spaceLabelPaint.descent() - spaceLabelPaint.ascent()
+        val markOffset =
+            (spaceLabelPaint.descent() - spaceLabelPaint.ascent()) * SPACE_MARK_LINE_FRACTION
+        spaceLabelPaint.getTextBounds(languageLabel, 0, languageLabel.length, textBounds)
+        val inkTop = textBounds.top
+        spaceLabelPaint.getTextBounds(SPACE_MARK, 0, SPACE_MARK.length, textBounds)
+        val inkBottom = markOffset + textBounds.bottom
         val centre = (rects[i * 4 + 1] + rects[i * 4 + 3]) / 2f
-        spaceLabelY = centre - spaceLabelPaint.descent()
-        spaceMarkY = spaceLabelY + lineHeight * SPACE_MARK_LINE_FRACTION
+        spaceLabelY = centre - (inkTop + inkBottom) / 2f
+        spaceMarkY = spaceLabelY + markOffset
     }
 
     private fun fitLabel(
@@ -805,6 +812,7 @@ public class KeyboardView(
         if (popupLabels.size != popup.count) return
         val top = popup.top
         val bottom = top + popup.cellHeight
+        val selectedBottom = bottom - lockBarHeightPx - POPUP_ACCENT_SPACING_GAPS * gapPx
         val panelRight = popup.left + popup.count * popup.cellWidth
         canvas.drawRoundRect(
             popup.left,
@@ -840,7 +848,7 @@ public class KeyboardView(
                     left + 2 * gapPx,
                     top + 2 * gapPx,
                     right - 2 * gapPx,
-                    bottom - lockBarHeightPx - 2 * gapPx,
+                    selectedBottom,
                     cornerPx,
                     cornerPx,
                     popupSelectedPaint,
@@ -852,7 +860,7 @@ public class KeyboardView(
             canvas.drawText(
                 label,
                 (left + right) / 2f,
-                (top + bottom) / 2f - (paint.ascent() + paint.descent()) / 2f,
+                (top + selectedBottom) / 2f - (paint.ascent() + paint.descent()) / 2f,
                 paint,
             )
         }
@@ -896,6 +904,7 @@ public class KeyboardView(
         const val SPACE_MARK = "␣"
         const val MAX_PREVIEW_WIDTH_ROWS = 2f
         const val SPACE_LINE_HEIGHT_FRACTION = 0.4f
-        const val SPACE_MARK_LINE_FRACTION = 0.9f
+        const val SPACE_MARK_LINE_FRACTION = 0.75f
+        const val POPUP_ACCENT_SPACING_GAPS = 4
     }
 }
