@@ -45,6 +45,7 @@ public class KeyboardView(
     private val labelScale: Float = 1f,
     pages: Map<String, Layout> = emptyMap(),
     private val actions: KeyboardActions = KeyboardActions {},
+    fnToggles: Boolean = false,
 ) : View(context) {
 
     private val gapPx = resources.getDimension(R.dimen.key_gap)
@@ -130,6 +131,8 @@ public class KeyboardView(
     private var special = BooleanArray(0)
     private var previewSize = FloatArray(0)
     private var previewFnSize = FloatArray(0)
+    private var previewWidths = FloatArray(0)
+    private var previewFnWidths = FloatArray(0)
     private var hintLabels = emptyArray<String>()
     private var fnLabels = emptyArray<String>()
     private var fnSmall = BooleanArray(0)
@@ -170,6 +173,7 @@ public class KeyboardView(
 
     init {
         engine.languageSwipe = pageSet.languageCount > 1
+        engine.fnToggles = fnToggles
         buildLabels()
         ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
             applyInsets(insets)
@@ -269,6 +273,8 @@ public class KeyboardView(
         special = BooleanArray(count)
         previewSize = FloatArray(count)
         previewFnSize = FloatArray(count)
+        previewWidths = FloatArray(count)
+        previewFnWidths = FloatArray(count)
         spaceKey = NO_SPACE_KEY
         val rects = geometry.rects
         hintLabels = Array(count) { hintFor(geometry.spec(it).def) }
@@ -369,33 +375,43 @@ public class KeyboardView(
         shiftedLabel: String,
         cellWidth: Float,
     ) {
-        val width = previewWidth(cellWidth)
         val shown = if (isSpaceBar(def)) SPACE_MARK else label
         val shiftedShown = if (isSpaceBar(def)) SPACE_MARK else shiftedLabel
+        previewWidths[i] = previewBubbleWidth(cellWidth, shown, shiftedShown)
         previewSize[i] =
             fitLabel(
                 previewLabelPaint,
                 previewLabelSizePx,
                 shown,
                 shiftedShown,
-                width,
+                previewWidths[i],
                 previewLabelSizePx,
             )
         if (fnLabels[i].isNotEmpty()) {
+            previewFnWidths[i] = previewBubbleWidth(cellWidth, fnLabels[i], fnLabels[i])
             previewFnSize[i] =
                 fitLabel(
                     previewLabelPaint,
                     previewLabelSizePx,
                     fnLabels[i],
                     fnLabels[i],
-                    width,
+                    previewFnWidths[i],
                     previewLabelSizePx,
                 )
         }
     }
 
-    private fun previewWidth(keyWidth: Float): Float =
-        keyWidth.coerceIn(rowHeightPx.toFloat(), rowHeightPx * MAX_PREVIEW_WIDTH_ROWS)
+    private fun previewBubbleWidth(keyWidth: Float, label: String, shiftedLabel: String): Float {
+        previewLabelPaint.textSize = previewLabelSizePx
+        val labelWidth =
+            maxOf(previewLabelPaint.measureText(label), previewLabelPaint.measureText(shiftedLabel))
+        return previewBubbleWidth(
+            keyWidth,
+            rowHeightPx.toFloat(),
+            labelWidth + 2 * (gapPx + labelPaddingPx),
+            geometry.widthPx.toFloat(),
+        )
+    }
 
     // The Fn page stays up after a space-bar swipe, so it shows the language too.
     private fun showsLanguage(): Boolean =
@@ -782,7 +798,7 @@ public class KeyboardView(
         val rects = geometry.rects
         val keyLeft = rects[key * 4]
         val keyRight = rects[key * 4 + 2]
-        val previewWidth = previewWidth(keyRight - keyLeft)
+        val previewWidth = if (usesFn) previewFnWidths[key] else previewWidths[key]
         val left =
             ((keyLeft + keyRight - previewWidth) / 2f)
                 .coerceAtMost(geometry.widthPx - previewWidth)
@@ -902,7 +918,6 @@ public class KeyboardView(
         const val LATENCY_TAG = "PCK-LAT"
         const val LOCK_BAR_WIDTH_FRACTION = 0.3f
         const val SPACE_MARK = "␣"
-        const val MAX_PREVIEW_WIDTH_ROWS = 2f
         const val SPACE_LINE_HEIGHT_FRACTION = 0.4f
         const val SPACE_MARK_LINE_FRACTION = 0.75f
         const val POPUP_ACCENT_SPACING_GAPS = 4

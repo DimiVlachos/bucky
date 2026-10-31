@@ -34,6 +34,7 @@ internal fun KeyboardSettingsScreen(
     onLabelScaleChange: (Int) -> Unit,
     onKeyPreviewChange: (Boolean) -> Unit,
     onHapticsChange: (Boolean) -> Unit,
+    onFnTogglesChange: (Boolean) -> Unit,
     onFKeyRowChange: (Boolean) -> Unit,
     onOutsideTerminalsChange: (OutsideTerminals) -> Unit,
     onAutoCapitalizeChange: (Boolean) -> Unit,
@@ -108,6 +109,11 @@ internal fun KeyboardSettingsScreen(
             text = stringResource(R.string.settings_haptics),
             checked = settings.haptics,
             onCheckedChange = onHapticsChange,
+        )
+        SwitchRow(
+            text = stringResource(R.string.settings_fn_toggles),
+            checked = settings.fnToggles,
+            onCheckedChange = onFnTogglesChange,
         )
         SectionTitle(stringResource(R.string.settings_extra_rows))
         SwitchRow(
@@ -186,6 +192,7 @@ private fun KeyboardSettingsScreenPreview() {
         KeyboardSettingsScreen(
             KeyboardSettings.defaults("el"),
             { _, _ -> },
+            {},
             {},
             {},
             {},

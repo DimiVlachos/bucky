@@ -77,6 +77,15 @@ class KeyboardSettingsViewModelTest {
         }
 
     @Test
+    fun `an fn toggle change is saved`() =
+        runTest(dispatcher) {
+            val viewModel = KeyboardSettingsViewModel(repository, FakeExtraRowInterpreter())
+            backgroundScope.launch { viewModel.state.collect {} }
+            viewModel.onFnTogglesChange(true)
+            assertEquals(true, repository.stored.value.fnToggles)
+        }
+
+    @Test
     fun `a failed save sets the error flag instead of crashing`() =
         runTest(dispatcher) {
             val viewModel = KeyboardSettingsViewModel(repository, FakeExtraRowInterpreter())

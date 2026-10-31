@@ -12,6 +12,7 @@ public data class KeyboardSettings(
     val labelScalePercent: Int = DEFAULT_LABEL_SCALE_PERCENT,
     val keyPreview: Boolean = true,
     val haptics: Boolean = true,
+    val fnToggles: Boolean = false,
     val fKeyRow: Boolean = false,
     val extraRow: List<String> = emptyList(),
     val outsideTerminals: OutsideTerminals = OutsideTerminals.COMPACT,

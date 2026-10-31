@@ -124,4 +124,74 @@ class LabelFitTest {
     fun `a smaller label size shrinks the fitted size`() {
         assertEquals(24f, scaledLabelSize(fittedSize = 30f, scale = 0.8f, maxSize = 100f), 0.001f)
     }
+
+    @Test
+    fun `a single character keeps the key width in the preview`() {
+        assertEquals(
+            60f,
+            previewBubbleWidth(
+                keyWidth = 60f,
+                rowHeight = 50f,
+                paddedLabelWidth = 30f,
+                keyboardWidth = 1000f,
+            ),
+            0.001f,
+        )
+    }
+
+    @Test
+    fun `a word label widens the preview to fit`() {
+        assertEquals(
+            130f,
+            previewBubbleWidth(
+                keyWidth = 60f,
+                rowHeight = 50f,
+                paddedLabelWidth = 130f,
+                keyboardWidth = 1000f,
+            ),
+            0.001f,
+        )
+    }
+
+    @Test
+    fun `a word label widens the preview to at most three rows`() {
+        assertEquals(
+            150f,
+            previewBubbleWidth(
+                keyWidth = 60f,
+                rowHeight = 50f,
+                paddedLabelWidth = 400f,
+                keyboardWidth = 1000f,
+            ),
+            0.001f,
+        )
+    }
+
+    @Test
+    fun `the preview never gets wider than the keyboard`() {
+        assertEquals(
+            120f,
+            previewBubbleWidth(
+                keyWidth = 60f,
+                rowHeight = 50f,
+                paddedLabelWidth = 400f,
+                keyboardWidth = 120f,
+            ),
+            0.001f,
+        )
+    }
+
+    @Test
+    fun `a wide key keeps the two row preview cap`() {
+        assertEquals(
+            100f,
+            previewBubbleWidth(
+                keyWidth = 300f,
+                rowHeight = 50f,
+                paddedLabelWidth = 30f,
+                keyboardWidth = 1000f,
+            ),
+            0.001f,
+        )
+    }
 }

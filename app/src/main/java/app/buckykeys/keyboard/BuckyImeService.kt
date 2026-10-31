@@ -319,6 +319,7 @@ class BuckyImeService : InputMethodService() {
                     else -> fullPages()
                 },
             actions = actions,
+            fnToggles = settings.fnToggles,
         )
     }
 

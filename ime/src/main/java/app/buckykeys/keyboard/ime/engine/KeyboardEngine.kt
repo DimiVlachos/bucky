@@ -43,6 +43,8 @@ internal class KeyboardEngine(
 
     public var languageSwipe: Boolean = false
 
+    public var fnToggles: Boolean = false
+
     public var autoShift: Boolean = false
         private set
 
@@ -417,6 +419,10 @@ internal class KeyboardEngine(
         when {
             kind == ModifierKind.SHIFT && autoShift -> autoShift = false
             lockedMask and bit != 0 -> lockedMask = lockedMask and bit.inv()
+            kind == ModifierKind.FN && fnToggles -> {
+                oneShotMask = oneShotMask and bit.inv()
+                lockedMask = lockedMask or bit
+            }
             oneShotMask and bit != 0 -> {
                 oneShotMask = oneShotMask and bit.inv()
                 lockedMask = lockedMask or bit
