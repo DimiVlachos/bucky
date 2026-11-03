@@ -100,4 +100,30 @@ class PageSetTest {
             fnPageTarget(BuiltInLayouts.PAGE_SYMBOLS, fnActive = false, hasFnPage = true),
         )
     }
+
+    @Test
+    fun `a numeric field opens the number pad from any page`() {
+        listOf(BuiltInLayouts.PAGE_LETTERS, BuiltInLayouts.PAGE_FN).forEach {
+            assertEquals(
+                BuiltInLayouts.PAGE_NUMERIC,
+                fieldPageTarget(it, BuiltInLayouts.PAGE_NUMERIC),
+            )
+        }
+    }
+
+    @Test
+    fun `a text field leaves the number pad for the letters`() {
+        assertEquals(
+            BuiltInLayouts.PAGE_LETTERS,
+            fieldPageTarget(BuiltInLayouts.PAGE_NUMERIC, BuiltInLayouts.PAGE_LETTERS),
+        )
+    }
+
+    @Test
+    fun `a text field restart keeps a locked fn page open`() {
+        assertEquals(
+            BuiltInLayouts.PAGE_FN,
+            fieldPageTarget(BuiltInLayouts.PAGE_FN, BuiltInLayouts.PAGE_LETTERS),
+        )
+    }
 }

@@ -8,14 +8,14 @@ import org.junit.Test
 class StartPageTest {
 
     @Test
-    fun `number phone and date fields open on the symbol page`() {
+    fun `number phone and date fields open on the number pad`() {
         listOf(
                 InputType.TYPE_CLASS_NUMBER,
                 InputType.TYPE_CLASS_PHONE,
                 InputType.TYPE_CLASS_DATETIME,
             )
             .forEach {
-                assertEquals(BuiltInLayouts.PAGE_SYMBOLS, startPageFor(it))
+                assertEquals(BuiltInLayouts.PAGE_NUMERIC, startPageFor(it))
             }
     }
 

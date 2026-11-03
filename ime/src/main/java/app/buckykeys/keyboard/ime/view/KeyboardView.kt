@@ -670,6 +670,16 @@ public class KeyboardView(
         switchPage(target)
     }
 
+    public fun showFieldPage(fieldPage: String) {
+        val target = fieldPageTarget(page, fieldPage)
+        // The pad has no modifier keys, so one locked before it could never be turned off there.
+        if (target == BuiltInLayouts.PAGE_NUMERIC && target != page && pageSet.isPage(target)) {
+            engine.reset()
+            removeCallbacks(fnPageSync)
+        }
+        showPage(target)
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         // The first measure sizes the IME window, and the listener only runs after it.

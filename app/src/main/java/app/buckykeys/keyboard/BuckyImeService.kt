@@ -214,7 +214,12 @@ class BuckyImeService : InputMethodService() {
         dispatcher.doubleSpacePeriod = flags.doubleSpacePeriod
         autoCapitalizeField = flags.autoCapitalize
         keyboardView?.previewEnabled = previewAllowed(info)
-        if (profile == Profile.COMPACT) keyboardView?.showPage(startPageFor(inputType))
+        val fieldPage = startPageFor(inputType)
+        if (profile == Profile.COMPACT) {
+            keyboardView?.showPage(fieldPage)
+        } else {
+            keyboardView?.showFieldPage(fieldPage)
+        }
         updateAutoShift()
     }
 
@@ -241,7 +246,8 @@ class BuckyImeService : InputMethodService() {
                 fullLayoutIds(target.languages, target.fullLayoutStyle) +
                 fullPageIds(target.fullLayoutStyle) +
                 BuiltInLayouts.COMPACT_SYMBOLS +
-                BuiltInLayouts.COMPACT_SYMBOLS_MORE
+                BuiltInLayouts.COMPACT_SYMBOLS_MORE +
+                BuiltInLayouts.COMPACT_NUMERIC
         val missing = wanted.distinct().filter { it !in layouts }
         if (missing.isEmpty()) return
         val optional = optionalLayoutIds(target.languages, target.fullLayoutStyle)
@@ -334,7 +340,12 @@ class BuckyImeService : InputMethodService() {
     private fun fullPages(): Map<String, Layout> =
         fullPagesFor(settings.fullLayoutStyle, layouts::get).mapValues { (_, page) ->
             page.withExtraRows(settings.fKeyRow, settings.extraRow)
-        }
+        } + numericPage()
+
+    private fun numericPage(): Map<String, Layout> =
+        layouts[BuiltInLayouts.COMPACT_NUMERIC]
+            ?.let { mapOf(BuiltInLayouts.PAGE_NUMERIC to it) }
+            .orEmpty()
 
     private fun compactLanguages(): List<Layout> {
         val switchable = switchable(settings.languages.map { layouts[it.compactLayoutId] })
@@ -346,6 +357,7 @@ class BuckyImeService : InputMethodService() {
         return mapOf(
                 BuiltInLayouts.PAGE_SYMBOLS to layouts[BuiltInLayouts.COMPACT_SYMBOLS],
                 BuiltInLayouts.PAGE_SYMBOLS_MORE to layouts[BuiltInLayouts.COMPACT_SYMBOLS_MORE],
+                BuiltInLayouts.PAGE_NUMERIC to layouts[BuiltInLayouts.COMPACT_NUMERIC],
             )
             .mapNotNull { (page, layout) -> layout?.let { page to it } }
             .toMap()

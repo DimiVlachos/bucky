@@ -28,9 +28,10 @@ internal fun optionalLayoutIds(
     style: FullLayoutStyle,
 ): Set<String> =
     if (style == FullLayoutStyle.HK_CLASSIC) {
-        (languages.map { it.classicLayoutId } + fullPageIds(style)).toSet()
+        (languages.map { it.classicLayoutId } + fullPageIds(style) + BuiltInLayouts.COMPACT_NUMERIC)
+            .toSet()
     } else {
-        emptySet()
+        setOf(BuiltInLayouts.COMPACT_NUMERIC)
     }
 
 internal fun fullPageIds(style: FullLayoutStyle): List<String> =

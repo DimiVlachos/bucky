@@ -18,6 +18,7 @@ class CompactLayoutsTest {
                 BuiltInLayouts.COMPACT_FI,
                 BuiltInLayouts.COMPACT_SYMBOLS,
                 BuiltInLayouts.COMPACT_SYMBOLS_MORE,
+                BuiltInLayouts.COMPACT_NUMERIC,
             )
             .associateWith { load(it) }
 
@@ -31,7 +32,7 @@ class CompactLayoutsTest {
 
     @Test
     fun `every compact page parses`() {
-        assertEquals(6, pages.size)
+        assertEquals(7, pages.size)
     }
 
     @Test
@@ -42,6 +43,28 @@ class CompactLayoutsTest {
                 assertEquals("$id row $index", 10.0, units, 0.001)
             }
         }
+    }
+
+    @Test
+    fun `the number pad has every digit, delete, enter and a way back to letters`() {
+        val pad = pages.getValue(BuiltInLayouts.COMPACT_NUMERIC)
+        val defs = pad.keys().map { it.def }
+        ('0'..'9').forEach { pad.char(it.toString()) }
+        assertTrue(KeyDef.Special(KeyCode.BACKSPACE) in defs)
+        assertTrue(KeyDef.Special(KeyCode.ENTER) in defs)
+        assertTrue(
+            defs.any { it is KeyDef.LayoutSwitch && it.targetId == BuiltInLayouts.PAGE_LETTERS },
+        )
+    }
+
+    @Test
+    fun `the number pad holds what phone and date fields need`() {
+        val pad = pages.getValue(BuiltInLayouts.COMPACT_NUMERIC)
+        assertEquals(listOf("*", "#"), pad.char("+").alternates.map { (it as KeyDef.Char).primary })
+        assertEquals(
+            listOf(",", "/", ":"),
+            pad.char(".").alternates.map { (it as KeyDef.Char).primary },
+        )
     }
 
     @Test
@@ -80,7 +103,8 @@ class CompactLayoutsTest {
 
     @Test
     fun `the keyboard key holds to the full layout on every page`() {
-        pages.forEach { (id, layout) ->
+        // The number pad is shared with the full layout, and its ABC key is one tap from ⌨.
+        (pages - BuiltInLayouts.COMPACT_NUMERIC).forEach { (id, layout) ->
             assertTrue(id, layout.keys().any { it.def == keyboardKey })
         }
     }
