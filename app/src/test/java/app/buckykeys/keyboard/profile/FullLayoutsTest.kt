@@ -76,9 +76,17 @@ class FullLayoutsTest {
     @Test
     fun `the classic layouts and the fn page may be missing, everything else falls back`() {
         assertEquals(
-            setOf("pc_hk_en_us", "pc_hk_el", BuiltInLayouts.PC_HK_FN),
+            setOf(
+                "pc_hk_en_us",
+                "pc_hk_el",
+                BuiltInLayouts.PC_HK_FN,
+                BuiltInLayouts.COMPACT_NUMERIC,
+            ),
             optionalLayoutIds(languages, FullLayoutStyle.HK_CLASSIC),
         )
-        assertEquals(emptySet<String>(), optionalLayoutIds(languages, FullLayoutStyle.CENTRED))
+        assertEquals(
+            setOf(BuiltInLayouts.COMPACT_NUMERIC),
+            optionalLayoutIds(languages, FullLayoutStyle.CENTRED),
+        )
     }
 }

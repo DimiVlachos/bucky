@@ -31,3 +31,11 @@ internal fun fnPageTarget(current: String, fnActive: Boolean, hasFnPage: Boolean
         !fnActive && current == BuiltInLayouts.PAGE_FN -> BuiltInLayouts.PAGE_LETTERS
         else -> current
     }
+
+// A terminal's field can restart at any time, so only the number pad moves here, never a locked Fn.
+internal fun fieldPageTarget(current: String, fieldPage: String): String =
+    when {
+        fieldPage == BuiltInLayouts.PAGE_NUMERIC -> BuiltInLayouts.PAGE_NUMERIC
+        current == BuiltInLayouts.PAGE_NUMERIC -> BuiltInLayouts.PAGE_LETTERS
+        else -> current
+    }
