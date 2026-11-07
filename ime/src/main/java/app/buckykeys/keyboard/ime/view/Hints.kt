@@ -18,3 +18,17 @@ private fun hintFor(primary: String, shifted: String, alternates: List<KeyDef>):
     if (primary.uppercase() != primary) return ""
     return alternates.getOrNull(1)?.let(DefaultLabels::of).orEmpty()
 }
+
+// Hacker's Keyboard showed Shift and AltGr on a symbol key; holding types the left one.
+internal fun shiftHintFor(def: KeyDef): String =
+    when (def) {
+        is KeyDef.Char -> shiftHintFor(def.primary, def.shifted, def.alternates)
+        is KeyDef.Dead -> shiftHintFor(def.primary, def.shifted, def.alternates)
+        else -> ""
+    }
+
+private fun shiftHintFor(primary: String, shifted: String, alternates: List<KeyDef>): String {
+    val first = alternates.firstOrNull() as? KeyDef.Char ?: return ""
+    if (shifted == primary || first.primary != shifted) return ""
+    return if (primary.uppercase() == primary) shifted else ""
+}
