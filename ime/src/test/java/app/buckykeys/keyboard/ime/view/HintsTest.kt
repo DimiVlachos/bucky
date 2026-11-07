@@ -48,4 +48,31 @@ class HintsTest {
     fun `a symbol whose only alternate is its shifted form shows nothing`() {
         assertEquals("", hintFor(KeyDef.Char("/", "?", listOf(KeyDef.Char("?", "?")))))
     }
+
+    @Test
+    fun `a symbol that holds for its shifted form shows it as the shift hint`() {
+        val alternates = listOf(KeyDef.Char("\"", "\""), KeyDef.Char("@", "@"))
+        val two = KeyDef.Char("2", "\"", alternates)
+        assertEquals("\"", shiftHintFor(two))
+        assertEquals("@", hintFor(two))
+    }
+
+    @Test
+    fun `a dead key that holds for its shifted mark shows it as the shift hint`() {
+        val alternates = listOf(KeyDef.Char("`", "`"), KeyDef.Special(KeyCode.F12))
+        assertEquals("`", shiftHintFor(KeyDef.Dead("´", "`", alternates = alternates)))
+    }
+
+    @Test
+    fun `a letter shows no shift hint`() {
+        assertEquals("", shiftHintFor(KeyDef.Char("e", "E", listOf(KeyDef.Char("E", "E")))))
+        assertEquals("", shiftHintFor(KeyDef.Char("q", "Q", listOf(KeyDef.Char("1", "1")))))
+    }
+
+    @Test
+    fun `a symbol whose first alternate is not its shifted form shows no shift hint`() {
+        assertEquals("", shiftHintFor(KeyDef.Char(".", ">", listOf(KeyDef.Char("…", "…")))))
+        assertEquals("", shiftHintFor(KeyDef.Char("-", "-", listOf(KeyDef.Char("-", "-")))))
+        assertEquals("", shiftHintFor(KeyDef.Special(KeyCode.ESC)))
+    }
 }

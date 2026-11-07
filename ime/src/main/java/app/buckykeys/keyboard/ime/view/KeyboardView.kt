@@ -106,6 +106,7 @@ public class KeyboardView(
                 color = ContextCompat.getColor(context, R.color.key_label_secondary)
                 textAlign = Paint.Align.RIGHT
             }
+    private val shiftHintPaint = Paint(hintPaint).apply { textAlign = Paint.Align.LEFT }
     private val spaceLabelPaint =
         labelPaint(smallLabelSizePx).apply {
             color = ContextCompat.getColor(context, R.color.key_label_secondary)
@@ -139,6 +140,8 @@ public class KeyboardView(
     private var fnSize = FloatArray(0)
     private var fnY = FloatArray(0)
     private var hintX = FloatArray(0)
+    private var shiftHintLabels = emptyArray<String>()
+    private var shiftHintX = FloatArray(0)
     private var hintY = FloatArray(0)
     private var spaceKey = NO_SPACE_KEY
     private var spaceLabelSize = 0f
@@ -278,11 +281,20 @@ public class KeyboardView(
         spaceKey = NO_SPACE_KEY
         val rects = geometry.rects
         hintLabels = Array(count) { hintFor(geometry.spec(it).def) }
+        hintX = FloatArray(count) { rects[it * 4 + 2] - gapPx - 2 * labelPaddingPx }
+        shiftHintX = FloatArray(count) { rects[it * 4] + gapPx + 2 * labelPaddingPx }
+        shiftHintLabels =
+            Array(count) {
+                val label = shiftHintFor(geometry.spec(it).def)
+                val right = hintX[it] - hintPaint.measureText(hintLabels[it])
+                val fits =
+                    shiftHintX[it] + shiftHintPaint.measureText(label) + labelPaddingPx * 2 <= right
+                if (fits && !isSmall(hintLabels[it])) label else ""
+            }
         fnLabels = Array(count) { geometry.spec(it).fn?.let(DefaultLabels::of).orEmpty() }
         fnSmall = BooleanArray(count) { isSmall(fnLabels[it]) }
         fnSize = FloatArray(count)
         fnY = FloatArray(count)
-        hintX = FloatArray(count) { rects[it * 4 + 2] - gapPx - 2 * labelPaddingPx }
         hintY =
             FloatArray(count) { rects[it * 4 + 1] + gapPx + labelPaddingPx - hintPaint.ascent() }
         for (i in 0 until count) {
@@ -566,10 +578,16 @@ public class KeyboardView(
             return
         }
         val spec = geometry.spec(i)
+        val showsShifted =
+            when (spec.def) {
+                is KeyDef.Char -> shifted
+                is KeyDef.Dead -> deadShifted
+                else -> false
+            }
         val label =
             when (val def = spec.def) {
-                is KeyDef.Char -> if (shifted) def.shifted else spec.label
-                is KeyDef.Dead -> if (deadShifted) def.shifted else spec.label
+                is KeyDef.Char -> if (showsShifted) def.shifted else spec.label
+                is KeyDef.Dead -> if (showsShifted) def.shifted else spec.label
                 else -> spec.label
             }
         val paint = if (labelSmall[i]) smallLabelPaint else labelPaint
@@ -577,6 +595,8 @@ public class KeyboardView(
         canvas.drawText(label, labelX[i], labelY[i], paint)
         if (hintLabels[i].isNotEmpty())
             canvas.drawText(hintLabels[i], hintX[i], hintY[i], hintPaint)
+        if (!showsShifted && shiftHintLabels[i].isNotEmpty())
+            canvas.drawText(shiftHintLabels[i], shiftHintX[i], hintY[i], shiftHintPaint)
     }
 
     private fun drawLockBar(canvas: Canvas, key: Int) {
