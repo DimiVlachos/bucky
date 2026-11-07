@@ -121,8 +121,8 @@ internal class KeyboardEngine(
     ) {
         if (pointerId !in 0 until MAX_POINTERS) return
         when (action) {
-            PointerAction.DOWN -> press(pointerId, geometry.keyAt(x, y), x, y, timeMs)
-            PointerAction.MOVE -> move(pointerId, x, y)
+            PointerAction.DOWN -> press(pointerId, geometry.keyAt(x, y), x, y, timeMs, sink)
+            PointerAction.MOVE -> move(pointerId, x, y, timeMs)
             PointerAction.CANCEL -> cancel(pointerId)
             PointerAction.UP -> lift(pointerId, x, y, sink)
         }
@@ -180,11 +180,14 @@ internal class KeyboardEngine(
         return NO_DEAD_KEY
     }
 
-    private fun press(pointerId: Int, key: Int, x: Float, y: Float, timeMs: Long) {
+    private fun press(pointerId: Int, key: Int, x: Float, y: Float, timeMs: Long, sink: InputSink) {
         val def = if (key == NO_KEY) null else geometry.spec(key).def
         if (def !is KeyDef.Modifier) {
             stopTimer()
             closePopup()
+        }
+        if (def != null && def !is KeyDef.Modifier) {
+            for (other in 0 until MAX_POINTERS) if (other != pointerId) commitRolled(other, sink)
         }
         endHold(pointerKeys[pointerId])
         pointerKeys[pointerId] = key
@@ -192,13 +195,17 @@ internal class KeyboardEngine(
         pointerDownX[pointerId] = x
         pointerX[pointerId] = x
         pointerY[pointerId] = y
+        if (def is KeyDef.Modifier) startHold(def.kind)
+        aim(pointerId, key, timeMs)
+    }
+
+    private fun aim(pointerId: Int, key: Int, timeMs: Long) {
         pointerFn[pointerId] =
             key != NO_KEY && geometry.spec(key).fn != null && isActive(ModifierKind.FN)
-        if (def is KeyDef.Modifier) startHold(def.kind)
         val acting = if (key == NO_KEY) null else acting(key, pointerFn[pointerId])
         when (acting) {
             is KeyDef.Modifier -> Unit
-            null -> previewPointer = NO_POINTER
+            null -> if (pointerId == previewPointer) previewPointer = NO_POINTER
             else -> previewPointer = pointerId
         }
         when {
@@ -208,20 +215,52 @@ internal class KeyboardEngine(
         }
     }
 
-    private fun move(pointerId: Int, x: Float, y: Float) {
+    // Fast typists press the next key before lifting the last one; typing the held key now keeps
+    // the order, as Hacker's Keyboard does.
+    private fun commitRolled(pointerId: Int, sink: InputSink) {
+        val key = pointerKeys[pointerId]
+        if (key == NO_KEY || pointerConsumed[pointerId] || pointerId == popupPointer) return
+        val spec = geometry.spec(key)
+        val def = acting(key, pointerFn[pointerId])
+        if (def is KeyDef.Modifier || def is KeyDef.LayoutSwitch || spec.then != null) return
+        if (pointerId == previewPointer) previewPointer = NO_POINTER
+        pointerConsumed[pointerId] = true
+        release(key, false, pointerFn[pointerId], sink)
+    }
+
+    private fun move(pointerId: Int, x: Float, y: Float, timeMs: Long) {
         pointerX[pointerId] = x
         pointerY[pointerId] = y
         if (isLanguageSwipe(pointerId, x)) {
             swipeLanguage(pointerId, forward = x > pointerDownX[pointerId])
             return
         }
-        if (pointerId == previewPointer && !staysOn(pointerKeys[pointerId], x, y)) {
-            previewPointer = NO_POINTER
+        if (pointerId == popupPointer) {
+            popup.select(x, y)
+            return
         }
-        when (pointerId) {
-            popupPointer -> popup.select(x, y)
-            timerPointer -> if (!staysOn(pointerKeys[pointerId], x, y)) stopTimer()
+        val key = pointerKeys[pointerId]
+        if (staysOn(key, x, y)) return
+        if (pointerConsumed[pointerId] || (key != NO_KEY && isModifier(key))) {
+            if (pointerId == previewPointer) previewPointer = NO_POINTER
+            if (pointerId == timerPointer) stopTimer()
+            return
         }
+        val target = geometry.keyAt(x, y)
+        slideTo(
+            pointerId,
+            if (target == NO_KEY || isModifier(target)) NO_KEY else target,
+            x,
+            timeMs,
+        )
+    }
+
+    private fun slideTo(pointerId: Int, key: Int, x: Float, timeMs: Long) {
+        if (key == pointerKeys[pointerId]) return
+        if (pointerId == timerPointer) stopTimer()
+        pointerKeys[pointerId] = key
+        pointerDownX[pointerId] = x
+        aim(pointerId, key, timeMs)
     }
 
     private fun isLanguageSwipe(pointerId: Int, x: Float): Boolean {
