@@ -677,10 +677,105 @@ class KeyboardEngineTest {
     }
 
     @Test
-    fun `sliding off the previewed key hides the preview`() {
+    fun `sliding onto the next key moves the preview there`() {
         down("a", pointer = 0)
         move("s", pointer = 0)
-        assertEquals(KeyboardEngine.NO_PREVIEW, engine.previewKey)
+        assertEquals(indexOf("s"), engine.previewKey)
+    }
+
+    @Test
+    fun `sliding onto the next key moves the highlight there`() {
+        down("g", pointer = 0)
+        move("h", pointer = 0)
+        assertTrue(engine.isPressed(indexOf("h")))
+        assertFalse(engine.isPressed(indexOf("g")))
+        up("h", pointer = 0)
+        assertEquals(listOf(Text("h")), sink.emitted)
+    }
+
+    @Test
+    fun `a small slip keeps the highlight on the pressed key`() {
+        val i = indexOf("g") * 4
+        val r = geometry.rects
+        val y = (r[i + 1] + r[i + 3]) / 2f
+        engine.onPointer(0, r[i + 2] - 1f, y, PointerAction.DOWN, now, sink)
+        engine.onPointer(0, r[i + 2] + (r[i + 2] - r[i]) / 4f, y, PointerAction.MOVE, now, sink)
+        assertTrue(engine.isPressed(indexOf("g")))
+    }
+
+    @Test
+    fun `sliding onto a modifier keeps the highlight off it and types nothing`() {
+        down("a", pointer = 0)
+        move("Ctrl", pointer = 0)
+        assertFalse(engine.isPressed(indexOf("Ctrl")))
+        up("Ctrl", pointer = 0)
+        assertTrue(sink.emitted.isEmpty())
+    }
+
+    @Test
+    fun `sliding onto another key restarts the long press there`() {
+        down("a", pointer = 0)
+        now = 200
+        move("1", pointer = 0)
+        tick(400)
+        assertFalse(engine.popup.isOpen)
+        tick(500)
+        assertTrue(engine.popup.isOpen)
+    }
+
+    @Test
+    fun `a second letter pressed before the first is lifted keeps the typing order`() {
+        down("a", pointer = 0)
+        down("s", pointer = 1)
+        up("s", pointer = 1)
+        up("a", pointer = 0)
+        assertEquals(listOf(Text("a"), Text("s")), sink.emitted)
+    }
+
+    @Test
+    fun `the earlier letter is typed once when a second finger lands`() {
+        down("a", pointer = 0)
+        down("s", pointer = 1)
+        assertEquals(listOf(Text("a")), sink.emitted)
+        up("a", pointer = 0)
+        assertEquals(listOf(Text("a")), sink.emitted)
+    }
+
+    @Test
+    fun `a backspace tapped while a letter is still held deletes after the letter`() {
+        down("a", pointer = 0)
+        tap("⌫", pointer = 1)
+        up("a", pointer = 0)
+        assertEquals(listOf(Text("a"), del), sink.emitted)
+    }
+
+    @Test
+    fun `a letter tapped while backspace is still held deletes first`() {
+        down("⌫", pointer = 0)
+        tap("a", pointer = 1)
+        up("⌫", pointer = 0)
+        assertEquals(listOf(del, Text("a")), sink.emitted)
+    }
+
+    @Test
+    fun `a backspace tap that drifts up a little still deletes`() {
+        val i = indexOf("⌫") * 4
+        val r = geometry.rects
+        val x = (r[i] + r[i + 2]) / 2f
+        engine.onPointer(0, x, r[i + 1] + 2f, PointerAction.DOWN, now, sink)
+        engine.onPointer(0, x, r[i + 1] - (r[i + 3] - r[i + 1]) / 4f, PointerAction.UP, now, sink)
+        assertEquals(listOf(del), sink.emitted)
+    }
+
+    @Test
+    fun `holding shift while rolling two letters capitalises both`() {
+        down("⇧", pointer = 0)
+        down("a", pointer = 1)
+        down("s", pointer = 2)
+        up("a", pointer = 1)
+        up("s", pointer = 2)
+        up("⇧", pointer = 0)
+        assertEquals(listOf(Text("A"), Text("S")), sink.emitted)
     }
 
     @Test
@@ -1329,8 +1424,9 @@ class KeyboardEngineTest {
             KeySpec(KeyDef.Char(" ", " "), "space", then = BuiltInLayouts.PAGE_LETTERS),
             char("@"),
         )
+        down("space", pointer = 0)
         down("@", pointer = 1)
-        tap("space", pointer = 0)
+        up("space", pointer = 0)
         assertEquals(BuiltInLayouts.PAGE_LETTERS, engine.takeSwitchRequest())
         val letters =
             KeyboardGeometry(Layout("l", "l", listOf(Row(listOf(char("q"), char("a"))))), 400, 120)
@@ -1338,6 +1434,30 @@ class KeyboardEngineTest {
         geometry = letters
         up("a", pointer = 1)
         assertEquals(listOf(Text(" "), Text("a")), sink.emitted)
+    }
+
+    @Test
+    fun `a symbol held while a page switching key is tapped is typed first`() {
+        useRow(
+            KeySpec(KeyDef.Char(" ", " "), "space", then = BuiltInLayouts.PAGE_LETTERS),
+            char("@"),
+        )
+        down("@", pointer = 1)
+        tap("space", pointer = 0)
+        up("@", pointer = 1)
+        assertEquals(listOf(Text("@"), Text(" ")), sink.emitted)
+    }
+
+    @Test
+    fun `a page switching key held while another key is pressed waits for its lift`() {
+        useRow(
+            KeySpec(KeyDef.Char(" ", " "), "space", then = BuiltInLayouts.PAGE_LETTERS),
+            char("@"),
+        )
+        down("space", pointer = 0)
+        down("@", pointer = 1)
+        assertTrue(sink.emitted.isEmpty())
+        assertEquals(null, engine.takeSwitchRequest())
     }
 
     @Test
