@@ -35,4 +35,12 @@ class BottomInsetTest {
     fun `only the part the window does not reserve is padded`() {
         assertEquals(21, keysBottomPadding(barBottom = 42, gestureBottom = 63, reservedBelow = 42))
     }
+
+    @Test
+    fun `a view that overshoots its root never pads more than the bar`() {
+        assertEquals(
+            126,
+            keysBottomPadding(barBottom = 126, gestureBottom = 126, reservedBelow = -1200),
+        )
+    }
 }
