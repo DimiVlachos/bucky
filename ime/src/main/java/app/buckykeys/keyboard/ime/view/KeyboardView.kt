@@ -216,6 +216,7 @@ public class KeyboardView(
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        if (rootView.height == 0) return
         val reserved = rootView.height - bottomInRoot()
         if (reserved != reservedBelowPx) {
             reservedBelowPx = reserved
