@@ -37,11 +37,12 @@ internal class AlternatesPopup {
         val i = keyIndex * 4
         this.keyIndex = keyIndex
         this.count = count
-        cellWidth = minOf(rects[i + 2] - rects[i], keyboardWidth / count)
         cellHeight = rects[i + 3] - rects[i + 1]
+        // Narrow keys get square cells so the alternates read as large as the keys, as ketas asked.
+        cellWidth = minOf(maxOf(rects[i + 2] - rects[i], cellHeight), keyboardWidth / count)
         val width = count * cellWidth
         val centre = (rects[i] + rects[i + 2]) / 2f
-        left = rects[i].coerceAtMost(keyboardWidth - width).coerceAtLeast(0f)
+        left = (centre - cellWidth / 2f).coerceAtMost(keyboardWidth - width).coerceAtLeast(0f)
         anchor = ((centre - left) / cellWidth).toInt().coerceIn(0, count - 1)
         reversed = count - 1 - anchor < anchor
         top = rects[i + 1] - cellHeight

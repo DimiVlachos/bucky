@@ -508,7 +508,10 @@ public class KeyboardView(
                     popupLabels[it],
                     popupShiftedLabels[it],
                     popup.cellWidth,
-                    popup.cellHeight * LABEL_HEIGHT_FRACTION,
+                    popupLabelMaxSize(
+                        popup.cellHeight,
+                        lockBarHeightPx + POPUP_ACCENT_SPACING_GAPS * gapPx,
+                    ),
                 )
             }
     }

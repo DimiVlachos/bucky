@@ -510,10 +510,27 @@ class KeyboardEngineTest {
         tick(300)
         val i = indexOf("1") * 4
         val r = geometry.rects
-        assertEquals(r[i], engine.popup.left, 0.01f)
         assertEquals(r[i + 1] - 120f, engine.popup.top, 0.01f)
-        assertEquals(r[i + 2] - r[i], engine.popup.cellWidth, 0.01f)
         assertEquals(120f, engine.popup.cellHeight, 0.01f)
+    }
+
+    @Test
+    fun `popup cells on a narrow key are as wide as the row is tall`() {
+        down("1", pointer = 0)
+        tick(300)
+        val i = indexOf("1") * 4
+        assertTrue(geometry.rects[i + 2] - geometry.rects[i] < 120f)
+        assertEquals(120f, engine.popup.cellWidth, 0.01f)
+    }
+
+    @Test
+    fun `the first popup cell is centred over its key`() {
+        down("5", pointer = 0)
+        tick(300)
+        val (x, _) = centre("5")
+        val firstCell = (0 until engine.popup.count).first { engine.popup.alternateAt(it) == 0 }
+        val cellCentre = engine.popup.left + (firstCell + 0.5f) * engine.popup.cellWidth
+        assertEquals(x, cellCentre, 0.01f)
     }
 
     @Test
@@ -544,7 +561,6 @@ class KeyboardEngineTest {
         useRow(char("x"), char("y"), char("z"), accented)
         down("e", pointer = 0)
         tick(300)
-        assertEquals(100f, engine.popup.left, 0.01f)
         assertEquals(400f, engine.popup.left + 3 * engine.popup.cellWidth, 0.01f)
     }
 
