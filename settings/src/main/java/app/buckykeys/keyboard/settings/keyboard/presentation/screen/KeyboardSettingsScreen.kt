@@ -17,6 +17,7 @@ import app.buckykeys.keyboard.settings.keyboard.domain.model.FullLayoutStyle
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardLanguage
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
 import app.buckykeys.keyboard.settings.keyboard.domain.model.OutsideTerminals
+import app.buckykeys.keyboard.settings.keyboard.presentation.components.ActionRow
 import app.buckykeys.keyboard.settings.keyboard.presentation.components.CheckboxRow
 import app.buckykeys.keyboard.settings.keyboard.presentation.components.ExtraRowEditor
 import app.buckykeys.keyboard.settings.keyboard.presentation.components.RadioRow
@@ -43,6 +44,8 @@ internal fun KeyboardSettingsScreen(
     extraRowPreview: ExtraRowPreview,
     onExtraRowSave: () -> Unit,
     onFullLayoutStyleChange: (FullLayoutStyle) -> Unit,
+    touchCorrectionLearned: Boolean,
+    onTouchCorrectionReset: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(BuckyTheme.spacing.medium)) {
         SectionTitle(stringResource(R.string.settings_languages))
@@ -114,6 +117,13 @@ internal fun KeyboardSettingsScreen(
             text = stringResource(R.string.settings_fn_toggles),
             checked = settings.fnToggles,
             onCheckedChange = onFnTogglesChange,
+        )
+        ActionRow(
+            text = stringResource(R.string.settings_touch_correction),
+            description = stringResource(R.string.settings_touch_correction_description),
+            actionLabel = stringResource(R.string.settings_touch_correction_reset),
+            actionEnabled = touchCorrectionLearned,
+            onAction = onTouchCorrectionReset,
         )
         SectionTitle(stringResource(R.string.settings_extra_rows))
         SwitchRow(
@@ -206,6 +216,8 @@ private fun KeyboardSettingsScreenPreview() {
             ExtraRowPreview(emptyList(), emptyList(), overLimit = false, limit = 15),
             {},
             {},
+            touchCorrectionLearned = true,
+            onTouchCorrectionReset = {},
         )
     }
 }

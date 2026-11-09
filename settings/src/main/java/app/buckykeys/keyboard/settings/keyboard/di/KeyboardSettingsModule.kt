@@ -5,9 +5,13 @@ import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.dataStoreFile
 import app.buckykeys.keyboard.settings.keyboard.data.repository.KeyboardSettingsRepositoryImpl
+import app.buckykeys.keyboard.settings.keyboard.data.repository.TouchOffsetRepositoryImpl
 import app.buckykeys.keyboard.settings.keyboard.data.serializer.KeyboardSettingsSerializer
+import app.buckykeys.keyboard.settings.keyboard.data.serializer.TouchOffsetSerializer
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
+import app.buckykeys.keyboard.settings.keyboard.domain.model.TouchOffset
 import app.buckykeys.keyboard.settings.keyboard.domain.repository.KeyboardSettingsRepository
+import app.buckykeys.keyboard.settings.keyboard.domain.repository.TouchOffsetRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,5 +39,18 @@ internal object KeyboardSettingsModule {
         return KeyboardSettingsRepositoryImpl(dataStore, defaults)
     }
 
+    @Provides
+    @Singleton
+    fun provideTouchOffsetRepository(@ApplicationContext context: Context): TouchOffsetRepository {
+        val dataStore =
+            DataStoreFactory.create(
+                serializer = TouchOffsetSerializer(),
+                corruptionHandler = ReplaceFileCorruptionHandler { TouchOffset.NONE },
+                produceFile = { context.dataStoreFile(TOUCH_OFFSET_FILE_NAME) },
+            )
+        return TouchOffsetRepositoryImpl(dataStore)
+    }
+
     private const val FILE_NAME = "keyboard_settings.json"
+    private const val TOUCH_OFFSET_FILE_NAME = "touch_offset.json"
 }

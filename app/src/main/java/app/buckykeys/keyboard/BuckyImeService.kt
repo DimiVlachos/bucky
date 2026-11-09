@@ -33,8 +33,11 @@ import app.buckykeys.keyboard.profile.startPageFor
 import app.buckykeys.keyboard.settings.SettingsActivity
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
 import app.buckykeys.keyboard.settings.keyboard.domain.model.OutsideTerminals
+import app.buckykeys.keyboard.settings.keyboard.domain.model.TouchOffset
 import app.buckykeys.keyboard.settings.keyboard.domain.repository.KeyboardSettingsRepository
+import app.buckykeys.keyboard.settings.keyboard.domain.repository.TouchOffsetRepository
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.IOException
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -55,6 +58,10 @@ class BuckyImeService : InputMethodService() {
     @Inject lateinit var billingRepository: BillingRepository
 
     @Inject lateinit var keyboardSettingsRepository: KeyboardSettingsRepository
+
+    @Inject lateinit var touchOffsetRepository: TouchOffsetRepository
+
+    private var syncedOffset: TouchOffset? = null
 
     private val serviceScope =
         CoroutineScope(
@@ -122,6 +129,33 @@ class BuckyImeService : InputMethodService() {
                     if (isInputViewShown) startField(currentInputEditorInfo) else refreshView()
                 }
         }
+        serviceScope.launch {
+            touchOffsetRepository.offset
+                .catch { Timber.e(it, "touch offset failed, keeping the learned one") }
+                .collect(::applyStoredOffset)
+        }
+    }
+
+    // A value we didn't just save is the first load or a reset from settings.
+    private fun applyStoredOffset(stored: TouchOffset) {
+        if (stored == syncedOffset) return
+        syncedOffset = stored
+        ImeSession.touchBias.restore(stored.x, stored.y)
+    }
+
+    private fun saveLearnedOffset() {
+        if (syncedOffset == null) return
+        val bias = ImeSession.touchBias
+        val learned = TouchOffset(bias.x, bias.y)
+        if (learned == syncedOffset) return
+        syncedOffset = learned
+        serviceScope.launch {
+            try {
+                touchOffsetRepository.save(learned)
+            } catch (e: IOException) {
+                Timber.e(e, "saving the touch offset failed")
+            }
+        }
     }
 
     override fun onCreateInputView(): View = createView().also(::adopt)
@@ -184,6 +218,7 @@ class BuckyImeService : InputMethodService() {
 
     override fun onFinishInputView(finishingInput: Boolean) {
         keyboardView?.resetState()
+        saveLearnedOffset()
         super.onFinishInputView(finishingInput)
     }
 
