@@ -326,6 +326,7 @@ class BuckyImeService : InputMethodService() {
                 },
             actions = actions,
             fnToggles = settings.fnToggles,
+            touchBias = ImeSession.touchBias,
         )
     }
 
