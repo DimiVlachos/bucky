@@ -6,7 +6,7 @@ import app.buckykeys.keyboard.ime.layout.Layout
 internal class KeyboardGeometry(
     layout: Layout,
     public val widthPx: Int,
-    private val rowHeightPx: Int,
+    public val rowHeightPx: Int,
 ) {
 
     private val specs: List<KeySpec> = layout.rows.flatMap { it.keys }
@@ -38,6 +38,16 @@ internal class KeyboardGeometry(
 
     public fun spec(index: Int): KeySpec = specs[index]
 
+    // A touch on the keyboard stays on it after the shift, so a correction never drops a key.
+    public fun keyAt(x: Float, y: Float, dx: Float, dy: Float): Int {
+        if (keyAt(x, y) == -1) return -1
+        val bottom = (rowStarts.size - 1) * rowHeightPx.toFloat()
+        return keyAt(
+            (x - dx).coerceIn(0f, widthPx - EDGE_INSET),
+            (y - dy).coerceIn(0f, bottom - EDGE_INSET),
+        )
+    }
+
     public fun keyAt(x: Float, y: Float): Int {
         if (!hittable || x < 0f || y < 0f) return -1
         val row = (y / rowHeightPx).toInt()
@@ -50,5 +60,9 @@ internal class KeyboardGeometry(
             if (x >= rects[index * 4] && x < rects[index * 4 + 2]) return index
         }
         return last
+    }
+
+    private companion object {
+        const val EDGE_INSET = 0.5f
     }
 }

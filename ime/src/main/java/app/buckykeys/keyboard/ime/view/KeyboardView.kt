@@ -18,6 +18,7 @@ import app.buckykeys.keyboard.ime.R
 import app.buckykeys.keyboard.ime.engine.InputSink
 import app.buckykeys.keyboard.ime.engine.KeyboardEngine
 import app.buckykeys.keyboard.ime.engine.PointerAction
+import app.buckykeys.keyboard.ime.engine.TouchBias
 import app.buckykeys.keyboard.ime.geometry.KeyboardGeometry
 import app.buckykeys.keyboard.ime.layout.BuiltInLayouts
 import app.buckykeys.keyboard.ime.layout.DefaultLabels
@@ -46,6 +47,7 @@ public class KeyboardView(
     pages: Map<String, Layout> = emptyMap(),
     private val actions: KeyboardActions = KeyboardActions {},
     fnToggles: Boolean = false,
+    touchBias: TouchBias = TouchBias(),
 ) : View(context) {
 
     private val gapPx = resources.getDimension(R.dimen.key_gap)
@@ -123,7 +125,7 @@ public class KeyboardView(
     private var geometry = KeyboardGeometry(layout, 0, rowHeightPx)
     private var geometryLanguage = languageIndex
     private var geometryPage = page
-    private val engine = KeyboardEngine(geometry, longPressMs)
+    private val engine = KeyboardEngine(geometry, longPressMs, touchBias)
     private var labelX = FloatArray(0)
     private var labelY = FloatArray(0)
     private var labelSize = FloatArray(0)

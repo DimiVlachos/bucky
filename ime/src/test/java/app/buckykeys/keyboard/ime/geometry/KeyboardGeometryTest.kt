@@ -129,4 +129,20 @@ class KeyboardGeometryTest {
         assertEquals(0, inset.keyAt(10f, 50f))
         assertEquals(8, inset.keyAt(995f, 50f))
     }
+
+    @Test
+    fun `a shifted lookup finds the key the offset points at`() {
+        val shifted = geometry.keyAt(1f, 599f, dx = 0f, dy = 120f)
+        assertEquals(geometry.keyAt(1f, 479f), shifted)
+    }
+
+    @Test
+    fun `a shifted lookup past the top edge stays on the top row`() {
+        assertEquals(geometry.keyAt(1f, 1f), geometry.keyAt(1f, 1f, dx = 0f, dy = 60f))
+    }
+
+    @Test
+    fun `a shifted lookup outside the keyboard finds nothing`() {
+        assertEquals(-1, geometry.keyAt(1f, 700f, dx = 0f, dy = 200f))
+    }
 }

@@ -1629,6 +1629,87 @@ class KeyboardEngineTest {
             "e",
         )
 
+    @Test
+    fun `a fresh keyboard types the key under the touch`() {
+        tapAt(leftEdge("d") - 10f, centre("d").second)
+        assertEquals(listOf(Text("s")), sink.emitted)
+    }
+
+    @Test
+    fun `after taps that land low and left the keyboard shifts touches up and right`() {
+        learnOffset(-30f, 30f)
+        tapAt(leftEdge("d") - 10f, centre("d").second)
+        assertEquals(listOf(Text("d")), sink.emitted)
+    }
+
+    @Test
+    fun `a learned offset carries over to a new engine sharing the bias`() {
+        val bias = TouchBias()
+        engine = KeyboardEngine(geometry, LONG_PRESS_MS, bias)
+        learnOffset(-30f, 30f)
+        engine = KeyboardEngine(geometry, LONG_PRESS_MS, bias)
+        tapAt(leftEdge("d") - 10f, centre("d").second)
+        assertEquals(listOf(Text("d")), sink.emitted)
+    }
+
+    @Test
+    fun `taps that slide onto another key teach nothing`() {
+        repeat(100) {
+            val (x, y) = centre("f")
+            engine.onPointer(0, x, y, PointerAction.DOWN, now, sink)
+            val (gx, gy) = centre("g")
+            engine.onPointer(0, gx, gy, PointerAction.MOVE, now, sink)
+            engine.onPointer(0, gx, gy, PointerAction.UP, now, sink)
+        }
+        sink.emitted.clear()
+        tapAt(leftEdge("d") - 10f, centre("d").second)
+        assertEquals(listOf(Text("s")), sink.emitted)
+    }
+
+    @Test
+    fun `taps on the space bar teach nothing`() {
+        val space =
+            (0 until geometry.keyCount).first { geometry.spec(it).def == KeyDef.Char(" ", " ") }
+        val r = geometry.rects
+        val y = (r[space * 4 + 1] + r[space * 4 + 3]) / 2f
+        repeat(100) { tapAt(r[space * 4] + 5f, y + 50f) }
+        sink.emitted.clear()
+        tapAt(leftEdge("d") - 10f, centre("d").second)
+        assertEquals(listOf(Text("s")), sink.emitted)
+    }
+
+    @Test
+    fun `rolled keys teach the offset too`() {
+        repeat(100) {
+            val (fx, fy) = centre("f")
+            val (jx, jy) = centre("j")
+            engine.onPointer(0, fx - 30f, fy + 30f, PointerAction.DOWN, now, sink)
+            engine.onPointer(1, jx - 30f, jy + 30f, PointerAction.DOWN, now, sink)
+            engine.onPointer(0, fx - 30f, fy + 30f, PointerAction.UP, now, sink)
+            engine.onPointer(1, jx - 30f, jy + 30f, PointerAction.UP, now, sink)
+        }
+        sink.emitted.clear()
+        tapAt(leftEdge("d") - 10f, centre("d").second)
+        assertEquals(listOf(Text("d")), sink.emitted)
+    }
+
+    private fun learnOffset(dx: Float, dy: Float) {
+        repeat(100) {
+            for (label in listOf("f", "g", "h", "j")) {
+                val (x, y) = centre(label)
+                tapAt(x + dx, y + dy)
+            }
+        }
+        sink.emitted.clear()
+    }
+
+    private fun tapAt(x: Float, y: Float) {
+        engine.onPointer(0, x, y, PointerAction.DOWN, now, sink)
+        engine.onPointer(0, x, y, PointerAction.UP, now, sink)
+    }
+
+    private fun leftEdge(label: String): Float = geometry.rects[indexOf(label) * 4]
+
     private fun char(c: String): KeySpec = KeySpec(KeyDef.Char(c, c.uppercase()), c)
 
     private fun useRow(vararg keys: KeySpec) {

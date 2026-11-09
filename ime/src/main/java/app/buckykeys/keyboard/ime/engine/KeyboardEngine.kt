@@ -13,6 +13,7 @@ import kotlin.math.min
 internal class KeyboardEngine(
     geometry: KeyboardGeometry,
     private val longPressMs: Long,
+    private val bias: TouchBias = TouchBias(),
 ) {
 
     private var geometry = geometry
@@ -20,6 +21,9 @@ internal class KeyboardEngine(
     private val pointerKeys = IntArray(MAX_POINTERS) { NO_KEY }
     private val pointerConsumed = BooleanArray(MAX_POINTERS)
     private val pointerDownX = FloatArray(MAX_POINTERS)
+    private val pointerStartKey = IntArray(MAX_POINTERS) { NO_KEY }
+    private val pointerStartX = FloatArray(MAX_POINTERS)
+    private val pointerStartY = FloatArray(MAX_POINTERS)
     private val pointerFn = BooleanArray(MAX_POINTERS)
     private val pointerX = FloatArray(MAX_POINTERS)
     private val pointerY = FloatArray(MAX_POINTERS)
@@ -82,7 +86,7 @@ internal class KeyboardEngine(
             val key = pointerKeys[p]
             val target =
                 if (keepPointers && key != NO_KEY && !pointerConsumed[p]) {
-                    geometry.keyAt(pointerX[p], pointerY[p])
+                    keyAt(geometry, pointerX[p], pointerY[p])
                 } else {
                     NO_KEY
                 }
@@ -121,7 +125,7 @@ internal class KeyboardEngine(
     ) {
         if (pointerId !in 0 until MAX_POINTERS) return
         when (action) {
-            PointerAction.DOWN -> press(pointerId, geometry.keyAt(x, y), x, y, timeMs, sink)
+            PointerAction.DOWN -> press(pointerId, keyAt(geometry, x, y), x, y, timeMs, sink)
             PointerAction.MOVE -> move(pointerId, x, y, timeMs)
             PointerAction.CANCEL -> cancel(pointerId)
             PointerAction.UP -> lift(pointerId, x, y, sink)
@@ -193,6 +197,9 @@ internal class KeyboardEngine(
         pointerKeys[pointerId] = key
         pointerConsumed[pointerId] = false
         pointerDownX[pointerId] = x
+        pointerStartKey[pointerId] = key
+        pointerStartX[pointerId] = x
+        pointerStartY[pointerId] = y
         pointerX[pointerId] = x
         pointerY[pointerId] = y
         if (def is KeyDef.Modifier) startHold(def.kind)
@@ -225,7 +232,27 @@ internal class KeyboardEngine(
         if (def is KeyDef.Modifier || def is KeyDef.LayoutSwitch || spec.then != null) return
         if (pointerId == previewPointer) previewPointer = NO_POINTER
         pointerConsumed[pointerId] = true
+        learnFrom(pointerId, key)
         release(key, false, pointerFn[pointerId], sink)
+    }
+
+    // Only plain taps on character keys teach the offset; slides, long presses and wide keys say
+    // little about where this person's finger lands.
+    private fun learnFrom(pointerId: Int, key: Int) {
+        if (key != pointerStartKey[pointerId] || geometry.spec(key).def !is KeyDef.Char) return
+        val r = geometry.rects
+        val i = key * 4
+        val row = geometry.rowHeightPx.toFloat()
+        if (row <= 0f || r[i + 2] - r[i] > row * MAX_LEARNING_WIDTH_ROWS) return
+        bias.learn(
+            (pointerStartX[pointerId] - (r[i] + r[i + 2]) / 2f) / row,
+            (pointerStartY[pointerId] - (r[i + 1] + r[i + 3]) / 2f) / row,
+        )
+    }
+
+    private fun keyAt(geometry: KeyboardGeometry, x: Float, y: Float): Int {
+        val row = geometry.rowHeightPx
+        return geometry.keyAt(x, y, bias.x * row, bias.y * row)
     }
 
     private fun move(pointerId: Int, x: Float, y: Float, timeMs: Long) {
@@ -246,7 +273,7 @@ internal class KeyboardEngine(
             if (pointerId == timerPointer) stopTimer()
             return
         }
-        val target = geometry.keyAt(x, y)
+        val target = keyAt(geometry, x, y)
         slideTo(
             pointerId,
             if (target == NO_KEY || isModifier(target)) NO_KEY else target,
@@ -308,10 +335,11 @@ internal class KeyboardEngine(
         val chorded = endHold(key)
         if (consumed) return
         if (staysOn(key, x, y)) {
+            learnFrom(pointerId, key)
             release(key, chorded, usesFn, sink)
             return
         }
-        val target = geometry.keyAt(x, y)
+        val target = keyAt(geometry, x, y)
         if (target == NO_KEY || isModifier(key) || isModifier(target)) return
         release(target, false, geometry.spec(target).fn != null && isActive(ModifierKind.FN), sink)
     }
@@ -320,11 +348,16 @@ internal class KeyboardEngine(
 
     private fun staysOn(key: Int, x: Float, y: Float): Boolean {
         if (key == NO_KEY) return false
-        if (geometry.keyAt(x, y) == key) return true
+        if (keyAt(geometry, x, y) == key) return true
         val r = geometry.rects
         val i = key * 4
         val slop = min(r[i + 2] - r[i], r[i + 3] - r[i + 1]) * SLIP_FRACTION
-        return x > r[i] - slop && x < r[i + 2] + slop && y > r[i + 1] - slop && y < r[i + 3] + slop
+        val cx = x - bias.x * geometry.rowHeightPx
+        val cy = y - bias.y * geometry.rowHeightPx
+        return cx > r[i] - slop &&
+            cx < r[i + 2] + slop &&
+            cy > r[i + 1] - slop &&
+            cy < r[i + 3] + slop
     }
 
     private fun startTimer(pointerId: Int, at: Long, repeats: Boolean) {
@@ -583,5 +616,6 @@ internal class KeyboardEngine(
         private const val REPEAT_INTERVAL_MS = 50L
         private const val LANGUAGE_SWIPE_FRACTION = 0.08f
         private const val SLIP_FRACTION = 0.4f
+        private const val MAX_LEARNING_WIDTH_ROWS = 1.5f
     }
 }
