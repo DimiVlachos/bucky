@@ -34,4 +34,28 @@ class TouchBiasTest {
         assertEquals(TouchBias.MAX_ROWS, bias.x, 0f)
         assertEquals(-TouchBias.MAX_ROWS, bias.y, 0f)
     }
+
+    @Test
+    fun `restoring sets a saved offset`() {
+        val bias = TouchBias()
+        bias.restore(-0.1f, 0.2f)
+        assertEquals(-0.1f, bias.x, 0f)
+        assertEquals(0.2f, bias.y, 0f)
+    }
+
+    @Test
+    fun `restoring clamps an offset that is too large`() {
+        val bias = TouchBias()
+        bias.restore(4f, -4f)
+        assertEquals(TouchBias.MAX_ROWS, bias.x, 0f)
+        assertEquals(-TouchBias.MAX_ROWS, bias.y, 0f)
+    }
+
+    @Test
+    fun `restoring an unreadable number starts from zero`() {
+        val bias = TouchBias()
+        bias.restore(Float.NaN, Float.POSITIVE_INFINITY)
+        assertEquals(0f, bias.x, 0f)
+        assertEquals(0f, bias.y, 0f)
+    }
 }

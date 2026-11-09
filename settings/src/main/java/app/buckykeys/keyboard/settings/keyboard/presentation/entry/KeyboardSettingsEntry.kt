@@ -50,6 +50,8 @@ internal fun KeyboardSettingsEntry(
                 if (extraRowPreview.valid) saveExtraRow(viewModel, extraRowDraft, focusManager)
             },
             onFullLayoutStyleChange = viewModel::onFullLayoutStyleChange,
+            touchCorrectionLearned = state.touchCorrectionLearned,
+            onTouchCorrectionReset = viewModel::onTouchCorrectionReset,
         )
     }
 }

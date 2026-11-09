@@ -8,7 +8,9 @@ import app.buckykeys.keyboard.settings.keyboard.domain.model.FullLayoutStyle
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardLanguage
 import app.buckykeys.keyboard.settings.keyboard.domain.model.KeyboardSettings
 import app.buckykeys.keyboard.settings.keyboard.domain.model.OutsideTerminals
+import app.buckykeys.keyboard.settings.keyboard.domain.model.TouchOffset
 import app.buckykeys.keyboard.settings.keyboard.domain.repository.KeyboardSettingsRepository
+import app.buckykeys.keyboard.settings.keyboard.domain.repository.TouchOffsetRepository
 import app.buckykeys.keyboard.settings.keyboard.presentation.state.KeyboardSettingsState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.IOException
@@ -26,13 +28,18 @@ internal class KeyboardSettingsViewModel
 constructor(
     private val repository: KeyboardSettingsRepository,
     private val extraRowInterpreter: ExtraRowInterpreter,
+    private val touchOffsets: TouchOffsetRepository,
 ) : ViewModel() {
 
     private val saveFailed = MutableStateFlow(false)
 
     val state: StateFlow<KeyboardSettingsState> =
-        combine(repository.settings, saveFailed) { settings, failed ->
-                KeyboardSettingsState(settings = settings, saveFailed = failed)
+        combine(repository.settings, saveFailed, touchOffsets.offset) { settings, failed, offset ->
+                KeyboardSettingsState(
+                    settings = settings,
+                    saveFailed = failed,
+                    touchCorrectionLearned = offset.isLearned,
+                )
             }
             .stateIn(
                 viewModelScope,
@@ -94,6 +101,16 @@ constructor(
 
     fun previewExtraRow(text: String): ExtraRowPreview =
         extraRowInterpreter.interpret(text.split(Whitespace).filter { it.isNotEmpty() })
+
+    fun onTouchCorrectionReset() {
+        viewModelScope.launch {
+            try {
+                touchOffsets.save(TouchOffset.NONE)
+            } catch (e: IOException) {
+                saveFailed.value = true
+            }
+        }
+    }
 
     fun onSaveErrorShown() {
         saveFailed.value = false

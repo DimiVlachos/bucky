@@ -10,6 +10,11 @@ public class TouchBias {
     public var y: Float = 0f
         private set
 
+    public fun restore(x: Float, y: Float) {
+        this.x = if (x.isFinite()) x.coerceIn(-MAX_ROWS, MAX_ROWS) else 0f
+        this.y = if (y.isFinite()) y.coerceIn(-MAX_ROWS, MAX_ROWS) else 0f
+    }
+
     internal fun learn(dx: Float, dy: Float) {
         x = (x + (dx - x) * RATE).coerceIn(-MAX_ROWS, MAX_ROWS)
         y = (y + (dy - y) * RATE).coerceIn(-MAX_ROWS, MAX_ROWS)
