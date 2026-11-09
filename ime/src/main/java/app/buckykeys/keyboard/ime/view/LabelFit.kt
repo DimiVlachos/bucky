@@ -1,10 +1,13 @@
 package app.buckykeys.keyboard.ime.view
 
-internal const val LABEL_HEIGHT_FRACTION = 0.55f
 internal const val KEY_LABEL_HEIGHT_FRACTION = 0.8f
 internal const val PREVIEW_LABEL_HEIGHT_FRACTION = 0.7f
 internal const val MAX_PREVIEW_WIDTH_ROWS = 2f
 internal const val MAX_WORD_PREVIEW_WIDTH_ROWS = 3f
+
+// The accent bar under the cells takes reservedBelow; the rest holds the label.
+internal fun popupLabelMaxSize(cellHeight: Float, reservedBelow: Float): Float =
+    ((cellHeight - reservedBelow) * KEY_LABEL_HEIGHT_FRACTION).coerceAtLeast(0f)
 
 internal fun fittedTextSize(
     baseSize: Float,

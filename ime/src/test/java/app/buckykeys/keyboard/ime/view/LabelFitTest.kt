@@ -194,4 +194,14 @@ class LabelFitTest {
             0.001f,
         )
     }
+
+    @Test
+    fun `popup labels may fill their label area as much as key labels fill a key`() {
+        assertEquals(80f, popupLabelMaxSize(cellHeight = 120f, reservedBelow = 20f), 0.01f)
+    }
+
+    @Test
+    fun `a popup with no room for labels caps them at zero`() {
+        assertEquals(0f, popupLabelMaxSize(cellHeight = 10f, reservedBelow = 20f), 0.01f)
+    }
 }
