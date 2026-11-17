@@ -150,6 +150,57 @@ class BuiltInLayoutsTest {
     }
 
     @Test
+    fun `holding a key on a latin pc layout types its shifted character`() {
+        listOf(
+                BuiltInLayouts.PC_FULL_EN_US,
+                BuiltInLayouts.PC_FULL_ET,
+                BuiltInLayouts.PC_FULL_FI,
+                BuiltInLayouts.PC_HK_EN_US,
+                BuiltInLayouts.PC_HK_ET,
+                BuiltInLayouts.PC_HK_FI,
+            )
+            .forEach { id ->
+                LayoutParser.parse(asset(id))
+                    .getOrThrow()
+                    .rows
+                    .flatMap { it.keys }
+                    .mapNotNull { it.def as? KeyDef.Char }
+                    .filter { it.alternates.isNotEmpty() }
+                    .forEach { key ->
+                        assertEquals(
+                            "$id ${key.primary}",
+                            key.shifted,
+                            (key.alternates.first() as? KeyDef.Char)?.primary,
+                        )
+                    }
+            }
+    }
+
+    @Test
+    fun `estonian and finnish letters mark their alt gr character`() {
+        val expected = mapOf("e" to "€", "s" to "š", "z" to "ž")
+        listOf(
+                BuiltInLayouts.PC_FULL_ET,
+                BuiltInLayouts.PC_HK_ET,
+                BuiltInLayouts.PC_FULL_FI,
+                BuiltInLayouts.PC_HK_FI,
+            )
+            .forEach { id ->
+                val chars =
+                    LayoutParser.parse(asset(id))
+                        .getOrThrow()
+                        .rows
+                        .flatMap { it.keys }
+                        .mapNotNull { it.def as? KeyDef.Char }
+                        .associateBy { it.primary }
+                expected.forEach { (letter, altGr) ->
+                    assertEquals("$id $letter", altGr, chars.getValue(letter).altGr)
+                }
+                if (id.endsWith("_et")) assertEquals(id, "§", chars.getValue("õ").altGr)
+            }
+    }
+
+    @Test
     fun `the estonian caron and tilde dead keys compose the estonian letters`() {
         val chars = estonianChars()
         assertEquals("š", chars.getValue("s").composed["ˇ"])

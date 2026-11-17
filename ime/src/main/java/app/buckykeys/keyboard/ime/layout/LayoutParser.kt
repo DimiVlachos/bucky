@@ -22,6 +22,7 @@ public object LayoutParser {
             "label",
             "width",
             "longPress",
+            "altGr",
             "latin",
             "fn",
             "then",
@@ -89,6 +90,7 @@ public object LayoutParser {
         if (def !is KeyDef.Char && def !is KeyDef.Dead && "longPress" in obj) {
             fail("$path.longPress", "needs chars or dead")
         }
+        if (def !is KeyDef.Char && "altGr" in obj) fail("$path.altGr", "needs chars")
         if (def !is KeyDef.LayoutSwitch && "holdTo" in obj) fail("$path.holdTo", "needs switchTo")
         val types = def is KeyDef.Char || def is KeyDef.Special
         if (!types && "then" in obj) fail("$path.then", "needs chars or key")
@@ -110,12 +112,23 @@ public object LayoutParser {
         if (chars.size !in 1..2) fail("$path.chars", "needs one or two strings")
         if (chars[0] == " " && "longPress" in obj)
             fail("$path.longPress", "not allowed on the space bar")
+        val alternates = alternates(obj, path)
         return KeyDef.Char(
             chars[0],
             chars.getOrElse(1) { chars[0].uppercase() },
-            alternates(obj, path),
+            alternates,
             latin(obj, path),
+            altGr = altGr(obj, alternates, path),
         )
+    }
+
+    private fun altGr(obj: JsonObject, alternates: List<KeyDef>, path: String): String? {
+        if ("altGr" !in obj) return null
+        val altGr = obj.string("altGr", path)
+        if (alternates.none { it is KeyDef.Char && it.primary == altGr }) {
+            fail("$path.altGr", "needs to be one of longPress")
+        }
+        return altGr
     }
 
     private fun alternates(obj: JsonObject, path: String): List<KeyDef> =

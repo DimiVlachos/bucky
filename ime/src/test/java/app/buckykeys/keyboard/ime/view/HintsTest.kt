@@ -27,6 +27,12 @@ class HintsTest {
     }
 
     @Test
+    fun `a letter that holds for its capital shows its alt gr character`() {
+        val alternates = listOf(KeyDef.Char("S", "S"), KeyDef.Char("š", "Š"))
+        assertEquals("š", hintFor(KeyDef.Char("s", "S", alternates, altGr = "š")))
+    }
+
+    @Test
     fun `a symbol shows its first alternate`() {
         assertEquals("…", hintFor(KeyDef.Char(".", ">", listOf(KeyDef.Char("…", "…")))))
         assertEquals("F1", hintFor(KeyDef.Char("1", "!", listOf(KeyDef.Special(KeyCode.F1)))))

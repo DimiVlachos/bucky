@@ -252,6 +252,33 @@ class LayoutParserTest {
     }
 
     @Test
+    fun `alt gr marks one of the long press characters`() {
+        assertEquals(
+            "š",
+            (parseKeys("""{ "chars": ["s"], "longPress": ["S", "š"], "altGr": "š" }""").single().def
+                    as KeyDef.Char)
+                .altGr,
+        )
+    }
+
+    @Test
+    fun `alt gr must be one of the long press characters`() {
+        assertEquals(
+            "$.rows[0].keys[0].altGr",
+            failureOf(layoutWithKeys("""{ "chars": ["s"], "longPress": ["S"], "altGr": "š" }"""))
+                .path,
+        )
+    }
+
+    @Test
+    fun `alt gr needs a character key`() {
+        assertEquals(
+            "$.rows[0].keys[0].altGr",
+            failureOf(layoutWithKeys("""{ "key": "TAB", "altGr": "š" }""")).path,
+        )
+    }
+
+    @Test
     fun `long press needs a character key`() {
         assertEquals(
             "$.rows[0].keys[0].longPress",

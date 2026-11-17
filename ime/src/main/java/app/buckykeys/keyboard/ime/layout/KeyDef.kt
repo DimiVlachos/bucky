@@ -8,6 +8,7 @@ public sealed interface KeyDef {
         val latin: String? = null,
         val composed: Map<String, String> = emptyMap(),
         val composedShifted: Map<String, String> = emptyMap(),
+        val altGr: String? = null,
     ) : KeyDef
 
     public data class Dead(
