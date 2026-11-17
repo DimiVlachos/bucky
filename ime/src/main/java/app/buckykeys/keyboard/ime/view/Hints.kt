@@ -3,10 +3,11 @@ package app.buckykeys.keyboard.ime.view
 import app.buckykeys.keyboard.ime.layout.DefaultLabels
 import app.buckykeys.keyboard.ime.layout.KeyDef
 
-// The hint shows what holding adds beyond Shift: letters hide it, symbols show the next alternate.
+// The hint shows what holding adds beyond Shift: AltGr if marked, else letters hide it and symbols
+// show the next alternate.
 internal fun hintFor(def: KeyDef): String =
     when (def) {
-        is KeyDef.Char -> hintFor(def.primary, def.shifted, def.alternates)
+        is KeyDef.Char -> def.altGr ?: hintFor(def.primary, def.shifted, def.alternates)
         is KeyDef.Dead -> hintFor(def.primary, def.shifted, def.alternates)
         else -> ""
     }
