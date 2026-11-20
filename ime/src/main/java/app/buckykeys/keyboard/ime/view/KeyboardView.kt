@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import app.buckykeys.keyboard.ime.R
+import app.buckykeys.keyboard.ime.engine.AlternatesPopup
 import app.buckykeys.keyboard.ime.engine.InputSink
 import app.buckykeys.keyboard.ime.engine.KeyboardEngine
 import app.buckykeys.keyboard.ime.engine.PointerAction
@@ -61,7 +62,7 @@ public class KeyboardView(
     private val lockBarInsetPx = resources.getDimension(R.dimen.key_lock_bar_inset)
     private val labelMaxSizePx = rowHeightPx * KEY_LABEL_HEIGHT_FRACTION
 
-    public val keysTop: Int = rowHeightPx
+    public val keysTop: Int = POPUP_MAX_ROWS * rowHeightPx
 
     private val keysEdgeGapPx = gapPx.roundToInt()
 
@@ -863,9 +864,9 @@ public class KeyboardView(
         if (!popup.isOpen) return
         if (popupLabels.size != popup.count) return
         val top = popup.top
-        val bottom = top + popup.cellHeight
-        val selectedBottom = bottom - lockBarHeightPx - POPUP_ACCENT_SPACING_GAPS * gapPx
-        val panelRight = popup.left + popup.count * popup.cellWidth
+        val bottom = top + popup.rows * popup.cellHeight
+        val selectedInset = lockBarHeightPx + POPUP_ACCENT_SPACING_GAPS * gapPx
+        val panelRight = popup.left + popup.columns * popup.cellWidth
         canvas.drawRoundRect(
             popup.left,
             top,
@@ -891,30 +892,35 @@ public class KeyboardView(
             bottom - gapPx,
             popupAccentPaint,
         )
-        for (cell in 0 until popup.count) {
-            val i = popup.alternateAt(cell)
-            val left = popup.left + cell * popup.cellWidth
-            val right = left + popup.cellWidth
-            if (i == popup.selected) {
-                canvas.drawRoundRect(
-                    left + 2 * gapPx,
-                    top + 2 * gapPx,
-                    right - 2 * gapPx,
-                    selectedBottom,
-                    cornerPx,
-                    cornerPx,
-                    popupSelectedPaint,
+        for (row in 0 until popup.rows) {
+            val rowTop = popup.rowTop(row)
+            val selectedBottom = rowTop + popup.cellHeight - selectedInset
+            for (cell in 0 until popup.columns) {
+                val i = popup.alternateAt(row, cell)
+                if (i == AlternatesPopup.NONE) continue
+                val left = popup.left + cell * popup.cellWidth
+                val right = left + popup.cellWidth
+                if (i == popup.selected) {
+                    canvas.drawRoundRect(
+                        left + 2 * gapPx,
+                        rowTop + 2 * gapPx,
+                        right - 2 * gapPx,
+                        selectedBottom,
+                        cornerPx,
+                        cornerPx,
+                        popupSelectedPaint,
+                    )
+                }
+                val label = if (shifted) popupShiftedLabels[i] else popupLabels[i]
+                val paint = if (popupSmall[i]) smallLabelPaint else labelPaint
+                paint.textSize = popupSize[i]
+                canvas.drawText(
+                    label,
+                    (left + right) / 2f,
+                    (rowTop + selectedBottom) / 2f - (paint.ascent() + paint.descent()) / 2f,
+                    paint,
                 )
             }
-            val label = if (shifted) popupShiftedLabels[i] else popupLabels[i]
-            val paint = if (popupSmall[i]) smallLabelPaint else labelPaint
-            paint.textSize = popupSize[i]
-            canvas.drawText(
-                label,
-                (left + right) / 2f,
-                (top + selectedBottom) / 2f - (paint.ascent() + paint.descent()) / 2f,
-                paint,
-            )
         }
     }
 
@@ -957,5 +963,6 @@ public class KeyboardView(
         const val SPACE_LINE_HEIGHT_FRACTION = 0.4f
         const val SPACE_MARK_LINE_FRACTION = 0.75f
         const val POPUP_ACCENT_SPACING_GAPS = 4
+        const val POPUP_MAX_ROWS = 2
     }
 }
