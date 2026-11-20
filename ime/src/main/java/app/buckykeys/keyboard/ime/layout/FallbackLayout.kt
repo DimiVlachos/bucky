@@ -4,7 +4,7 @@ public object FallbackLayout {
 
     private val alternates =
         mapOf(
-            "a" to "A à á â ä ã å æ ā",
+            "a" to "A à á â ä ã å æ ā ą",
             "c" to "C ç ć č",
             "d" to "D ď ð",
             "e" to "E è é ê ë ē ę ě €",

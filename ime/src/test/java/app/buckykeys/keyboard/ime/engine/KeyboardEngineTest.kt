@@ -528,7 +528,8 @@ class KeyboardEngineTest {
         down("5", pointer = 0)
         tick(300)
         val (x, _) = centre("5")
-        val firstCell = (0 until engine.popup.count).first { engine.popup.alternateAt(it) == 0 }
+        val firstCell =
+            (0 until engine.popup.columns).first { engine.popup.alternateAt(0, it) == 0 }
         val cellCentre = engine.popup.left + (firstCell + 0.5f) * engine.popup.cellWidth
         assertEquals(x, cellCentre, 0.01f)
     }
@@ -602,6 +603,60 @@ class KeyboardEngineTest {
         tick(300)
         assertEquals(0f, engine.popup.left, 0.01f)
         assertEquals(400f / 3, engine.popup.cellWidth, 0.01f)
+    }
+
+    @Test
+    fun `a popup with more than six alternates wraps into two rows`() {
+        useWideRow(manyAccents(10))
+        down("a", pointer = 0)
+        tick(300)
+        assertEquals(2, engine.popup.rows)
+        assertEquals(5, engine.popup.columns)
+        val i = indexOf("a") * 4
+        assertEquals(geometry.rects[i + 1] - 2 * 120f, engine.popup.top, 0.01f)
+    }
+
+    @Test
+    fun `six alternates stay in one row`() {
+        useWideRow(manyAccents(6))
+        down("a", pointer = 0)
+        tick(300)
+        assertEquals(1, engine.popup.rows)
+        assertEquals(6, engine.popup.columns)
+    }
+
+    @Test
+    fun `the first alternate stays under the finger in a two-row popup`() {
+        useWideRow(manyAccents(10))
+        down("a", pointer = 0)
+        tick(300)
+        assertEquals(0, engine.popup.selected)
+        up("a", pointer = 0)
+        assertEquals(listOf(Text("a0")), sink.emitted)
+    }
+
+    @Test
+    fun `sliding up into the second row selects its alternate`() {
+        useWideRow(manyAccents(10))
+        down("a", pointer = 0)
+        tick(300)
+        slideToAlternate(7)
+        assertEquals(listOf(Text("a7")), sink.emitted)
+    }
+
+    @Test
+    fun `an empty cell in the short top row selects nothing`() {
+        useWideRow(manyAccents(9))
+        down("a", pointer = 0)
+        tick(300)
+        val popup = engine.popup
+        val cell =
+            (0 until popup.columns).first { popup.alternateAt(1, it) == AlternatesPopup.NONE }
+        val x = popup.left + (cell + 0.5f) * popup.cellWidth
+        engine.onPointer(0, x, popup.top + popup.cellHeight / 2f, PointerAction.MOVE, now, sink)
+        assertEquals(AlternatesPopup.NONE, popup.selected)
+        engine.onPointer(0, x, popup.top + popup.cellHeight / 2f, PointerAction.UP, now, sink)
+        assertTrue(sink.emitted.isEmpty())
     }
 
     @Test
@@ -1410,16 +1465,17 @@ class KeyboardEngineTest {
     }
 
     @Test
-    fun `a full width popup fills toward the wider side and wraps`() {
+    fun `ten alternates fill the bottom row first and continue in the row above`() {
         useTenKeys()
         down("k2", pointer = 0)
         tick(LONG_PRESS_MS)
-        engine.onPointer(0, 350f, 60f, PointerAction.MOVE, now, sink)
+        val x = engine.popup.left + 1.5f * engine.popup.cellWidth
+        engine.onPointer(0, x, 60f, PointerAction.MOVE, now, sink)
         assertEquals(1, engine.popup.selected)
-        engine.onPointer(0, 150f, 60f, PointerAction.MOVE, now, sink)
-        assertEquals(8, engine.popup.selected)
-        engine.onPointer(0, 50f, 60f, PointerAction.UP, now, sink)
-        assertEquals(listOf(Text("9")), sink.emitted)
+        engine.onPointer(0, x, -180f, PointerAction.MOVE, now, sink)
+        assertEquals(6, engine.popup.selected)
+        engine.onPointer(0, x, -180f, PointerAction.UP, now, sink)
+        assertEquals(listOf(Text("6")), sink.emitted)
     }
 
     private fun useTenKeys() {
@@ -1712,6 +1768,15 @@ class KeyboardEngineTest {
 
     private fun char(c: String): KeySpec = KeySpec(KeyDef.Char(c, c.uppercase()), c)
 
+    private fun manyAccents(n: Int): KeySpec =
+        KeySpec(KeyDef.Char("a", "A", List(n) { KeyDef.Char("a$it", "A$it") }), "a")
+
+    private fun useWideRow(key: KeySpec) {
+        lastLayout = Layout("test", "test", listOf(Row(listOf(char("x"), key, char("y")))))
+        geometry = KeyboardGeometry(lastLayout, 1080, 120)
+        engine = KeyboardEngine(geometry, LONG_PRESS_MS)
+    }
+
     private fun useRow(vararg keys: KeySpec) {
         lastLayout = Layout("test", "test", listOf(Row(keys.toList())))
         geometry = KeyboardGeometry(lastLayout, 400, 120)
@@ -1740,9 +1805,10 @@ class KeyboardEngineTest {
 
     private fun slideToAlternate(alternate: Int) {
         val popup = engine.popup
-        val cell = (0 until popup.count).first { popup.alternateAt(it) == alternate }
+        val row = alternate / popup.columns
+        val cell = (0 until popup.columns).first { popup.alternateAt(row, it) == alternate }
         val x = popup.left + (cell + 0.5f) * popup.cellWidth
-        val y = popup.top + popup.cellHeight / 2f
+        val y = popup.rowTop(row) + popup.cellHeight / 2f
         engine.onPointer(0, x, y, PointerAction.MOVE, now, sink)
         engine.onPointer(0, x, y, PointerAction.UP, now, sink)
     }

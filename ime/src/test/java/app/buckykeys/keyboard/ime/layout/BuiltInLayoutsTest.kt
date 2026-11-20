@@ -18,6 +18,20 @@ class BuiltInLayoutsTest {
     }
 
     @Test
+    fun `holding a offers the polish a with ogonek on every latin layout`() {
+        val latin =
+            listOf("pc_full", "pc_hk", "compact").flatMap { kind ->
+                listOf("en_us", "et", "fi").map { "${kind}_$it" }
+            }
+        for (id in latin) {
+            val keys = LayoutParser.parse(asset(id)).getOrThrow().rows.flatMap { it.keys }
+            val a = keys.first { it.def is KeyDef.Char && (it.def as KeyDef.Char).primary == "a" }
+            val alternates = (a.def as KeyDef.Char).alternates.map { (it as KeyDef.Char).primary }
+            assertEquals(id, "ą", alternates.last())
+        }
+    }
+
+    @Test
     fun `a layout that parses is used as it is`() {
         val json = asset(BuiltInLayouts.PC_FULL_EN_US).replace("PC Full (US)", "From the asset")
 
